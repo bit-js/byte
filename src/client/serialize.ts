@@ -25,4 +25,4 @@ export const serializers: SerializersGroup = {
 /**
  * Serialize an abitrary entity
  */
-export default (o: any) => serializers[typeof o](o);
+export default (o: any): any => serializers[typeof o](o);

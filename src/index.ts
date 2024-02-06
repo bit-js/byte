@@ -51,7 +51,7 @@ class Byte<T extends RoutesRecord> {
     /**
      * Build the fetch function
      */
-    fetch = (req: Request) => {
+    fetch = (req: Request): any => {
         for (const route of this.record)
             this.router.put(route.method, route.path, this.wrap(route.handler));
 

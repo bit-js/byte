@@ -27,7 +27,7 @@ export const serializers: SerializersGroup = {
 /**
  * Serialize an abitrary entity
  */
-const serialize = (o: any, ctx: Context) => serializers[typeof o](o, ctx);
+const serialize = (o: any, ctx: Context): any => serializers[typeof o](o, ctx);
 
 /**
  * Wrap a handler
