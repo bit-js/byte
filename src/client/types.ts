@@ -1,4 +1,4 @@
-import type { RoutesRecord, Route } from '../core/methods';
+import type { RoutesRecord, Route } from '../core/routes';
 import type Byte from '..';
 
 export interface RequestOptions<Params = any, Body = any> extends Omit<RequestInit, 'body'> {
@@ -21,8 +21,8 @@ export type UnionToIntersection<U> = (
 type PathPart<Path extends string> = Path extends `:${infer Rest}` ? `$${Rest}` : Path;
 
 export type Chain<Path extends string, Result> = Path extends `${infer Current}/${infer Rest}`
-    ? { [K in PathPart<Current>]: Chain<Rest, Result> }
-    : Path extends '' ? Result : { [K in Path extends '*' ? string : PathPart<Path>]: Result };
+    ? { readonly [K in PathPart<Current>]: Chain<Rest, Result> }
+    : Path extends '' ? Result : { readonly [K in Path extends '*' ? string : PathPart<Path>]: Result };
 
 // Infer a route
 type NormalizePath<P extends string> = P extends `/${infer Rest}` ? Rest : P;

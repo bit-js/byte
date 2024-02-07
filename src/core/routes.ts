@@ -1,8 +1,7 @@
 import type Byte from '..';
-import type { Handler } from './types';
 
-export const methods = ['get', 'post', 'put', 'delete', 'patch', 'options', 'trace'] as const;
-export type RequestMethod = typeof methods[number];
+import type { Handler } from './types';
+import type { RequestMethod } from './method';
 
 export type Route = {
     path: string,

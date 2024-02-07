@@ -37,4 +37,4 @@ test('JSON', async () => {
     });
 
     expect(await res.json()).toEqual({ id: '90' });
-})
+});

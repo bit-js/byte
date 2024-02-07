@@ -1,7 +1,9 @@
 import { t } from 'wint-js';
-import { type RoutesRecord, type HandlerRegister, methods } from './core/methods';
+
+import { type RoutesRecord, type HandlerRegister } from './core/routes';
 import type { Serve, Wrapper } from './core/types';
 import wrap from './core/serializers';
+import { methods } from './core/method';
 
 /**
  * Request register
