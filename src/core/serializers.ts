@@ -2,33 +2,33 @@ import type { Context, Handler } from './types';
 
 export interface SerializersGroup extends Record<string, (o: any, ctx: Context) => any> { };
 
+const yieldFn = (o: any) => o, toStr = (o: any) => o.toString();
+
 export const objectSerializers: SerializersGroup = {
     Object: (o, ctx) => {
-        // @ts-ignore
-        ctx.headers['Content-Type'] ??= 'application/json';
+        ctx.headers['Content-Type'] = 'application/json';
         return JSON.stringify(o);
-    }
+    },
+    Buffer: yieldFn,
+    Response: yieldFn,
+    ArrayBuffer: yieldFn,
+    URLSearchParams: yieldFn
 };
 
 export const serializers: SerializersGroup = {
-    number: (o: number) => o.toString(),
-    boolean: (o: boolean) => o.toString(),
-    function: (o: Function) => o.toString(),
-    string: (o: string) => o,
+    number: toStr,
+    boolean: toStr,
+    // Idk whatever
+    function: toStr,
+    string: yieldFn,
     undefined: () => null,
-    object: (o: object, ctx: Context) => {
-        if (o === null) return null;
-
-        const serializer = objectSerializers[o.constructor.name];
-        return typeof serializer === 'undefined' ? o : serializer(o, ctx);
-    }
+    object: (o, ctx) => o === null ? null : objectSerializers[o.constructor.name](o, ctx)
 } as const;
 
 /**
  * Serialize an abitrary entity
  */
-const serialize = (o: any, ctx: Context): any => serializers[typeof o](o, ctx);
-
+export const serialize = (o: any, ctx: Context): any => serializers[typeof o](o, ctx);
 /**
  * Wrap a handler
  */

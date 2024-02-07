@@ -1,25 +1,23 @@
 export interface SerializersGroup extends Record<string, (o: any) => any> { };
 
+const yieldFn = (o: any) => o, toStr = (o: any) => o.toString();
+
 export const objectSerializers: SerializersGroup = {
-    Object: o => {
-        // @ts-ignore
-        ctx.headers['Content-Type'] ??= 'application/json';
-        return JSON.stringify(o);
-    }
+    Object: JSON.stringify,
+    Buffer: yieldFn,
+    Response: yieldFn,
+    ArrayBuffer: yieldFn,
+    URLSearchParams: yieldFn
 };
 
 export const serializers: SerializersGroup = {
-    number: (o: number) => o.toString(),
-    boolean: (o: boolean) => o.toString(),
-    function: (o: Function) => o.toString(),
-    string: o => o,
+    number: toStr,
+    boolean: toStr,
+    // Idk whatever
+    function: toStr,
+    string: yieldFn,
     undefined: () => null,
-    object: o => {
-        if (o === null) return null;
-
-        const serializer = objectSerializers[o.constructor.name];
-        return typeof serializer === 'undefined' ? o : serializer(o);
-    }
+    object: o => o === null ? null : objectSerializers[o.constructor.name](o)
 } as const;
 
 /**
