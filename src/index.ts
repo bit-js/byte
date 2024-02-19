@@ -1,2 +1,1 @@
-export * from './core/client';
-export * from './core/server';
+export * from './core';

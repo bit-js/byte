@@ -1,40 +1,5 @@
-import type { ParamsKey } from '@bit-js/blitz';
-import { type Byte, type BaseRoute, type RoutesRecord, methods } from './server';
-
-// Utils type
-type UnionToIntersection<T> =
-    (T extends any ? (x: T) => any : never) extends
-    (x: infer R) => any ? R : never;
-
-type AwaitedReturn<T> = T extends (...args: any[]) => infer R ? Awaited<R> : never;
-
-// Parameter types
-type RouteParams<T extends BaseRoute> = ParamsKey<T['path']>;
-type ParamValue = string | number | boolean;
-type SetParamKeys<V extends string> = V extends never ? {} : {
-    params: { [K in V]: ParamValue }
-};
-type SetParams<T extends BaseRoute> = SetParamKeys<RouteParams<T>>;
-
-// Main types
-export interface RequestOptions extends Omit<RequestInit, 'body' | 'method'> { }
-
-export interface ClientResponse<R> extends Response {
-    text(): Promise<R extends string ? R : string>;
-    json(): Promise<R>;
-}
-
-export type InferRoute<T extends BaseRoute> = {
-    [K in T['method']]: (path: T['path'], init?: RequestOptions & SetParams<T>) => Promise<
-        ClientResponse<AwaitedReturn<T['handler']>>
-    >;
-};
-
-export type InferRoutes<T extends RoutesRecord> = T extends [infer Route extends BaseRoute, ...infer Rest extends RoutesRecord]
-    ? InferRoute<Route> | InferRoutes<Rest>
-    : {};
-
-export type Client<T extends Byte<any>> = UnionToIntersection<InferRoutes<T['record']>>;
+import { methods, type Byte } from '../server';
+import type { Client } from './types';
 
 // Main stuff
 function createFetcher(url: string, method: string): Function {
@@ -54,7 +19,7 @@ function createFetcher(url: string, method: string): Function {
 /**
  * Inject parameter to the path
  */
-function injectParams(path: string, params: Record<string, ParamValue>) {
+function injectParams(path: string, params: Record<string, any>) {
     const parts: string[] = [];
 
     let paramIdx = path.indexOf(':'), start = 0;
@@ -82,9 +47,10 @@ function injectParams(path: string, params: Record<string, ParamValue>) {
 
         // Push additional slash if wildcard does not start with slash
         if (wildcardValue.charCodeAt(0) !== 47) parts.push('/');
-
         parts.push(wildcardValue);
     }
+
+    // Slice last static path
     else parts.push(path.substring(start));
 
     return parts.join('');
@@ -105,3 +71,5 @@ export function bit<T extends Byte<any>>(url: string): Client<T> {
     client.$ = client.get;
     return client;
 }
+
+export * from './types';

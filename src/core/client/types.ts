@@ -1,0 +1,40 @@
+import type { ParamsKey } from '@bit-js/blitz';
+import { type Byte, type BaseRoute, type RoutesRecord } from '../server';
+
+// Utils type
+type UnionToIntersection<T> =
+    (T extends any ? (x: T) => any : never) extends
+    (x: infer R) => any ? R : never;
+
+type AwaitedReturn<T> = T extends (...args: any[]) => infer R ? Awaited<R> : never;
+
+// Parameter types
+type RouteParamsKey<T extends BaseRoute> = ParamsKey<T['path']>;
+type ParamValue = string | number | boolean;
+type SetParamsKey<V extends string> = V extends never ? {} : {
+    params: { [K in V]: ParamValue }
+};
+type SetParams<T extends BaseRoute> = SetParamsKey<RouteParamsKey<T>>;
+
+// Main types
+type RequestProps = Omit<RequestInit, 'body' | 'method'>;
+export type RequestOptions<T extends BaseRoute> = RequestProps & SetParams<T>;
+
+export interface ClientResponse<R> extends Response {
+    text(): Promise<R extends string ? R : string>;
+    json(): Promise<R>;
+}
+
+export type InferRoute<T extends BaseRoute> = {
+    [K in T['method']]: (path: T['path'], init?: RequestOptions<T>) => Promise<
+        ClientResponse<AwaitedReturn<T['handler']>>
+    >;
+};
+
+export type InferRoutes<T extends RoutesRecord> = T extends [infer Route extends BaseRoute, ...infer Rest extends RoutesRecord]
+    ? InferRoute<Route> | InferRoutes<Rest> : {};
+
+/**
+ * Infer client type
+ */
+export type Client<T extends Byte<any>> = UnionToIntersection<InferRoutes<T['routes']>>;
