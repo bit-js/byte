@@ -9,7 +9,6 @@ type UnionToIntersection<T> =
 type AwaitedReturn<T> = T extends (...args: any[]) => infer R ? Awaited<R> : never;
 
 // Parameter types
-type RouteParamsKey<T extends BaseRoute> = ParamsKey<T['path']>;
 type ParamValue = string | number | boolean;
 type SetParamsKey<V extends string> = V extends never ? {} : {
     /**
@@ -17,7 +16,7 @@ type SetParamsKey<V extends string> = V extends never ? {} : {
      */
     params: { [K in V]: ParamValue }
 };
-type SetParams<T extends BaseRoute> = SetParamsKey<RouteParamsKey<T>>;
+type SetParams<T extends BaseRoute> = SetParamsKey<ParamsKey<T['path']>>;
 
 // Main types
 type RequestProps = Omit<RequestInit, 'body'>;

@@ -11,11 +11,6 @@ type HandlerRegister<T extends RoutesRecord> = {
         Path extends string,
         Handler extends BaseHandler<Path>
     >(path: Path, handler: Handler) => Byte<[...T, Route<Method, Path, Handler>]>;
-} & {
-    any<
-        Path extends string,
-        Handler extends BaseHandler<Path>
-    >(path: Path, handler: Handler): Byte<[...T, Route<AllMethodType, Path, Handler>]>
 };
 
 /**
@@ -25,9 +20,11 @@ export class Byte<Record extends RoutesRecord = []> {
     /** 
      * Register a handler for all method
      */
-    any(path: string, handler: any) {
+    any<
+        Path extends string,
+        Handler extends BaseHandler<Path>
+    >(path: Path, handler: Handler): Byte<[...Record, Route<AllMethodType, Path, Handler>]> {
         this.routes.push({ path, handler, method: allMethod });
-
         return this as any;
     }
 
