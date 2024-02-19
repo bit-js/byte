@@ -12,6 +12,9 @@ type AwaitedReturn<T> = T extends (...args: any[]) => infer R ? Awaited<R> : nev
 type RouteParamsKey<T extends BaseRoute> = ParamsKey<T['path']>;
 type ParamValue = string | number | boolean;
 type SetParamsKey<V extends string> = V extends never ? {} : {
+    /**
+     * Rest parameter ('$') must start with a slash
+     */
     params: { [K in V]: ParamValue }
 };
 type SetParams<T extends BaseRoute> = SetParamsKey<RouteParamsKey<T>>;
@@ -38,3 +41,5 @@ export type InferRoutes<T extends RoutesRecord> = T extends [infer Route extends
  * Infer client type
  */
 export type Client<T extends Byte<any>> = UnionToIntersection<InferRoutes<T['routes']>>;
+
+export type Fetcher = typeof fetch;

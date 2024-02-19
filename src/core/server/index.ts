@@ -1,9 +1,6 @@
 import Blitz from '@bit-js/blitz';
 import type { BaseHandler, RoutesRecord, Route } from './types';
-
-// Request methods
-export const methods = ['get', 'post', 'put', 'delete', 'patch', 'options', 'trace'] as const;
-export type RequestMethod = typeof methods[number];
+import { type RequestMethod, injectProto } from '../utils/methods';
 
 const allMethod = '$';
 type AllMethodType = typeof allMethod;
@@ -65,13 +62,10 @@ export class Byte<Record extends RoutesRecord = []> {
 
 // Init handler register
 export interface Byte<Record> extends HandlerRegister<Record> { };
-for (let i = 0, { length } = methods; i < length; ++i) {
-    const method = methods[i].toUpperCase();
 
-    Byte.prototype[methods[i]] = function(path, handler) {
-        this.routes.push({ path, handler, method });
-        return this;
-    };
-}
+injectProto(Byte, method => function(this: Byte<any>, path: string, handler: any) {
+    this.routes.push({ path, handler, method });
+    return this;
+});
 
 export * from './types';
