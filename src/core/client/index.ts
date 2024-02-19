@@ -1,5 +1,6 @@
 import type { Byte } from '../server';
 import { injectProto } from '../utils/methods';
+import serialize from './serialize';
 import type { InferClient, Fetcher } from './types';
 
 type PathInjectFunction = (params: Record<string, any>) => string;
@@ -57,10 +58,17 @@ class Client {
         this.url = url.charCodeAt(lastIdx) === 47 ? url.substring(0, lastIdx) : url;
     }
 
-    $(this: Client, path: string, init?: any) {
-        const params = init?.params;
+    $(path: string, init?: any) {
+        init ??= {};
+
+        const { params, body } = init;
+
+        // Cast body
+        if (typeof body !== 'undefined')
+            init.body = serialize(body);
 
         return this.fetch(
+            // Cast URL parameters
             this.url + (typeof params === 'undefined'
                 ? path : (injectPath[path] ?? buildPathInject(path))(params)
             ), init

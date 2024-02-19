@@ -4,7 +4,8 @@
   "module": "index.js",
   "devDependencies": {
     "@types/bun": "latest",
-    "vld-ts": "latest"
+    "vld-ts": "latest",
+    "mitata": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -13,5 +14,9 @@
   "types": "types/index.d.ts",
   "dependencies": {
     "@bit-js/blitz": "^1.0.1"
+  },
+  "scripts": {
+    "jit": "BUN_JSC_jitPolicyScale=0.0 BUN_JSC_thresholdForOptimizeSoon=0.0 BUN_JSC_thresholdForJITSoon=0.0 bun run",
+    "jitless": "BUN_JSC_UseJit=0 bun run"
   }
 }
