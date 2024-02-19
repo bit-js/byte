@@ -51,6 +51,16 @@ export class Bit {
         const lastIdx = url.length - 1;
         if (url.charCodeAt(lastIdx) === 47) url = url.substring(0, lastIdx);
     }
+
+    $(this: Bit, path: string, init?: any) {
+        const params = init?.params;
+
+        return this.fetch(
+            this.url + (typeof params === 'undefined'
+                ? path : (injectPath[path] ?? buildPathInject(path))(params)
+            ), init
+        );
+    };
 }
 
 // Inject method fetcher
@@ -59,7 +69,7 @@ injectProto(Bit, method => {
 
     return function(this: Bit, path: string, init?: any) {
         init ??= defaultInit;
-        init.method ??= method;
+        init.method = method;
 
         if (typeof init.params !== 'undefined')
             // Parser caching
@@ -69,13 +79,10 @@ injectProto(Bit, method => {
     }
 });
 
-// @ts-expect-error All method fetcher
-Bit.prototype.$ = Bit.prototype.get;
-
 /**
  * A fast type safe client
  */
-export function bit<T extends Byte<any>>(url: string, fetcher: Fetcher = fetch): Client<T> {
+export function bit<T extends Byte<any>>(url: string, fetcher: Fetcher = fetch): Client<T> & Bit {
     return new Bit(url, fetcher) as any;
 }
 

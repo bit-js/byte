@@ -20,7 +20,7 @@ type SetParamsKey<V extends string> = V extends never ? {} : {
 type SetParams<T extends BaseRoute> = SetParamsKey<RouteParamsKey<T>>;
 
 // Main types
-type RequestProps = Omit<RequestInit, 'body' | 'method'>;
+type RequestProps = Omit<RequestInit, 'body'>;
 export type RequestOptions<T extends BaseRoute> = RequestProps & SetParams<T>;
 
 export interface ClientResponse<R> extends Response {
