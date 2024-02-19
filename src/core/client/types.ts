@@ -40,6 +40,6 @@ export type InferRoutes<T extends RoutesRecord> = T extends [infer Route extends
 /**
  * Infer client type
  */
-export type Client<T extends Byte<any>> = UnionToIntersection<InferRoutes<T['routes']>>;
+export type InferClient<T extends Byte<any>> = UnionToIntersection<InferRoutes<T['routes']>>;
 
 export type Fetcher = typeof fetch;

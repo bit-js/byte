@@ -1,6 +1,6 @@
 import type { Byte } from '../server';
 import { injectProto } from '../utils/methods';
-import type { Client, Fetcher } from './types';
+import type { InferClient, Fetcher } from './types';
 
 type PathInjectFunction = (params: Record<string, any>) => string;
 
@@ -45,14 +45,19 @@ function buildPathInject(path: string): PathInjectFunction {
 }
 
 // Bit client prototype
-export class Bit {
-    constructor(readonly url: string, readonly fetch: Fetcher) {
+class Client {
+    /**
+     * Base URL
+     */
+    readonly url: string;
+
+    constructor(url: string, readonly fetch: Fetcher) {
         // Normalize URL
         const lastIdx = url.length - 1;
-        if (url.charCodeAt(lastIdx) === 47) url = url.substring(0, lastIdx);
+        this.url = url.charCodeAt(lastIdx) === 47 ? url.substring(0, lastIdx) : url;
     }
 
-    $(this: Bit, path: string, init?: any) {
+    $(this: Client, path: string, init?: any) {
         const params = init?.params;
 
         return this.fetch(
@@ -64,26 +69,21 @@ export class Bit {
 }
 
 // Inject method fetcher
-injectProto(Bit, method => {
+injectProto(Client, method => {
     const defaultInit = { method };
 
-    return function(this: Bit, path: string, init?: any) {
+    return function(this: Client, path: string, init?: any) {
         init ??= defaultInit;
         init.method = method;
-
-        if (typeof init.params !== 'undefined')
-            // Parser caching
-            path = (injectPath[path] ?? buildPathInject(path))(init.params);
-
-        return this.fetch(this.url + path, init);
+        return this.$(path, init);
     }
 });
 
 /**
  * A fast type safe client
  */
-export function bit<T extends Byte<any>>(url: string, fetcher: Fetcher = fetch): Client<T> & Bit {
-    return new Bit(url, fetcher) as any;
+export function bit<T extends Byte<any>>(url: string, fetcher: Fetcher = fetch): InferClient<T> & Client {
+    return new Client(url, fetcher) as any;
 }
 
 export * from './types';
