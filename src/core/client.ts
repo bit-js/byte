@@ -105,8 +105,3 @@ export function bit<T extends Byte<any>>(url: string): Client<T> {
     client.$ = client.get;
     return client;
 }
-
-console.log(injectParams('/user/:id/v/:name', {
-    id: 90,
-    name: 'R'
-}))
