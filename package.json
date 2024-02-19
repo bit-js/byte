@@ -2,16 +2,16 @@
   "name": "byte",
   "version": "1.0.0",
   "module": "index.js",
-  "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
     "vld-ts": "latest"
   },
-  "types": "types/index.d.ts",
-  "dependencies": {
-    "wint-js": "^1.2.6"
-  },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "type": "module",
+  "types": "types/index.d.ts",
+  "dependencies": {
+    "@bit-js/blitz": "^1.0.1"
   }
 }

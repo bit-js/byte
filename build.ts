@@ -15,7 +15,7 @@ Bun.build({
     format: 'esm',
     target: 'bun',
     outdir: '.',
-    entrypoints: ['./src/index.ts', './src/client.ts'],
+    entrypoints: ['./src/index.ts'],
     external: Object.keys(pkg.devDependencies)
 });
 
