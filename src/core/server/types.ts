@@ -1,6 +1,6 @@
 import { Context as BaseContext, type Params } from '@bit-js/blitz';
 
-export type BaseHandler<Path extends string> = (c: Context<Params<Path>>) => any;
+export type BaseHandler<Path extends string> = (c: Context<Params<Path>>) => Response | Promise<Response>;
 export class Context<Params> extends BaseContext<Params> { };
 
 // A singular route record
@@ -18,4 +18,3 @@ export type BaseRoute = Route<any, any, any>;
 
 // Route list
 export type RoutesRecord = BaseRoute[];
-export type HandlerWrap = (f: any) => any;

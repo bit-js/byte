@@ -18,20 +18,13 @@ type SetParamsKey<V extends string> = V extends never ? {} : {
 };
 type SetParams<T extends BaseRoute> = SetParamsKey<ParamsKey<T['path']>>;
 
-// Response type
-interface TypedResponse<R> extends Response {
-    text(): Promise<R extends string ? R : string>;
-    json(): Promise<R>;
-}
-export type ClientResponse<R> = R extends Response ? R : TypedResponse<R>;
-
 // Main types
 type RequestProps = Omit<RequestInit, 'body'>;
 export type RequestOptions<T extends BaseRoute> = RequestProps & SetParams<T>;
 
 export type InferRoute<T extends BaseRoute> = {
     [K in T['method']]: (path: T['path'], init?: RequestOptions<T>) => Promise<
-        ClientResponse<AwaitedReturn<T['handler']>>
+        AwaitedReturn<T['handler']>
     >;
 };
 
