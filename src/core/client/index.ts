@@ -1,7 +1,8 @@
 import type { Byte } from '../server';
-import { injectProto } from '../utils/methods';
-import serialize from './serialize';
 import type { InferClient, Fetcher } from './types';
+import serialize from './serialize';
+
+import { injectProto } from '../utils/methods';
 
 type PathInjectFunction = (params: Record<string, any>) => string;
 

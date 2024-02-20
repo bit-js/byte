@@ -1,16 +1,21 @@
-const yieldInput = (input: any) => input;
-const inputToString = (input: any) => input.toString();
-const noop = () => null;
+type Serializer = (input: any) => any;
 
-const objectSerializers: Record<string, (input: any) => any> = {
+const yieldInput: Serializer = input => input;
+const inputToString: Serializer = input => input.toString();
+const noop: Serializer = () => null;
+
+const objectSerializers: Record<string, Serializer> = {
+    // Stringify object literal
     Object: JSON.stringify,
+    // Try serialize promise
     Promise: async input => serialize(await input),
 
     URLSearchParams: yieldInput,
     ArrayBuffer: yieldInput,
     FormData: yieldInput,
     Blob: yieldInput,
-    ReadableStream: yieldInput
+    ReadableStream: yieldInput,
+    Response: yieldInput
 };
 
 const serializers = {
@@ -25,7 +30,7 @@ const serializers = {
     undefined: noop,
 
     object: t => t === null ? null : (objectSerializers[t.constructor.name] ?? yieldInput)(t)
-} satisfies Record<string, (input: any) => any>;
+} satisfies Record<string, Serializer>;
 
 export default function serialize(input: any) {
     return serializers[typeof input](input);
