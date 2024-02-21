@@ -1,12 +1,12 @@
 // Server
-import { Byte, BasicResponse, JsonResponse } from '..';
+import { Byte, send, sendJson } from '..';
 
 const userApis = new Byte()
-    .get('/:id', ctx => new BasicResponse(ctx.params.id));
+    .get('/:id', ctx => send(ctx.params.id));
 
 export default new Byte()
-    .get('/', () => new BasicResponse('Hi'))
+    .get('/', () => send('Hi'))
     .route('/user', userApis)
-    .post('/json', async ctx => new JsonResponse(ctx.req.json()));
+    .post('/json', async ctx => sendJson(await ctx.req.json()));
 
 
