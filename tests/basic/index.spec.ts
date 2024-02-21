@@ -1,6 +1,6 @@
 // Client
-import { bit } from '..';
-import { app } from './app';
+import { bit } from '@bit-js/byte';
+import { app } from '../app';
 import { test, expect } from 'bun:test';
 
 const server = Bun.serve(app);

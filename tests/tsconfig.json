@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "ESNext",
+            "DOM"
+        ],
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleDetection": "force",
+        "jsx": "react-jsx",
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        /* Linting */
+        "skipLibCheck": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "strictBindCallApply": true,
+        "strictFunctionTypes": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true,
+        /* Emit declarations */
+        "declaration": true,
+        "declarationDir": "types",
+        "emitDeclarationOnly": true,
+        "paths": {
+            "@bit-js/byte": [
+                ".."
+            ]
+        }
+    },
+    "include": [
+        "."
+    ]
+}

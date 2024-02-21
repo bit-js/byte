@@ -1,5 +1,5 @@
 // Server
-import { Byte, send } from '..';
+import { Byte, send } from '@bit-js/byte';
 
 const userApis = new Byte()
     .get('/:id', ctx => send.body(ctx.params.id));

@@ -6,7 +6,7 @@ type UnionToIntersection<T> =
     (T extends any ? (x: T) => any : never) extends
     (x: infer R) => any ? R : never;
 
-type AwaitedReturn<T> = T extends (...args: any[]) => infer R ? Awaited<R> : never;
+type ReturnOf<T> = T extends (...args: any[]) => infer R ? R : never;
 
 // Parameter types
 type ParamValue = string | number | boolean;
@@ -20,11 +20,18 @@ type SetParams<T extends BaseRoute> = SetParamsKey<ParamsKey<T['path']>>;
 
 // Main types
 type RequestProps = Omit<RequestInit, 'body'>;
-export type RequestOptions<T extends BaseRoute> = RequestProps & SetParams<T>;
+type Promisify<T> = T extends Promise<any> ? T : Promise<T>;
+type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];
+
+type RouteFunc<Path extends string, Init extends RequestProps, Return> =
+    RequiredKeys<Init> extends never
+    ? (path: Path, init?: RequestProps) => Promisify<Return>
+    : (path: Path, init: Init) => Promisify<Return>;
 
 export type InferRoute<T extends BaseRoute> = {
-    [K in T['method']]: (path: T['path'], init?: RequestOptions<T>) => Promise<
-        AwaitedReturn<T['handler']>
+    [K in T['method']]: RouteFunc<
+        T['path'], RequestProps & SetParams<T>,
+        ReturnOf<T['handler']>
     >;
 };
 

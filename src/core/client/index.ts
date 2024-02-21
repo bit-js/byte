@@ -1,5 +1,5 @@
 import type { Byte } from '../server';
-import type { InferClient, Fetcher } from './types';
+import type { Fetcher, InferClient } from './types';
 import serialize from './serialize';
 
 import { injectProto } from '../utils/methods';
@@ -60,11 +60,10 @@ class Client {
     }
 
     $(path: string, init?: any) {
-        init ??= {};
+        if (typeof init === 'undefined')
+            return this.fetch(this.url + path);
 
         const { params, body } = init;
-
-        // Cast body
         if (typeof body !== 'undefined')
             init.body = serialize(body);
 
@@ -82,16 +81,19 @@ injectProto(Client, method => {
     const defaultInit = { method };
 
     return function(this: Client, path: string, init?: any) {
-        init ??= defaultInit;
+        if (typeof init === 'undefined')
+            return this.$(path, defaultInit);
+
         init.method = method;
         return this.$(path, init);
     }
 });
 
+const fetchFn = fetch.bind(globalThis);
 /**
  * A fast type safe client
  */
-export function bit<T extends Byte<any>>(url: string, fetcher: Fetcher = fetch): InferClient<T> & Client {
+export function bit<T extends Byte<any>>(url: string, fetcher: Fetcher = fetchFn): InferClient<T> & Client {
     return new Client(url, fetcher) as any;
 }
 
