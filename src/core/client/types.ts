@@ -23,6 +23,7 @@ type RequestProps = Omit<RequestInit, 'body'>;
 type Promisify<T> = T extends Promise<any> ? T : Promise<T>;
 type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];
 
+// Infer a single route
 type RouteFunc<Path extends string, Init extends RequestProps, Return> =
     RequiredKeys<Init> extends never
     ? (path: Path, init?: RequestProps) => Promisify<Return>

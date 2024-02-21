@@ -1,10 +1,10 @@
 // Client
-import { bit } from '@bit-js/byte';
-import { app } from '../app';
+import { type App, fetch } from '../app';
+import createClient from './createClient';
+
 import { test, expect } from 'bun:test';
 
-const server = Bun.serve(app);
-const client = bit<typeof app>(server.url.href);
+const client = createClient<App>({ fetch, port: 3000 });
 
 // Main testing
 test('Root', async () => {
@@ -18,4 +18,3 @@ test('Parameter', async () => {
     });
     expect(await res.text()).toBe('90');
 });
-
