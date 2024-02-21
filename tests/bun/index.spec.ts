@@ -1,10 +1,8 @@
 // Client
-import { type App, fetch } from '../app';
-import createClient from './createClient';
-
+import listen from './listen';
 import { test, expect } from 'bun:test';
 
-const client = createClient<App>({ fetch, port: 3000 });
+const client = listen(3000);
 
 // Main testing
 test('Root', async () => {
