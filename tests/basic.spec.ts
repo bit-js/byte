@@ -1,10 +1,10 @@
 // Client
 import { bit } from '..';
-import type app from './app';
-
+import { app } from './app';
 import { test, expect } from 'bun:test';
 
-const client = bit<typeof app>('http://localhost:3000');
+const server = Bun.serve(app);
+const client = bit<typeof app>(server.url.href);
 
 // Main testing
 test('Root', async () => {
