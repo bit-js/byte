@@ -12,4 +12,6 @@ const app = new Byte()
 // Export the fetch function
 export const { fetch } = app;
 
+// Export additional infos
 export type App = typeof app;
+export const appPath = import.meta.path;

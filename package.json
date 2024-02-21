@@ -4,8 +4,8 @@
   "module": "index.js",
   "devDependencies": {
     "@types/bun": "latest",
-    "vld-ts": "latest",
-    "mitata": "latest"
+    "mitata": "latest",
+    "vld-ts": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

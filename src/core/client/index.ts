@@ -47,7 +47,7 @@ function buildPathInject(path: string): PathInjectFunction {
 }
 
 // Bit client prototype
-class Client {
+class BitClient {
     /**
      * Base URL
      */
@@ -77,10 +77,10 @@ class Client {
 }
 
 // Inject method fetcher
-injectProto(Client, method => {
+injectProto(BitClient, method => {
     const defaultInit = { method };
 
-    return function(this: Client, path: string, init?: any) {
+    return function(this: BitClient, path: string, init?: any) {
         if (typeof init === 'undefined')
             return this.$(path, defaultInit);
 
@@ -89,12 +89,14 @@ injectProto(Client, method => {
     }
 });
 
+export type Client<T extends Byte<any>> = InferClient<T> & BitClient;
+
 const fetchFn = fetch.bind(globalThis);
 /**
  * A fast type safe client
  */
-export function bit<T extends Byte<any>>(url: string, fetcher: Fetcher = fetchFn): InferClient<T> & Client {
-    return new Client(url, fetcher) as any;
+export function bit<T extends Byte<any>>(url: string, fetcher: Fetcher = fetchFn): Client<T> {
+    return new BitClient(url, fetcher) as any;
 }
 
 export * from './types';
