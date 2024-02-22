@@ -1,7 +1,7 @@
 import createSend from '../utils/createSend';
 
 // Basic response
-export interface ClientResponse<T> extends Response {
+export interface BasicResponse<T> extends Response {
     text(): Promise<T extends string ? T : string>;
     clone(): this;
 }
@@ -16,7 +16,7 @@ export const send: {
     /**
      * Send a `BodyInit` as response
      */
-    body<T extends BodyInit>(body: T, init?: ResponseInit): ClientResponse<T>;
+    body<T extends BodyInit>(body: T, init?: ResponseInit): BasicResponse<T>;
 
     /**
      * Send response as JSON
@@ -26,7 +26,7 @@ export const send: {
     /**
      * Send HTML response
      */
-    html<const T extends BodyInit>(body: T, init?: ResponseInit): ClientResponse<T>;
+    html<const T extends BodyInit>(body: T, init?: ResponseInit): BasicResponse<T>;
 
     /**
      * Stream server-sent events
