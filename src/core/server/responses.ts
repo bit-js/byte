@@ -1,4 +1,4 @@
-import createSend from '../utils/createSend';
+import createSend from './compile/send';
 
 // Basic response
 export interface BasicResponse<T> extends Response {

@@ -9,6 +9,3 @@ export const jsonApis = new Byte()
     .post('/json', {
         body: async ctx => await ctx.req.json() as { message: string }
     }, ctx => send.body(ctx.state.body.message));
-
-// Export additional infos
-export const appPath = import.meta.path;

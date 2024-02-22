@@ -10,7 +10,7 @@ export type BaseValidatorRecord = Record<string, Fn> | undefined;
 
 type AwaitedReturn<T> = T extends (...args: any[]) => infer R ? Awaited<R> : never;
 export type ValidatorProp<T, Prop extends string> = { [K in Prop]: ValidatorResult<T> };
-export type ValidatorResult<T> = Exclude<AwaitedReturn<T>, Error>;
+export type ValidatorResult<T> = Exclude<AwaitedReturn<T>, Response>;
 
 export type InferValidator<T extends BaseValidatorRecord> = T extends undefined ? undefined : {
     [K in Extract<keyof T, string>]: ValidatorResult<T[K]>;

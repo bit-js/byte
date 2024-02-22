@@ -1,11 +1,11 @@
-import isVariableName from './isVariableName';
+import accessor from '../../utils/accessor';
 
 export default function createSend(headers: Record<string, string>, f: any): any {
     const body = f === null ? 'b' : 'f(b)';
     const propAssigns = [];
 
     for (const key in headers)
-        propAssigns.push(`headers${isVariableName(key) ? '.' + key : `[${JSON.stringify(key)}]`}??=${JSON.stringify(headers[key])}`);
+        propAssigns.push(`headers${accessor(key)}??=${JSON.stringify(headers[key])}`);
 
     // h is default response headers
     // i is default response init

@@ -1,6 +1,7 @@
 import Blitz from '@bit-js/blitz';
 import type { BaseHandler, RoutesRecord, Route, BaseRoute, InferValidator, ValidatorRecord } from './types';
 import { type RequestMethod, injectProto } from '../utils/methods';
+import compileValidator from './compile/validators';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -25,16 +26,6 @@ type NormalizePath<T extends string> = NormalizeEnd<T extends `${infer Start}//$
 type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Current extends BaseRoute, ...infer Rest extends RoutesRecord]
     ? [Omit<Current, 'path'> & { path: NormalizePath<`${Base}${Current['path']}`> }, ...SetBase<Base, Rest>]
     : [];
-
-function createMethodRegister(method: string) {
-    return function(this: Byte<any>, path: string, ...args: any[]) {
-        const handler = args.length === 1 ? args[0] : args[1];
-        const validator = args.length === 2 ? args[0] : undefined;
-
-        this.routes.push({ path, handler, method, validator });
-        return this;
-    }
-};
 
 /**
  * Create a Byte app
@@ -77,21 +68,32 @@ export class Byte<Record extends RoutesRecord = []> {
         const { routes } = this;
 
         for (let i = 0, { length } = routes; i < length; ++i) {
-            const route = routes[i];
+            const route = routes[i],
+                handler = compileValidator(route.handler, route.validator);
 
             if (route.method === '$')
-                this.router.handle(route.path, route.handler);
+                this.router.handle(route.path, handler);
             else
-                this.router.put(route.method, route.path, route.handler);
+                this.router.put(route.method, route.path, handler);
         }
 
         return this.router.build();
     }
 }
 
-// Init handler register
 export interface Byte<Record> extends HandlerRegisters<Record> { };
 
+function createMethodRegister(method: string) {
+    return function(this: Byte<any>, path: string, ...args: any[]) {
+        const handler = args.length === 1 ? args[0] : args[1];
+        const validator = args.length === 2 ? args[0] : undefined;
+
+        this.routes.push({ path, handler, method, validator });
+        return this;
+    }
+};
+
+// Init handler register
 injectProto(Byte, createMethodRegister);
 Byte.prototype.any = createMethodRegister('$');
 

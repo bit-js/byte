@@ -8,8 +8,7 @@ for (let i = 65; i < 91; ++i)
 for (let i = 97; i < 123; ++i)
     validChars[i] = validStartChars[i] = null;
 // $, _
-validStartChars[36] = validStartChars[95]
-    = validChars[36] = validChars[95] = null;
+validStartChars[95] = validChars[36] = validChars[95] = null;
 // 0 - 9
 for (let i = 48; i < 58; ++i)
     validChars[i] = null;
