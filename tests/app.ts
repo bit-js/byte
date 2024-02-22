@@ -8,4 +8,4 @@ export const basicApis = new Byte()
 export const jsonApis = new Byte()
     .post('/json', {
         body: async ctx => await ctx.req.json() as { message: string }
-    }, ctx => send.body(ctx.state.body.message));
+    }, ctx => send.json(ctx.state.body));

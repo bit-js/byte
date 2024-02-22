@@ -9,5 +9,7 @@ test('JSON', async () => {
     const res = await client.post('/json', {
         body: { message: 'Hi' }
     });
-    expect(await res.text()).toBe('Hi');
+    expect(await res.json()).toEqual({
+        message: 'Hi'
+    });
 });
