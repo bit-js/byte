@@ -1,21 +1,25 @@
 import Blitz from '@bit-js/blitz';
-import type { BaseHandler, RoutesRecord, Route, BaseRoute } from './types';
+import type { BaseHandler, RoutesRecord, Route, BaseRoute, ValidatorRecord } from './types';
 import { type RequestMethod, injectProto } from '../utils/methods';
 
 const allMethod = '$';
-type AllMethodType = typeof allMethod;
 
-type PathString = `/${string}`;
+interface Register<Method extends string, T extends RoutesRecord> {
+    <
+        const Path extends string,
+        const Handler extends BaseHandler<Path>,
+        const Validator extends ValidatorRecord | undefined,
+    >(path: Path, handler: Handler, validator?: Validator): Byte<[...T, Route<Method, Path, Handler, Validator>]>;
+}
 
 // Methods to register request handlers
-type HandlerRegister<T extends RoutesRecord> = {
-    [Method in RequestMethod]: <
-        Path extends PathString,
-        Handler extends BaseHandler<Path>
-    >(path: Path, handler: Handler) => Byte<[...T, Route<Method, Path, Handler>]>;
+type HandlerRegisters<T extends RoutesRecord> = {
+    [Method in RequestMethod | 'any']: Register<Method, T>;
 };
 
-type NormalizePath<T extends string> = T extends `${infer Start}//${infer End}` ? `${Start}/${End}` : T;
+type NormalizeEnd<T extends string> = T extends '/' ? '/' : (T extends `${infer Start}/` ? Start : T);
+type NormalizePath<T extends string> = NormalizeEnd<T extends `${infer Start}//${infer End}` ? `${Start}/${End}` : T>;
+
 type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Current extends BaseRoute, ...infer Rest extends RoutesRecord]
     ? [Omit<Current, 'path'> & { path: NormalizePath<`${Base}${Current['path']}`> }, ...SetBase<Base, Rest>]
     : [];
@@ -38,7 +42,7 @@ export class Byte<Record extends RoutesRecord = []> {
     /**
      * Register subroutes
      */
-    route<Path extends PathString, App extends Byte<any>>(base: Path, app: App): Byte<[...Record, ...SetBase<Path, App['routes']>]> {
+    route<Path extends string, App extends Byte<any>>(base: Path, app: App): Byte<[...Record, ...SetBase<Path, App['routes']>]> {
         const { routes } = app;
 
         for (let i = 0, { length } = routes; i < length; ++i) {
@@ -46,6 +50,7 @@ export class Byte<Record extends RoutesRecord = []> {
 
             this.routes.push({
                 handler: route.handler, method: route.method,
+                validator: route.validator,
                 path: (base + route.path).replace('//', '/')
             });
         }
@@ -56,11 +61,11 @@ export class Byte<Record extends RoutesRecord = []> {
     /** 
      * Register a handler for all method
      */
-    any<
-        Path extends PathString,
-        Handler extends BaseHandler<Path>
-    >(path: Path, handler: Handler): Byte<[...Record, Route<AllMethodType, Path, Handler>]> {
-        this.routes.push({ path, handler, method: allMethod });
+    any(path: string, handler: any, validator: any): any {
+        this.routes.push({
+            path, handler, method: allMethod,
+            validator: validator ?? null
+        });
         return this as any;
     }
 
@@ -84,10 +89,13 @@ export class Byte<Record extends RoutesRecord = []> {
 }
 
 // Init handler register
-export interface Byte<Record> extends HandlerRegister<Record> { };
+export interface Byte<Record> extends HandlerRegisters<Record> { };
 
-injectProto(Byte, method => function(this: Byte<any>, path: string, handler: any) {
-    this.routes.push({ path, handler, method });
+injectProto(Byte, method => function(this: Byte<any>, path: string, handler: any, validator: any) {
+    this.routes.push({
+        path, handler, method,
+        validator: validator ?? null
+    });
     return this;
 });
 

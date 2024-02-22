@@ -1,10 +1,9 @@
-import { bit } from '@bit-js/byte';
-import { fetch, type App } from '@app';
+import { bit, type Byte } from '@bit-js/byte';
 
 /**
  * Serve the app using Bun and create a bit client
  */
-export default function listen(port: number | string) {
-    const server = Bun.serve({ fetch, port });
+export default function listen<App extends Byte<any>>(app: App, port: number | string) {
+    const server = Bun.serve({ fetch: app.fetch, port });
     return bit<App>(server.url.href);
 }

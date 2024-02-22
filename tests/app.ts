@@ -1,17 +1,14 @@
 // Server
 import { Byte, send } from '@bit-js/byte';
 
-const userApis = new Byte()
+export const basicApis = new Byte()
+    .get('/', () => send.body('Hi'))
     .get('/:id', ctx => send.body(ctx.params.id));
 
-const app = new Byte()
-    .get('/', () => send.body('Hi'))
-    .route('/user', userApis)
-    .post('/json', async ctx => send.json(await ctx.req.json()));
-
-// Export the fetch function
-export const { fetch } = app;
+export const jsonApis = new Byte()
+    .post('/json', async ctx => send.json(await ctx.req.json()), {
+        body: async ctx => await ctx.req.json() as { message: string }
+    });
 
 // Export additional infos
-export type App = typeof app;
 export const appPath = import.meta.path;

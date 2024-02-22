@@ -1,5 +1,5 @@
 import type { ParamsKey } from '@bit-js/blitz';
-import { type Byte, type BaseRoute, type RoutesRecord } from '../server';
+import { type Byte, type BaseRoute, type RoutesRecord, type ValidatorRecord } from '../server';
 
 // Utils type
 type UnionToIntersection<T> =
@@ -8,30 +8,39 @@ type UnionToIntersection<T> =
 
 type ReturnOf<T> = T extends (...args: any[]) => infer R ? R : never;
 
+// Infer body from validator
+type AwaitedReturn<T> = T extends (...args: any[]) => infer R ? Awaited<R> : never;
+type SetBody<T extends ValidatorRecord | undefined> = T extends undefined ? {} : (
+    T extends { body: infer Fn } ? {
+        body: Exclude<AwaitedReturn<Fn>, Error>
+    } : {}
+);
+
 // Parameter types
 type ParamValue = string | number | boolean;
-type SetParamsKey<V extends string> = V extends never ? {} : {
+type SetParams<V extends string> = ParamsKey<V> extends never ? {} : {
     /**
      * Rest parameter ('$') must start with a slash
      */
-    params: { [K in V]: ParamValue }
+    params: { [K in ParamsKey<V>]: ParamValue }
 };
-type SetParams<T extends BaseRoute> = SetParamsKey<ParamsKey<T['path']>>;
 
 // Main types
-type RequestProps = Omit<RequestInit, 'body'>;
+type RequestBaseProps = Omit<RequestInit, 'body'>;
+export type RequestProps<T extends BaseRoute> = RequestBaseProps & SetParams<T['path']> & SetBody<T['validator']>;
+
 type Promisify<T> = T extends Promise<any> ? T : Promise<T>;
 type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];
 
 // Infer a single route
-type RouteFunc<Path extends string, Init extends RequestProps, Return> =
+type RouteFunc<Path extends string, Init, Return> =
     RequiredKeys<Init> extends never
-    ? (path: Path, init?: RequestProps) => Promisify<Return>
+    ? (path: Path, init?: RequestBaseProps) => Promisify<Return>
     : (path: Path, init: Init) => Promisify<Return>;
 
 export type InferRoute<T extends BaseRoute> = {
     [K in T['method']]: RouteFunc<
-        T['path'], RequestProps & SetParams<T>,
+        T['path'], RequestProps<T>,
         ReturnOf<T['handler']>
     >;
 };

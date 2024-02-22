@@ -26,7 +26,7 @@
         "emitDeclarationOnly": true,
         "paths": {
             "@bit-js/byte": [
-                ".."
+                "../src"
             ],
             "@app": [
                 "./app"
