@@ -35,13 +35,11 @@ export default function compileValidator(handler: Fn, validators: BaseValidatorR
     keys.push('$');
     values.push(handler);
 
-    const fnAsync = handler.constructor.name === 'AsyncFunction';
-    isAsync = isAsync || fnAsync;
-
     const fnNoContext = handler.length === 0;
     noContext = noContext && fnNoContext;
 
-    statements.push(`return ${fnAsync ? 'await ' : ''}$(${noContext ? '' : 'c'})`);
+    // Save some milliseconds if the function is async
+    statements.push(`return ${handler.constructor.name === 'AsyncFunction' && isAsync ? 'await ' : ''}$(${noContext ? '' : 'c'})`);
 
     // Build the function
     return Function(...keys, `return ${isAsync ? 'async ' : ''}(${noContext ? '' : 'c'})=>{${statements.join(';')}}`)(...values);

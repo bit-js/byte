@@ -1,9 +1,13 @@
 import accessor from '../../utils/accessor';
 
 export default function createSend(headers: Record<string, string>, f: any): any {
-    const body = f === null ? 'b' : 'f(b)';
-    const propAssigns = [];
+    const body = f === null
+        ? 'b'
+        : typeof f === 'string'
+            ? `${f}(b)`
+            : 'f(b)';
 
+    const propAssigns = [];
     for (const key in headers)
         propAssigns.push(`headers${accessor(key)}??=${JSON.stringify(headers[key])}`);
 
