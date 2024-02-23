@@ -12,6 +12,13 @@ export interface JsonResponse<T> extends Response {
     clone(): this;
 }
 
+export interface FormRecord extends Record<string, FormDataEntryValue> { };
+
+export interface BasicForm<T extends FormRecord> extends FormData {
+    get<K extends keyof T>(name: K): T[K];
+    get(name: string): null;
+}
+
 /**
  * Basic response format
  */
@@ -20,6 +27,11 @@ export const send: {
      * Send a `BodyInit` as response
      */
     body<const T extends BodyInit>(body: T, init?: ResponseInit): BasicResponse<T>;
+
+    /**
+     * Send response as plain text
+     */
+    text<const T extends BodyInit>(body: T, init?: ResponseInit): BasicResponse<T>;
 
     /**
      * Send response as JSON
@@ -53,6 +65,7 @@ export const send: {
 } = {
     body: (body, init): any => new Response(body, init),
 
+    text: createSend({ 'Content-Type': 'text/plain' }, null),
     json: createSend({ 'Content-Type': 'application/json' }, 'JSON.stringify'),
     xml: createSend({ 'Content-Type': 'application/xml' }, null),
     binary: createSend({ 'Content-Type': 'application/octet-stream' }, null),
