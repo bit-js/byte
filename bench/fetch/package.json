@@ -10,8 +10,7 @@
     "mitata": "^0.1.11"
   },
   "dependencies": {
-    "hono": "^4.0.6",
-    "sunder": "^0.10.1"
+    "hono": "^4.0.6"
   },
   "scripts": {
     "jit": "BUN_JSC_jitPolicyScale=0.0 BUN_JSC_thresholdForOptimizeSoon=0.0 BUN_JSC_thresholdForJITSoon=0.0 bun run",

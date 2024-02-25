@@ -31,47 +31,13 @@ function createHono() {
     return app.fetch;
 }
 
-// Sunder
-import { Router, Sunder } from 'sunder';
-
-function createSunder() {
-    const router = new Router()
-        .get('/user', (ctx) => {
-            ctx.response.body = 'User';
-        })
-        .get('/user/comments', (ctx) => {
-            ctx.response.body = 'User comments';
-        })
-        .get('/user/avatar', (ctx) => {
-            ctx.response.body = 'User avatar';
-        })
-        .get('/event/:id', (ctx) => {
-            ctx.response.body = `Event ${ctx.params.id}`;
-        })
-        .get('/event/:id/comments', (ctx) => {
-            ctx.response.body = `Event ${ctx.params.id} comments`;
-        })
-        .get('/status', (ctx) => {
-            ctx.response.body = 'Status';
-        })
-        .get('/deeply/nested/route/for/testing', (ctx) => {
-            ctx.response.body = 'Deeply nested route for testing';
-        });
-
-    const app = new Sunder();
-    app.use(router.middleware);
-
-    return app.fetch.bind(app);
-}
-
 // Main testing
 import test from './test';
 
 console.log('Benchmarking...');
 const { benchmarks } = await test({
     Byte: createByte(),
-    Hono: createHono(),
-    Sunder: createSunder()
+    Hono: createHono()
 });
 
 const groupResult = {};
