@@ -63,8 +63,10 @@ export const send: {
      */
     link(href: string, status: 301 | 302 | 307 | 308): Response;
 } = {
-    body: (body, init): any => new Response(body, init),
+    // Basically inlining can work here when init is not passed in as a parameter I guess
+    body: (body, init): any => typeof init === 'undefined' ? new Response(body) : new Response(body, init),
 
+    // All stuff down here cannot be inlined
     text: createSend({ 'Content-Type': 'text/plain' }, null),
     json: createSend({ 'Content-Type': 'application/json' }, 'JSON.stringify'),
     xml: createSend({ 'Content-Type': 'application/xml' }, null),
@@ -72,5 +74,6 @@ export const send: {
     html: createSend({ 'Content-Type': 'text/html' }, null),
     events: createSend({ 'Content-Type': 'text/event-stream' }, null),
 
+    // This response object can be reused multiple time
     link: (Location, status) => new Response(null, { status, headers: { Location } })
 };

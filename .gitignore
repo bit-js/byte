@@ -175,7 +175,7 @@ dist
 .DS_Store
 
 # Lock
-/bun.lockb
+bun.lockb
 
 # Output files
 /types

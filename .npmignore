@@ -8,3 +8,5 @@ tsconfig.json
 
 src
 examples
+
+bench

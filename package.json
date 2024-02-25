@@ -1,11 +1,10 @@
 {
   "name": "@bit-js/byte",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "module": "index.js",
   "devDependencies": {
     "@types/bun": "latest",
-    "mitata": "latest",
-    "vld-ts": "latest"
+    "mitata": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
