@@ -1,6 +1,6 @@
 {
   "name": "@bit-js/byte",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "module": "index.js",
   "devDependencies": {
     "@types/bun": "latest",
@@ -12,7 +12,7 @@
   "type": "module",
   "types": "types/index.d.ts",
   "dependencies": {
-    "@bit-js/blitz": "^1.0.1"
+    "@bit-js/blitz": "^1.0.2"
   },
   "scripts": {
     "jit": "BUN_JSC_jitPolicyScale=0.0 BUN_JSC_thresholdForOptimizeSoon=0.0 BUN_JSC_thresholdForJITSoon=0.0 bun run",
