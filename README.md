@@ -1,5 +1,5 @@
 # Byte
-A simple, performance-focused framework that works everywhere.
+A simple, performance-focused web framework that works on Bun, Deno, Cloudflare Workers and browsers.
 
 ```ts
 import { Byte, send } from '@bit-js/byte';
@@ -56,7 +56,7 @@ Validators are functions that parse and validate incoming request data.
 ```ts
 new Byte()
     .get('/', {
-        body: async ctx => {
+        body: async (ctx) => {
             try {
                 // Parse body as text
                 return await ctx.req.text();
@@ -69,10 +69,48 @@ new Byte()
 ```
 
 Parsed data is passed into `ctx.state` as a property.
+
 If a `Response` object is returned from the validator, it will be used instead of the handler response.
+
 If the function returns a `Promise` it should be properly marked as `async` for the compiler to detect.
 
-## Runtime support
-Byte should work on all runtimes as it doesn't use any runtime-specific APIs.
+### Client
+Byte provides a client implementation with type inference.
 
-If Byte does not work on any runtime please open an issue at https://github.com/bit-js/byte/issues.
+To use it, first export the type of your app.
+```ts
+const app = new Byte()
+    .get('/', () => send.body('Hi'))
+    .get('/user/:id', (ctx) => send.body(ctx.params.id));
+    .post('/text', {
+        body: async ctx => await ctx.req.text()
+    }, (ctx) => send.body(ctx.state.body))
+
+export type App = typeof app;
+```
+
+Then use it in client code.
+```ts
+import type { App } from './app';
+import { bit } from '@bit-js/byte';
+
+const app = bit<App>('http://localhost:3000');
+
+const msg = await app.get('/'); 
+await msg.text(); // 'Hi'
+
+const id = await app.get('/user/:id', {
+    params: { id: 90 }
+});
+await msg.text(); // '90'
+
+const body = await app.post('/text', {
+    body: 'Hi'
+});
+await body.text(); // Hi
+```
+
+You can also pass in a custom `fetch` function.
+```ts
+const app = bit<App>('http://localhost:3000', myFetch);
+```
