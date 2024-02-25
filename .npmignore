@@ -7,6 +7,9 @@ node_modules
 tsconfig.json
 
 src
+tests
 examples
+
+build.ts
 
 bench

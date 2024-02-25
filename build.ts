@@ -16,6 +16,6 @@ Bun.build({
     target: 'bun',
     outdir: '.',
     entrypoints: ['./src/index.ts'],
-    external: Object.keys(pkg.devDependencies)
+    external: Object.keys(pkg.devDependencies).concat(Object.keys(pkg.dependencies))
 });
 
