@@ -3,8 +3,7 @@
   "version": "1.0.3",
   "module": "index.js",
   "devDependencies": {
-    "@types/bun": "latest",
-    "mitata": "latest"
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

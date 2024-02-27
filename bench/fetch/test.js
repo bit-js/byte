@@ -55,7 +55,7 @@ export async function check(res, expect) {
 }
 
 export default function test(frameworks) {
-    for (let i = 0; i < 10; ++i) bench('noop', () => { });
+    for (let i = 0; i < 15; ++i) bench('noop', () => { });
 
     for (const path in routes) {
         const buildResult = buildPath(path);

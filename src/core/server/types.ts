@@ -1,4 +1,4 @@
-import { Context as BaseContext, type Params } from '@bit-js/blitz';
+import { Context as TypedContext, type Params } from '@bit-js/blitz';
 
 export type BaseHandler<Path extends string, State = undefined> = (c: Context<Params<Path>, State>) => Response | Promise<Response>;
 
@@ -6,17 +6,16 @@ export type BaseValidator<Path extends string> = (c: Context<Params<Path>>) => a
 export type ValidatorRecord<Path extends string> = Record<string, BaseValidator<Path>>;
 
 export type Fn = (c: Context<any, any>) => any;
-export type BaseValidatorRecord = Record<string, Fn> | undefined;
 
 type AwaitedReturn<T> = T extends (...args: any[]) => infer R ? Awaited<R> : never;
 export type ValidatorProp<T, Prop extends string> = { [K in Prop]: ValidatorResult<T> };
 export type ValidatorResult<T> = Exclude<AwaitedReturn<T>, Response>;
 
-export type InferValidator<T extends BaseValidatorRecord> = T extends undefined ? undefined : {
+export type InferValidator<T extends ValidatorRecord<any> | undefined> = T extends undefined ? undefined : {
     [K in Extract<keyof T, string>]: ValidatorResult<T[K]>;
 }
 
-export class Context<Params, State = undefined> extends BaseContext<Params> {
+export class Context<Params, State = undefined> extends TypedContext<Params> {
     state!: State;
 };
 
@@ -25,7 +24,7 @@ export interface Route<
     Method extends string,
     Path extends string,
     Handler extends Fn,
-    Validator extends BaseValidatorRecord,
+    Validator extends ValidatorRecord<Path> | undefined,
 > {
     method: Method;
     path: Path;

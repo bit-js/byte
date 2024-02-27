@@ -20,10 +20,6 @@
         "strictFunctionTypes": true,
         "noFallthroughCasesInSwitch": true,
         "forceConsistentCasingInFileNames": true,
-        /* Emit declarations */
-        "declaration": true,
-        "declarationDir": "types",
-        "emitDeclarationOnly": true,
         "paths": {
             "@bit-js/byte": [
                 "../src"

@@ -99,3 +99,4 @@ Byte.prototype.any = createMethodRegister('$');
 
 export * from './types';
 export * from './responses';
+export * from './macro';

@@ -1,13 +1,14 @@
-import type { BaseValidatorRecord, Fn } from '../types';
+import type { Fn } from '../types';
 import isVariableName from '../../utils/isVariableName';
+import { isAsync } from '../macro';
 
-export default function compileValidator(handler: Fn, validators: BaseValidatorRecord) {
+export default function compileValidator(handler: Fn, validators: Record<string, Fn>) {
     if (typeof validators === 'undefined') return handler;
 
     const keys = [], statements = [],
         values = [], paramsKeys = [];
 
-    let isAsync = false, noContext = true, idx = 0;
+    let hasAsync = false, noContext = true, idx = 0;
 
     for (const key in validators) {
         if (!isVariableName(key))
@@ -20,8 +21,8 @@ export default function compileValidator(handler: Fn, validators: BaseValidatorR
         keys.push(fnKey);
         values.push(fn);
 
-        const fnAsync = fn.constructor.name === 'AsyncFunction';
-        isAsync = isAsync || fnAsync;
+        const fnAsync = isAsync(fn);
+        hasAsync = hasAsync || fnAsync;
 
         const fnNoContext = fn.length === 0;
         noContext = noContext && fnNoContext;
@@ -39,8 +40,8 @@ export default function compileValidator(handler: Fn, validators: BaseValidatorR
     noContext = noContext && fnNoContext;
 
     // Save some milliseconds if the function is async
-    statements.push(`return ${handler.constructor.name === 'AsyncFunction' && isAsync ? 'await ' : ''}$(${noContext ? '' : 'c'})`);
+    statements.push(`return ${isAsync(handler) && hasAsync ? 'await ' : ''}$(${noContext ? '' : 'c'})`);
 
     // Build the function
-    return Function(...keys, `return ${isAsync ? 'async ' : ''}(${noContext ? '' : 'c'})=>{${statements.join(';')}}`)(...values);
+    return Function(...keys, `return ${hasAsync ? 'async ' : ''}(${noContext ? '' : 'c'})=>{${statements.join(';')}}`)(...values);
 }
