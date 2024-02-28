@@ -1,32 +1,20 @@
 import { group, run, bench } from 'mitata';
 
-const AsyncFunction = async function() { }.constructor;
 for (let i = 0; i < 15; ++i) bench('noop', () => { });
 
-const f1 = () => Promise.resolve(0);
+const thenFn = a => a + Math.random();
 
-const f2 = async () => Promise.resolve(0);
+const f1 = () => Promise.resolve(0).then(thenFn);
 
-const f3 = async () => await Promise.resolve(0);
-
-const f4 = () => Promise.resolve(0);
-f4.constructor = AsyncFunction;
+const f2 = async () => thenFn(await Promise.resolve(0));
 
 group('Async function testing', () => {
     bench('No async', async () => {
         await f1();
     });
 
-    bench('Fake async', async () => {
-        await f4();
-    });
-
-    bench('Async no await', async () => {
-        await f2();
-    });
-
     bench('Async await', async () => {
-        await f3();
+        await f2();
     });
 });
 

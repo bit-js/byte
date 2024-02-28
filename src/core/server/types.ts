@@ -1,13 +1,14 @@
 import { Context as TypedContext, type Params } from '@bit-js/blitz';
+import type { AwaitedReturn } from '../utils/types';
 
 export type BaseHandler<Path extends string, State = undefined> = (c: Context<Params<Path>, State>) => Response | Promise<Response>;
 
 export type BaseValidator<Path extends string> = (c: Context<Params<Path>>) => any;
 export type ValidatorRecord<Path extends string> = Record<string, BaseValidator<Path>>;
 
-export type Fn = (c: Context<any, any>) => any;
+export type Fn<R = any> = (c: Context<any, any>) => R;
 
-type AwaitedReturn<T> = T extends (...args: any[]) => infer R ? Awaited<R> : never;
+// Validator
 export type ValidatorProp<T, Prop extends string> = { [K in Prop]: ValidatorResult<T> };
 export type ValidatorResult<T> = Exclude<AwaitedReturn<T>, Response>;
 

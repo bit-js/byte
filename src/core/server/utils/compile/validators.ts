@@ -1,5 +1,5 @@
-import type { Fn } from '../types';
-import isVariableName from '../../utils/isVariableName';
+import type { Fn } from '../../types';
+import isVariableName from '../../../utils/isVariableName';
 import { isAsync } from '../macro';
 
 export default function compileValidator(handler: Fn, validators: Record<string, Fn>) {

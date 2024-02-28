@@ -1,4 +1,4 @@
-import type { Fn } from './types';
+import type { Fn } from '../types';
 
 export const AsyncFunction = (async function() { }).constructor;
 

@@ -1,4 +1,4 @@
-import accessor from '../../utils/accessor';
+import accessor from '../../../utils/accessor';
 
 export default function createSend(headers: Record<string, string>, f: any): any {
     const body = f === null

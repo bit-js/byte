@@ -1,5 +1,5 @@
 import type { ParamsKey } from '@bit-js/blitz';
-import type { Byte, BaseRoute, RoutesRecord, BaseValidatorRecord, ValidatorProp } from '../server';
+import type { Byte, BaseRoute, RoutesRecord, ValidatorProp, ValidatorRecord } from '../server';
 
 // Utils type
 type UnionToIntersection<T> =
@@ -9,7 +9,7 @@ type UnionToIntersection<T> =
 type ReturnOf<T> = T extends (...args: any[]) => infer R ? R : never;
 
 // Infer body from validator
-type SetBody<T extends BaseValidatorRecord> = T extends undefined ? {} : (
+type SetBody<T extends ValidatorRecord<any> | undefined> = T extends undefined ? {} : (
     T extends { body: infer F } ? ValidatorProp<F, 'body'> : {}
 );
 
