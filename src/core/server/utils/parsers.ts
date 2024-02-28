@@ -1,3 +1,4 @@
+import type { Fn } from '../types';
 import type { AwaitedReturn } from '../../utils/types';
 import { $async } from './macro';
 
@@ -27,27 +28,27 @@ export const parse: {
     /**
      * Create a text parser
      */
-    text<T extends ParserOptions<string> = ParserOptions<string>>(options?: T): Promise<AwaitedReturn<T['next']> | Response>;
+    text<T extends ParserOptions<string> = ParserOptions<string>>(options?: T): Fn<Promise<AwaitedReturn<T['next']> | Response>>;
 
     /**
      * Create a text parser
      */
-    json<T extends ParserOptions<any> = ParserOptions<any>>(options?: T): Promise<AwaitedReturn<T['next']> | Response>
+    json<T extends ParserOptions<any> = ParserOptions<any>>(options?: T): Fn<Promise<AwaitedReturn<T['next']> | Response>>;
 
     /**
      * Create a text parser
      */
-    form<T extends ParserOptions<FormData> = ParserOptions<FormData>>(options?: T): Promise<AwaitedReturn<T['next']> | Response>
+    form<T extends ParserOptions<FormData> = ParserOptions<FormData>>(options?: T): Fn<Promise<AwaitedReturn<T['next']> | Response>>;
 
     /**
      * Create a text parser
      */
-    blob<T extends ParserOptions<Blob> = ParserOptions<Blob>>(options?: T): Promise<AwaitedReturn<T['next']> | Response>
+    blob<T extends ParserOptions<Blob> = ParserOptions<Blob>>(options?: T): Fn<Promise<AwaitedReturn<T['next']> | Response>>;
 
     /**
      * Create a text parser
      */
-    buffer<T extends ParserOptions<ArrayBuffer> = ParserOptions<ArrayBuffer>>(options?: T): Promise<AwaitedReturn<T['next']> | Response>
+    buffer<T extends ParserOptions<ArrayBuffer> = ParserOptions<ArrayBuffer>>(options?: T): Fn<Promise<AwaitedReturn<T['next']> | Response>>;
 } = {
     text: compileParser('return (c)=>c.req.text()'),
     json: compileParser('return (c)=>c.req.json()'),

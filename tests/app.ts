@@ -1,5 +1,5 @@
 // Server
-import { Byte, send } from '@bit-js/byte';
+import { Byte, send, parse } from '@bit-js/byte';
 
 export const basicApis = new Byte()
     .get('/', () => send.body('Hi'))
@@ -7,5 +7,5 @@ export const basicApis = new Byte()
 
 export const jsonApis = new Byte()
     .post('/json', {
-        body: async ctx => await ctx.req.json() as { message: string }
+        body: parse.json()
     }, ctx => send.json(ctx.state.body));
