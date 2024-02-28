@@ -1,6 +1,5 @@
 # Byte
 A simple, performance-focused web framework that works on Bun, Deno, Cloudflare Workers and browsers.
-
 ```ts
 import { Byte, send } from '@bit-js/byte';
 
@@ -113,4 +112,58 @@ await body.text(); // Hi
 You can also pass in a custom `fetch` function.
 ```ts
 const app = bit<App>('http://localhost:3000', myFetch);
+```
+
+## Utilities
+
+### Sending response
+Response utilities should be used for client type inference.
+```ts
+import { send } from '@bit-js/byte';
+
+// new Response('Hi')
+send.body('Hi'); 
+
+// new Response('Hi', { headers: { 'Content-Type': 'text/plain' } })
+send.text('Hi'): 
+
+// new Response(JSON.stringify({ hello: 'world' }), { headers: { 'Content-Type': 'application/json' } })
+send.json({ hello: world });
+
+// new Response(null, { headers: { Location: '/home' }, status: 302 })
+send.link('/home', 302);
+
+// SSE
+send.events(readable);
+```
+
+All response utilities has two arguments.
+```ts
+send(body: any, init?: ResponseInit): any;
+```
+
+If a `ResponseInit` is passed in it will be merged with the corresponding headers.
+```ts
+// You should cache the header if it is static
+send.body('Not found', { status: 404 });
+```
+
+### Body parsers
+Use body parsers to parse request body and handle errors.
+```ts
+import { parse } from '@bit-js/byte';
+
+app.post('/text', {
+    body: parse.text({
+        // Do parsing with request body if specified
+        then(data) {
+            // If a `Response` object is returned.
+            // It will be used instead of the handler response.
+        },
+        // Handle error if specified
+        catch(error) {
+            // Should return a Response or Promise<Response>
+        }
+    })
+})
 ```

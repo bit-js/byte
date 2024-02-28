@@ -1,3 +1,4 @@
+import type { MaybePromise } from '../../utils/types';
 import createSend from './compile/send';
 
 // Basic response
@@ -5,6 +6,9 @@ export interface BasicResponse<T> extends Response {
     text(): Promise<T extends string ? T : string>;
     clone(): this;
 }
+
+// What a normal handler should return
+export type GenericResponse = MaybePromise<BasicResponse<any> | Response>;
 
 // JSON response
 export interface JsonResponse<T> extends Response {

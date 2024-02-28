@@ -7,5 +7,5 @@ export const basicApis = new Byte()
 
 export const jsonApis = new Byte()
     .post('/json', {
-        body: parse.text()
+        body: parse.json()
     }, ctx => send.json(ctx.state.body));

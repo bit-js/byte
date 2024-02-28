@@ -1,11 +1,17 @@
 import type { Fn } from '../types';
-import type { AwaitedReturn } from '../../utils/types';
+import type { AwaitedReturn, MaybePromise } from '../../utils/types';
+import type { GenericResponse } from './responses';
+
 import { $async } from './macro';
 
 export interface ParserOptions<T, R = T> {
-    then?(data: T): R;
-    catch?(error: any): Response | Promise<Response>;
+    then?(data: T): MaybePromise<R> | GenericResponse;
+    catch?(error: any): GenericResponse;
 }
+
+export type InferParser<T extends ParserOptions<any>> = Fn<
+    Promise<AwaitedReturn<T['then']> | AwaitedReturn<T['catch']> | Response>
+>;
 
 function compileParser(parserBody: string) {
     return (options?: ParserOptions<any>) => {
@@ -31,27 +37,27 @@ export const parse: {
     /**
      * Create a text parser
      */
-    text<T extends ParserOptions<string> = ParserOptions<string>>(options?: T): Fn<Promise<AwaitedReturn<T['then']> | Response>>;
+    text<T extends ParserOptions<string> = ParserOptions<string>>(options?: T): InferParser<T>;
 
     /**
      * Create a text parser
      */
-    json<T extends ParserOptions<any> = ParserOptions<any>>(options?: T): Fn<Promise<AwaitedReturn<T['then']> | Response>>;
+    json<T extends ParserOptions<any> = ParserOptions<any>>(options?: T): InferParser<T>;
 
     /**
      * Create a text parser
      */
-    form<T extends ParserOptions<FormData> = ParserOptions<FormData>>(options?: T): Fn<Promise<AwaitedReturn<T['then']> | Response>>;
+    form<T extends ParserOptions<FormData> = ParserOptions<FormData>>(options?: T): InferParser<T>;
 
     /**
      * Create a text parser
      */
-    blob<T extends ParserOptions<Blob> = ParserOptions<Blob>>(options?: T): Fn<Promise<AwaitedReturn<T['then']> | Response>>;
+    blob<T extends ParserOptions<Blob> = ParserOptions<Blob>>(options?: T): InferParser<T>;
 
     /**
      * Create a text parser
      */
-    buffer<T extends ParserOptions<ArrayBuffer> = ParserOptions<ArrayBuffer>>(options?: T): Fn<Promise<AwaitedReturn<T['then']> | Response>>;
+    buffer<T extends ParserOptions<ArrayBuffer> = ParserOptions<ArrayBuffer>>(options?: T): InferParser<T>;
 } = {
     text: compileParser('return (c)=>c.req.text()'),
     json: compileParser('return (c)=>c.req.json()'),
