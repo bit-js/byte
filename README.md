@@ -137,7 +137,7 @@ send.link('/home', 302);
 send.events(readable);
 ```
 
-All response utilities has two arguments.
+All response utilities (except `send.link`) has two arguments.
 ```ts
 send(body: any, init?: ResponseInit): any;
 ```
