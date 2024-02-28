@@ -165,5 +165,5 @@ app.post('/text', {
             // Should return a Response or Promise<Response>
         }
     })
-})
+});
 ```
