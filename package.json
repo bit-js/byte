@@ -1,20 +1,14 @@
 {
   "name": "@bit-js/byte",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "module": "index.js",
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
+    "@types/bun": "latest",
+    "typescript": "latest"
   },
   "type": "module",
   "types": "types/index.d.ts",
   "dependencies": {
-    "@bit-js/blitz": "^1.0.2"
-  },
-  "scripts": {
-    "jit": "BUN_JSC_jitPolicyScale=0.0 BUN_JSC_thresholdForOptimizeSoon=0.0 BUN_JSC_thresholdForJITSoon=0.0 bun run",
-    "jitless": "BUN_JSC_UseJit=0 bun run"
+    "@bit-js/blitz": "^1.0.3"
   }
 }
