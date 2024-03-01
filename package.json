@@ -9,6 +9,6 @@
   "type": "module",
   "types": "types/index.d.ts",
   "dependencies": {
-    "@bit-js/blitz": "^1.0.3"
+    "@bit-js/blitz": "^1.0.4"
   }
 }
