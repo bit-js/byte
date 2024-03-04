@@ -2,7 +2,7 @@ import type { Fn } from '../types';
 import type { AwaitedReturn, MaybePromise } from '../../utils/types';
 import type { GenericResponse } from './responses';
 
-import { $async } from './macro';
+import { $async, $pass } from './macro';
 
 export interface ParserOptions<T, R = T> {
     then?(data: T): MaybePromise<R> | GenericResponse;
@@ -16,7 +16,9 @@ export type InferParser<T extends ParserOptions<any>> = Fn<
 function compileParser(parserBody: string) {
     return (options?: ParserOptions<any>) => {
         if (typeof options === 'undefined')
-            return $async(Function(parserBody)());
+            return $pass($async(
+                Function(parserBody)()
+            ));
 
         const statement: string[] = [parserBody];
 
@@ -26,7 +28,9 @@ function compileParser(parserBody: string) {
         if (typeof errFn !== 'undefined')
             statement.push('catch(f2)');
 
-        return $async(Function('f1', 'f2', statement.join('.'))(then, errFn));
+        return $pass($async(
+            Function('f1', 'f2', statement.join('.'))(then, errFn)
+        ));
     }
 }
 

@@ -1,6 +1,6 @@
 import type { Fn } from '../../types';
 import isVariableName from '../../../utils/isVariableName';
-import { isAsync } from '../macro';
+import { isAsync, passChecks } from '../macro';
 
 export default function compileValidator(handler: Fn, validators: Record<string, Fn>) {
     if (typeof validators === 'undefined') return handler;
@@ -13,7 +13,6 @@ export default function compileValidator(handler: Fn, validators: Record<string,
     for (const key in validators) {
         if (!isVariableName(key))
             throw new Error(`State name ${key} must be a valid JavaScript variable name!`);
-        paramsKeys.push(key);
 
         // Validator
         const fn = validators[key], fnKey = 'f' + idx;
@@ -27,7 +26,14 @@ export default function compileValidator(handler: Fn, validators: Record<string,
         const fnNoContext = fn.length === 0;
         noContext = noContext && fnNoContext;
 
-        statements.push(`const ${key}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'});if(${key} instanceof Response)return ${key}`);
+        const result = `${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`;
+        if (passChecks(fn)) {
+            paramsKeys.push(`${key}:${result}`);
+            continue;
+        }
+
+        paramsKeys.push(key);
+        statements.push(`const ${key}=${result};if(${key} instanceof Response)return ${key}`);
     }
 
     statements.push(`c.state={${paramsKeys.join()}}`);
