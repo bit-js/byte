@@ -167,3 +167,11 @@ app.post('/text', {
     })
 });
 ```
+
+Available parsers are:
+- `parse.text`: Parse request body as text.
+- `parse.json`: Parse request body as JSON.
+- `parse.blob`: Parse request body as `Blob`.
+- `parse.form`: Parse request body as `FormData`.
+- `parse.buffer`: Parse request body as `ArrayBuffer`.
+
