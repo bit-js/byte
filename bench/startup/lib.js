@@ -1,6 +1,6 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_';
 const charactersLength = characters.length;
-const routesCount = 500;
+export const routesCount = 100;
 
 // Make everything as random as possible
 function makePart() {
@@ -13,7 +13,7 @@ function makePart() {
     return result.join('');
 }
 
-function makePath(idx) {
+export function makePath(idx) {
     const parts = new Array(routesCount);
     for (let i = 0; i < routesCount; ++i)
         parts[i] = makePart();
@@ -22,19 +22,3 @@ function makePath(idx) {
     parts[idx] = `:${parts[idx]}`;
     return `/${parts.join('/')}`;
 }
-
-const content = [
-    'import { Byte, send } from "../.."',
-    'performance.mark("Build start")',
-    'const { fetch } = new Byte()'
-];
-
-for (let i = 0; i < routesCount; ++i)
-    content.push(`\t.get('${makePath(i)}', () => send.body("${Math.random()}"))`);
-
-content.push('performance.mark("Build end")');
-content.push('console.log(fetch.toString())');
-content.push(`console.log(performance.measure("Build ${routesCount} routes", "Build start", "Build end"))`);
-
-Bun.write(import.meta.dir + '/index.js', content.join('\n'));
-
