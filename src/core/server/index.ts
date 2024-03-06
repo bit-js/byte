@@ -1,5 +1,5 @@
 import Blitz from '@bit-js/blitz';
-import type { BaseHandler, RoutesRecord, Route, BaseRoute, InferValidator, ValidatorRecord } from './types';
+import { type BaseHandler, type RoutesRecord, type Route, type BaseRoute, type InferValidator, type ValidatorRecord, Context, type Fn } from './types';
 import { type RequestMethod, injectProto } from '../utils/methods';
 import compileValidator from './utils/compile/validators';
 
@@ -61,6 +61,14 @@ export class Byte<Record extends RoutesRecord = []> {
     }
 
     /**
+     * Fallback if the router cannot find a matching route handler
+     */
+    fallback(f: Fn) {
+        // @ts-expect-error Context does not match
+        this.router.fallback = f;
+    }
+
+    /**
      * Get the fetch function for use
      */
     get fetch() {
@@ -76,7 +84,7 @@ export class Byte<Record extends RoutesRecord = []> {
                 this.router.put(route.method, route.path, handler);
         }
 
-        return this.router.build();
+        return this.router.build(Context);
     }
 }
 
@@ -99,4 +107,5 @@ export * from './types';
 
 export * from './utils/parsers';
 export * from './utils/responses';
+export * from './utils/query';
 export * from './utils/macro';

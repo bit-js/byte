@@ -80,7 +80,7 @@ To use it, first export the type of your app.
 ```ts
 const app = new Byte()
     .get('/', () => send.body('Hi'))
-    .get('/user/:id', (ctx) => send.body(ctx.params.id));
+    .get('/user/:id', (ctx) => send.body(ctx.params.id))
     .post('/text', {
         body: async ctx => await ctx.req.text()
     }, (ctx) => send.body(ctx.state.body))
@@ -175,3 +175,17 @@ Available parsers are:
 - `parse.form`: Parse request body as `FormData`.
 - `parse.buffer`: Parse request body as `ArrayBuffer`.
 
+### Query parsers
+Use query parsers to get parameter values out of a query string.
+```ts
+import { query } from '@bit-js/byte';
+
+// getID(ctx) -> Get a single value of parameter 'id' from query
+// Return null if parameter does not exist in query string
+const getID = query.value('id'); // string | null
+
+// getCats(ctx) -> Get a multiple values of parameter 'category' from query
+const getCats = query.values('category'); // string[]
+```
+
+The query parser utils do not `decodeURLComponent` the result by default
