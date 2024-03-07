@@ -102,7 +102,7 @@ export class Byte<Record extends RoutesRecord = []> {
                 this.router.put(route.method, route.path, handler);
         }
 
-        return this.router.build(Context);
+        return this.router.build(this.Context);
     }
 }
 

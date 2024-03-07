@@ -1,7 +1,9 @@
 // Server
 import { Byte, send, parse } from '@bit-js/byte';
 
-export const basicApis = new Byte()
+export const basicApis = new Byte({
+    headers: { 'X-Powered-By': 'Byte' }
+})
     .get('/', () => send.body('Hi'))
     .get('/:id', ctx => send.body(ctx.params.id));
 

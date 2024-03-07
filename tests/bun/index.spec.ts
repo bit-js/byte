@@ -9,6 +9,8 @@ const client = listen(basicApis, 3000);
 test('Root', async () => {
     const res = await client.get('/');
     expect(await res.text()).toBe('Hi');
+
+    expect(res.headers.get('X-Powered-By')).toBe('Byte');
 });
 
 test('Parameter', async () => {
@@ -16,4 +18,6 @@ test('Parameter', async () => {
         params: { id: 90 }
     });
     expect(await res.text()).toBe('90');
+
+    expect(res.headers.get('X-Powered-By')).toBe('Byte');
 });

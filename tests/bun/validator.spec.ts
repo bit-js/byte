@@ -12,4 +12,6 @@ test('JSON', async () => {
     expect(await res.json()).toEqual({
         message: 'Hi'
     });
+
+    expect(res.headers.get('X-Powered-By')).toBe('Byte');
 });
