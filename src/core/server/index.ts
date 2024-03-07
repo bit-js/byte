@@ -1,8 +1,12 @@
-import Blitz from '@bit-js/blitz';
-import { type BaseHandler, type RoutesRecord, type Route, type BaseRoute, type InferValidator, type ValidatorRecord, Context, type Fn, type BaseContext } from './types';
+import Blitz, { type ContextOptions, extendContext } from '@bit-js/blitz';
+
+import {
+    type BaseHandler, type RoutesRecord, type Route, type BaseRoute,
+    type InferValidator, type ValidatorRecord, Context, type Fn
+} from './types';
+
 import { type RequestMethod, injectProto } from '../utils/methods';
 import compileValidator from './utils/compile/validators';
-import extendClass from './utils/compile/extendClass';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -29,11 +33,6 @@ type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Cur
     : [];
 
 /**
- * Extends the context object 
- */
-export interface ContextOptions extends Partial<BaseContext>, Record<string, any> { }
-
-/**
  * Create a Byte app
  */
 export class Byte<Record extends RoutesRecord = []> {
@@ -46,7 +45,11 @@ export class Byte<Record extends RoutesRecord = []> {
      * Create a Byte app
      */
     constructor(options?: ContextOptions) {
-        this.Context = typeof options === 'undefined' ? Context : extendClass(Context, options);
+        // Headers should be set
+        options ??= {};
+        options.headers ??= {};
+
+        this.Context = extendContext(Context, options);
     }
 
     /**
