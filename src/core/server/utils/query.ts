@@ -1,15 +1,15 @@
-import type { Context } from '../types';
+import type { BaseContext } from '../types';
 
 export const query: {
     /**
      * Get a single value of the key from the query
      */
-    value(name: string): (ctx: Context<any, any>) => string | null;
+    value(name: string): (ctx: BaseContext) => string | null;
 
     /**
      * Get multiple values of the key from the query
      */
-    values(name: string, maxValues?: number): (ctx: Context<any, any>) => string[];
+    values(name: string, maxValues?: number): (ctx: BaseContext) => string[];
 } = {
     value: (name) => {
         const search = JSON.stringify(encodeURIComponent(name) + '=');

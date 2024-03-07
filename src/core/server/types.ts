@@ -26,6 +26,8 @@ export class Context<Params, State = undefined> extends TypedContext<Params> {
     state!: State;
 };
 
+export type BaseContext = Context<any, any>;
+
 // A singular route record
 export interface Route<
     Method extends string,
