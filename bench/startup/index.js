@@ -12,3 +12,9 @@ exec('Hono', [
     'performance.mark("Build start")',
     'const { fetch } = new Hono({ router: new Router() })'
 ], (route) => `\t.get('${route.path}', (ctx) => ctx.body(${route.value}))`);
+
+exec('Elysia', [
+    'import { Elysia } from "elysia"',
+    'performance.mark("Build start")',
+    'const { fetch } = new Elysia()'
+], (route) => `\t.get('${route.path}', () => ${route.value})`);
