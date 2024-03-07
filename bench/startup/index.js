@@ -1,10 +1,14 @@
-import { join } from 'path';
+import { exec } from './lib';
 
-const target = process.argv[2];
-if (typeof target === 'undefined')
-    throw new Error('Must specify a target framework to continue!');
+exec('Byte', [
+    'import { Byte, send } from "../.."',
+    'performance.mark("Build start")',
+    'const { fetch } = new Byte()'
+], (route) => `\t.get('${route.path}', () => send.body(${route.value}))`);
 
-Bun.spawnSync(['bun', 'run', join(import.meta.dir, target, 'codegen.js')]);
-
-const proc = Bun.spawnSync(['bun', 'run', join(import.meta.dir, target, 'index.js')]);
-console.log(proc.stdout.toString());
+exec('Hono', [
+    'import { Hono } from "hono"',
+    'import { LinearRouter as Router } from "hono/router/linear-router"',
+    'performance.mark("Build start")',
+    'const { fetch } = new Hono({ router: new Router() })'
+], (route) => `\t.get('${route.path}', (ctx) => ctx.body(${route.value}))`);
