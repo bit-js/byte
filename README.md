@@ -50,6 +50,16 @@ Parametric and wildcard patterns are supported.
 
 Like other frameworks, Byte pass the parsed parameter values to `ctx.params`, but wildcard parameter is named `$` instead of `*`.
 
+### Fallback
+Use `fallback` to handle the request when the path does not match any registed route.
+```ts
+new Byte()
+    // Normal route
+    .get('/', () => new Response('Hi'))
+    // Fallback when all routes do not match
+    .fallback((ctx) => new Response(ctx.path));
+```
+
 ### Validators
 Validators are functions that parse and validate incoming request data.
 ```ts
@@ -188,4 +198,4 @@ const getID = query.value('id'); // string | null
 const getCats = query.values('category'); // string[]
 ```
 
-The query parser utils do not `decodeURLComponent` the result by default
+The query parser utils do not `decodeURLComponent` the result by default.
