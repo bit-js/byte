@@ -15,6 +15,7 @@
   "scripts": {
     "jit": "BUN_JSC_jitPolicyScale=0.0 BUN_JSC_thresholdForOptimizeSoon=0.0 BUN_JSC_thresholdForJITSoon=0.0 bun run",
     "jitless": "BUN_JSC_UseJit=0 bun run",
-    "startup": "bun run ./startup/index.js"
+    "startup": "bun run ./startup/index.js",
+    "fetch": "bun jit ./fetch/index.js"
   }
 }

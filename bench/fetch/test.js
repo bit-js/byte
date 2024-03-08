@@ -1,4 +1,5 @@
 import { group, run, bench } from 'mitata';
+import JSC from 'bun:jsc';
 
 const routes = {
     '/user': () => 'User',
@@ -57,6 +58,9 @@ export async function check(res, expect) {
 export default function test(frameworks) {
     for (let i = 0; i < 15; ++i) bench('noop', () => { });
 
+    for (const label in frameworks)
+        console.log(label, frameworks[label].toString());
+
     for (const path in routes) {
         const buildResult = buildPath(path);
         const req = new Request('http://localhost' + buildResult.path);
@@ -64,9 +68,11 @@ export default function test(frameworks) {
         group(path, () => {
             for (const label in frameworks) {
                 const fn = frameworks[label];
-                check(fn(req, {}, {}), routes[path](buildResult.params));
+                check(fn(req), routes[path](buildResult.params));
 
-                bench(label, () => fn(req, {}, {}));
+                JSC.optimizeNextInvocation(fn);
+
+                bench(label, () => fn(req));
             }
         });
     }

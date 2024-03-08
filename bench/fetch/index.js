@@ -11,6 +11,24 @@ function createByte() {
         .get('/status', () => send.body('Status'))
         .get('/deeply/nested/route/for/testing', () => send.body('Deeply nested route for testing'));
 
+    app.fetch(new Request('http://localhost:3000'));
+    return app.fetch;
+}
+
+// Elysia
+import { Elysia } from 'elysia';
+
+function createElysia() {
+    const app = new Elysia()
+        .get('/user', () => 'User')
+        .get('/user/comments', () => 'User comments')
+        .get('/user/avatar', () => 'User avatar')
+        .get('/event/:id', (ctx) => `Event ${ctx.params.id}`)
+        .get('/event/:id/comments', (ctx) => `Event ${ctx.params.id} comments`)
+        .get('/status', () => 'Status')
+        .get('/deeply/nested/route/for/testing', () => 'Deeply nested route for testing');
+
+    app.fetch(new Request('http://localhost:3000'));
     return app.fetch;
 }
 
@@ -28,6 +46,7 @@ function createHono() {
         .get('/status', (ctx) => ctx.body('Status'))
         .get('/deeply/nested/route/for/testing', (ctx) => ctx.body('Deeply nested route for testing'));
 
+    app.fetch(new Request('http://localhost:3000'));
     return app.fetch;
 }
 
@@ -36,8 +55,9 @@ import test from './test';
 
 console.log('Benchmarking...');
 const { benchmarks } = await test({
+    Hono: createHono(),
+    Elysia: createElysia(),
     Byte: createByte(),
-    Hono: createHono()
 });
 
 const groupResult = {};
