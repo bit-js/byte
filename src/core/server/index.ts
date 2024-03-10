@@ -61,7 +61,8 @@ export class Byte<Record extends RoutesRecord = []> {
             return this;
         }
 
-        return this.action(cors.build());
+        this.actions.push(cors.build());
+        return this;
     }
 
     /**
