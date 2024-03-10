@@ -72,7 +72,7 @@ export class CORS {
         if (typeof allowOrigins === 'undefined')
             return Function(`return (c)=>{c.headers=${JSON.stringify(headers)}}`)();
 
-        return Function(`const m={${allowOrigins.map(mark).join('')}};return (c)=>{const h=${JSON.stringify(headers)};const o=c.req.url.substring(0,c.pathStart);if(m[o]!==null)h['Access-Control-Allow-Origin']='null';c.headers=h;}`)();
+        return Function(`const m={${allowOrigins.map(mark).join('')}};return (c)=>{const h=${JSON.stringify(headers)};const o=c.req.url.substring(0,c.pathStart-1);if(m[o]!==null)h['Access-Control-Allow-Origin']='null';c.headers=h;}`)();
     }
 }
 
