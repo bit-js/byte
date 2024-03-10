@@ -1,21 +1,40 @@
-import type { Fn } from '../../types';
+import type { BaseRoute, Fn } from '../../types';
 import isVariableName from '../../../utils/isVariableName';
 import { isAsync, passChecks } from '../macro';
 
-export default function compileValidator(handler: Fn, validators: Record<string, Fn>) {
-    if (typeof validators === 'undefined') return handler;
+export default function compileRoute(route: BaseRoute, actions: Fn[]) {
+    const { handler, validator } = route;
+    if (typeof validator === 'undefined') return handler;
 
     const keys = [], statements = [],
         values = [], paramsKeys = [];
 
     let hasAsync = false, noContext = true, idx = 0;
 
-    for (const key in validators) {
+    for (let i = 0, { length } = actions; i < length; ++i) {
+        // Validator
+        const fn = actions[i], fnKey = 'f' + idx;
+        ++idx;
+
+        keys.push(fnKey);
+        values.push(fn);
+
+        const fnAsync = isAsync(fn);
+        hasAsync = hasAsync || fnAsync;
+
+        const fnNoContext = fn.length === 0;
+        noContext = noContext && fnNoContext;
+
+        statements.push(`${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
+    }
+
+    for (const key in validator) {
         if (!isVariableName(key))
             throw new Error(`State name ${key} must be a valid JavaScript variable name!`);
 
         // Validator
-        const fn = validators[key], fnKey = 'f' + idx;
+        const fn = validator[key], fnKey = 'f' + idx;
+        ++idx;
 
         keys.push(fnKey);
         values.push(fn);

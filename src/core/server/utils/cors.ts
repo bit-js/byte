@@ -1,6 +1,6 @@
 import type { BaseContext } from '../types';
 
-export interface HeaderOptions {
+export interface CORSHeaderOptions {
     allowOrigins?: string | string[];
     allowMethods?: string | string[];
     exposeHeaders?: string | string[];
@@ -27,10 +27,10 @@ class CORSHeaders {
 
 export class CORS {
     // All CORS headers
-    public readonly headers: CORSHeaders;
+    public readonly headers: Record<string, string>;
     public readonly allowOrigins?: string[];
 
-    public constructor(options?: HeaderOptions) {
+    public constructor(options?: CORSHeaderOptions) {
         const headers = new CORSHeaders();
 
         if (typeof options === 'object') {
@@ -63,7 +63,7 @@ export class CORS {
             else headers['Access-Control-Allow-Origin'] = '*';
         }
 
-        this.headers = headers;
+        this.headers = headers as Record<string, string>;
     }
 
     build(): (ctx: BaseContext) => void {

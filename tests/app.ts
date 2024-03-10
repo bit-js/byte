@@ -5,9 +5,7 @@ export const basicApis = new Byte()
     .get('/', () => send.body('Hi'))
     .get('/:id', (ctx) => send.body(ctx.params.id));
 
-export const jsonApis = new Byte({
-    headers: { 'X-Powered-By': 'Byte' }
-})
+export const jsonApis = new Byte()
     .post('/json', {
         body: parse.json()
     }, (ctx) => send.json(ctx.state.body, ctx));

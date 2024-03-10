@@ -6,7 +6,8 @@ import {
 } from './types';
 
 import { type RequestMethod, injectProto } from '../utils/methods';
-import compileValidator from './utils/compile/validators';
+import compileRoute from './utils/compile/route';
+import { CORS, type CORSHeaderOptions } from './utils/cors';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -36,15 +37,31 @@ type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Cur
  * Create a Byte app
  */
 export class Byte<Record extends RoutesRecord = []> {
-    readonly contextOptions: ContextOptions;
+    readonly contextOptions: ContextOptions = { headers: {} };
+
+    readonly actions: Fn[] = [];
 
     /**
-     * Create a Byte app
+     * Run before validation
      */
-    constructor(contextOptions?: ContextOptions) {
-        // Headers should be set
-        contextOptions ??= { headers: {} };
-        this.contextOptions = contextOptions;
+    action(...fns: Fn[]): this {
+        this.actions.push(...fns);
+        return this;
+    }
+
+    /**
+     * Handle CORS
+     */
+    cors(options?: CORSHeaderOptions): this {
+        const cors = typeof options === 'undefined' ? new CORS() : new CORS(options);
+
+        // Set default header as CORS headers
+        if (typeof cors.allowOrigins === 'undefined') {
+            this.contextOptions.headers = cors.headers;
+            return this;
+        }
+
+        return this.action(cors.build());
     }
 
     /**
@@ -92,7 +109,7 @@ export class Byte<Record extends RoutesRecord = []> {
 
         for (let i = 0, { length } = routes; i < length; ++i) {
             const route = routes[i],
-                handler = compileValidator(route.handler, route.validator);
+                handler = compileRoute(route, this.actions);
 
             if (route.method === '$')
                 this.router.handle(route.path, handler);
