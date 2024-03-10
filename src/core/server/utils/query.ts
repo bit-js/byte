@@ -22,6 +22,6 @@ export const query: {
         const search = JSON.stringify(encodeURIComponent(name) + '=');
         const searchLen = search.length - 2;
 
-        return Function(`return (c)=>{const {url}=c.req;const r=[];let i=url.indexOf(${search},c.pathEnd+1)+${searchLen};while(i!===${searchLen - 1}${typeof maxValues === 'number' ? `&&r.length<${maxValues}` : ''}){const n=url.indexOf("&",i);if(n===-1){r.push(url.substring(i));return r;}r.push(url.substring(i,n));i=url.indexOf(${search},n+1)}}`)();
+        return Function(`return (c)=>{const {url}=c.req;const r=[];let i=url.indexOf(${search},c.pathEnd+1)+${searchLen};while(i!===${searchLen - 1}${typeof maxValues === 'number' ? `&&r.length<${maxValues}` : ''}){const n=url.indexOf("&",i);if(n===-1){r.push(url.substring(i));return r;}r.push(url.substring(i,n));i=url.indexOf(${search},n+1)}return r}`)();
     },
 };
