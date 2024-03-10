@@ -36,20 +36,15 @@ type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Cur
  * Create a Byte app
  */
 export class Byte<Record extends RoutesRecord = []> {
-    /**
-     * The context constructor
-     */
-    readonly Context: typeof Context;
+    readonly contextOptions: ContextOptions;
 
     /**
      * Create a Byte app
      */
-    constructor(options?: ContextOptions) {
+    constructor(contextOptions?: ContextOptions) {
         // Headers should be set
-        options ??= {};
-        options.headers ??= {};
-
-        this.Context = extendContext(Context, options);
+        contextOptions ??= { headers: {} };
+        this.contextOptions = contextOptions;
     }
 
     /**
@@ -105,7 +100,7 @@ export class Byte<Record extends RoutesRecord = []> {
                 this.router.put(route.method, route.path, handler);
         }
 
-        return this.router.build(this.Context);
+        return this.router.build(extendContext(Context, this.contextOptions));
     }
 }
 
