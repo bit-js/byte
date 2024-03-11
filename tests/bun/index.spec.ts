@@ -17,3 +17,9 @@ test('Parameter', async () => {
     });
     expect(await res.text()).toBe('90');
 });
+
+test('Query', async () => {
+    const query = { id: '1' };
+    const res = await client.get('/user', { query });
+    expect(await res.json()).toEqual(query);
+});

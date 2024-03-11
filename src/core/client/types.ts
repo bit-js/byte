@@ -23,7 +23,9 @@ type SetParams<V extends string> = ParamsKey<V> extends never ? {} : {
 };
 
 // Main types
-type RequestBaseProps = Omit<RequestInit, 'body'>;
+interface RequestBaseProps extends Omit<RequestInit, 'body'> {
+    query?: Record<string, string | number | boolean>;
+};
 export type RequestProps<T extends BaseRoute> = RequestBaseProps & SetParams<T['path']> & SetBody<T['validator']>;
 
 type Promisify<T> = T extends Promise<any> ? T : Promise<T>;

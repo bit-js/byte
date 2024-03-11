@@ -2,7 +2,7 @@ import Blitz, { type ContextOptions, extendContext } from '@bit-js/blitz';
 
 import {
     type BaseHandler, type RoutesRecord, type Route, type BaseRoute,
-    type InferValidator, type ValidatorRecord, Context, type Fn
+    type InferValidator, type ValidatorRecord, Context, type Fn, type Plugin
 } from './types';
 
 import { type RequestMethod, injectProto } from '../utils/methods';
@@ -62,6 +62,16 @@ export class Byte<Record extends RoutesRecord = []> {
         }
 
         this.actions.push(cors.build());
+        return this;
+    }
+
+    /**
+     * Register plugins
+     */
+    use(...plugin: Plugin[]) {
+        for (let i = 0, { length } = plugin; i < length; ++i)
+            plugin[i].plug(this);
+
         return this;
     }
 
@@ -143,3 +153,4 @@ export * from './utils/parsers';
 export * from './utils/responses';
 export * from './utils/query';
 export * from './utils/macro';
+export * from './utils/cors';

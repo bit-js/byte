@@ -46,6 +46,17 @@ function buildPathInject(path: string): PathInjectFunction {
     return buildFunc(path, parts);
 }
 
+function stringifyQuery(query: Record<string, string | number | boolean>) {
+    const parts = [];
+
+    for (const key in query) {
+        if (query[key] === false) continue;
+        parts.push(query[key] === true ? encodeURIComponent(key) : `${encodeURIComponent(key)}=${encodeURIComponent(query[key].toString())}`);
+    }
+
+    return `?${parts.join('&')}`;
+}
+
 // Bit client prototype
 class BitClient {
     /**
@@ -63,15 +74,15 @@ class BitClient {
         if (typeof init === 'undefined')
             return this.fetch(this.url + path);
 
-        const { params, body } = init;
+        const { params, body, query } = init;
         if (typeof body !== 'undefined')
             init.body = serialize(body);
 
         return this.fetch(
             // Cast URL parameters
-            this.url + (typeof params === 'undefined'
+            `${this.url}${typeof params === 'undefined'
                 ? path : (injectPath[path] ?? buildPathInject(path))(params)
-            ), init
+            }${typeof query === 'undefined' ? '' : stringifyQuery(query)}`, init
         );
     };
 }

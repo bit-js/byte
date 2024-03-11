@@ -28,9 +28,9 @@ function compileParser(parserBody: string) {
         if (typeof errFn !== 'undefined')
             statement.push('catch(f2)');
 
-        return $pass($async(
+        return $async(
             Function('f1', 'f2', statement.join('.'))(then, errFn)
-        ));
+        );
     }
 }
 

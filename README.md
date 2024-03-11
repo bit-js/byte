@@ -196,6 +196,9 @@ const getID = query.value('id'); // string | null
 
 // getCats(ctx) -> Get a multiple values of parameter 'category' from query
 const getCats = query.values('category'); // string[]
+
+// Parse query to key-value pair
+const result = query.get(ctx);
 ```
 
 The query parser utils do not `decodeURLComponent` the result by default.

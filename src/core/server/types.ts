@@ -3,6 +3,7 @@ import { Context as TypedContext, type Params } from '@bit-js/blitz';
 import type { AwaitedReturn } from '../utils/types';
 
 import type { GenericResponse } from './utils/responses';
+import type { Byte } from '.';
 
 // Basic handler
 export type BaseHandler<Path extends string, State = undefined> = (c: Context<Params<Path>, State>) => GenericResponse;
@@ -45,3 +46,10 @@ export type BaseRoute = Route<any, any, any, any>;
 
 // Route list
 export type RoutesRecord = BaseRoute[];
+
+/**
+ * A plugin
+ */
+export interface Plugin {
+    plug(app: Byte<any>): any;
+}

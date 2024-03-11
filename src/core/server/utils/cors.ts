@@ -1,4 +1,5 @@
-import type { BaseContext } from '../types';
+import type { Byte } from '..';
+import type { BaseContext, Plugin } from '../types';
 
 export interface CORSHeaderOptions {
     allowOrigins?: string | string[];
@@ -13,7 +14,7 @@ function parseValue(value: string | string[]): string {
     return typeof value === 'string' ? value : value.join(',');
 }
 
-class CORSHeaders {
+export class CORSHeaders {
     // All CORS headers
     public 'Access-Control-Allow-Origin'?: string;
     public Vary?: string;
@@ -25,7 +26,7 @@ class CORSHeaders {
     public 'Access-Control-Max-Age'?: string;
 }
 
-export class CORS {
+export class CORS implements Plugin {
     // All CORS headers
     public readonly headers: Record<string, string>;
     public readonly allowOrigins?: string[];
@@ -33,7 +34,7 @@ export class CORS {
     public constructor(options?: CORSHeaderOptions) {
         const headers = new CORSHeaders();
 
-        if (typeof options === 'object') {
+        if (typeof options !== 'undefined') {
             if (typeof options.allowMethods !== 'undefined')
                 headers['Access-Control-Allow-Methods'] = parseValue(options.allowMethods);
             if (typeof options.exposeHeaders !== 'undefined')
@@ -66,6 +67,9 @@ export class CORS {
         this.headers = headers as Record<string, string>;
     }
 
+    /**
+     * Build into a function that set CORS headers
+     */
     build(): (ctx: BaseContext) => void {
         const { headers, allowOrigins } = this;
 
@@ -73,6 +77,18 @@ export class CORS {
             return Function(`return (c)=>{c.headers=${JSON.stringify(headers)}}`)();
 
         return Function(`const m={${allowOrigins.map(mark).join('')}};return (c)=>{const h=${JSON.stringify(headers)};const o=c.req.url.substring(0,c.pathStart-1);if(m[o]!==null)h['Access-Control-Allow-Origin']='null';c.headers=h;}`)();
+    }
+
+    /**
+     * Register as a plugin
+     */
+    plug(app: Byte<any>) {
+        // Set default header as CORS headers
+        if (typeof this.allowOrigins === 'undefined') {
+            const { headers } = app.contextOptions;
+            if (typeof headers === 'undefined') app.contextOptions.headers = this.headers;
+            else Object.assign(headers, this.headers);
+        } else app.action(this.build());
     }
 }
 
