@@ -7,7 +7,6 @@ import {
 
 import { type RequestMethod, injectProto } from '../utils/methods';
 import compileRoute from './utils/compile/route';
-import { CORS, type CORSHeaderOptions } from './utils/cors';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -46,22 +45,6 @@ export class Byte<Record extends RoutesRecord = []> {
      */
     action(...fns: Fn[]): this {
         this.actions.push(...fns);
-        return this;
-    }
-
-    /**
-     * Handle CORS
-     */
-    cors(options?: CORSHeaderOptions): this {
-        const cors = typeof options === 'undefined' ? new CORS() : new CORS(options);
-
-        // Set default header as CORS headers
-        if (typeof cors.allowOrigins === 'undefined') {
-            this.contextOptions.headers = cors.headers;
-            return this;
-        }
-
-        this.actions.push(cors.build());
         return this;
     }
 
@@ -153,4 +136,3 @@ export * from './utils/parsers';
 export * from './utils/responses';
 export * from './utils/query';
 export * from './utils/macro';
-export * from './utils/cors';

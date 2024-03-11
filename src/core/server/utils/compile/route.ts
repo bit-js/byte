@@ -14,7 +14,6 @@ export default function compileRoute(route: BaseRoute, actions: Fn[]) {
     for (let i = 0, { length } = actions; i < length; ++i) {
         // Validator
         const fn = actions[i], fnKey = 'f' + idx;
-        ++idx;
 
         keys.push(fnKey);
         values.push(fn);
@@ -25,7 +24,16 @@ export default function compileRoute(route: BaseRoute, actions: Fn[]) {
         const fnNoContext = fn.length === 0;
         noContext = noContext && fnNoContext;
 
-        statements.push(`${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
+        const result = `${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`;
+        if (passChecks(fn)) {
+            statements.push(result);
+            continue;
+        }
+
+        const valKey = `c${idx}`;
+        statements.push(`const ${valKey}=${result};if (${valKey} instanceof Response)return ${valKey}`);
+
+        ++idx;
     }
 
     for (const key in validator) {
@@ -34,7 +42,6 @@ export default function compileRoute(route: BaseRoute, actions: Fn[]) {
 
         // Validator
         const fn = validator[key], fnKey = 'f' + idx;
-        ++idx;
 
         keys.push(fnKey);
         values.push(fn);
@@ -53,6 +60,8 @@ export default function compileRoute(route: BaseRoute, actions: Fn[]) {
 
         paramsKeys.push(key);
         statements.push(`const ${key}=${result};if(${key} instanceof Response)return ${key}`);
+
+        ++idx;
     }
 
     statements.push(`c.state={${paramsKeys.join()}}`);
