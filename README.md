@@ -96,7 +96,8 @@ new Byte()
 ```
 
 If a `Response` object is returned from any action function, it will be used directly.
-And before you ask why there is no 
+
+And before you ask why there is no other lifecycles like `afterValidation` or anything like that, we don't need that alr?
 
 ### Plugins
 Plugins are objects with a `plug()` function that modify the app instance.
