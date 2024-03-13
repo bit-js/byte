@@ -85,9 +85,15 @@ export class Byte<Record extends RoutesRecord = []> {
             const route = routes[i];
 
             this.routes.push({
-                handler: route.handler, method: route.method,
+                // Basically copy
+                handler: route.handler,
+                method: route.method,
                 validator: route.validator,
+
+                // Concat path
                 path: (base + route.path).replace('//', '/'),
+
+                // Get all actions
                 actions: app.getActions(route)
             });
         }
@@ -111,6 +117,7 @@ export class Byte<Record extends RoutesRecord = []> {
 
         for (let i = 0, { length } = routes; i < length; ++i) {
             const route = routes[i];
+            // Compile the handler before adding to the router
             const handler = compileRoute(route, this.getActions(routes[i]));
 
             if (route.method === '$')
