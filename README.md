@@ -83,6 +83,39 @@ If a `Response` object is returned from the validator, it will be used instead o
 
 If the function returns a `Promise` it should be properly marked as `async` for the compiler to detect.
 
+### Actions
+Actions are functions that executes before validators.
+```ts
+new Byte()
+    .action((ctx) => {
+        // Preparations
+    })
+    .action((ctx) => {
+        // Do something else
+    });
+```
+
+If a `Response` object is returned from any action function, it will be used directly.
+And before you ask why there is no 
+
+### Plugins
+Plugins are objects with a `plug()` function that modify the app instance.
+```ts
+import type { Plugin } from '@bit-js/byte';
+
+const plugin = {
+    plug(app) {
+        // Do something with the app instance
+        // Route types are not preserved
+        // You should not add route handlers
+    };
+};
+
+new Byte().use(plugin);
+```
+
+Plugins are meant to be used by third party libraries to add functionalities.
+
 ### Client
 Byte provides a client implementation with type inference.
 

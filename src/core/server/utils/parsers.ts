@@ -10,7 +10,7 @@ export interface ParserOptions<T, R = T> {
 }
 
 export type InferParser<T extends ParserOptions<any>> = Fn<
-    Promise<AwaitedReturn<T['then']> | AwaitedReturn<T['catch']> | Response>
+    Promise<AwaitedReturn<T['then']> | AwaitedReturn<T['catch']> | GenericResponse>
 >;
 
 function compileParser(parserBody: string) {

@@ -69,6 +69,13 @@ export class Byte<Record extends RoutesRecord = []> {
     readonly router: Blitz = new Blitz();
 
     /**
+     * Get actions
+     */
+    getActions(route: BaseRoute) {
+        return this.actions.concat(route.actions);
+    }
+
+    /**
      * Register subroutes
      */
     route<Path extends string, App extends Byte<any>>(base: Path, app: App): Byte<[...Record, ...SetBase<Path, App['routes']>]> {
@@ -80,7 +87,8 @@ export class Byte<Record extends RoutesRecord = []> {
             this.routes.push({
                 handler: route.handler, method: route.method,
                 validator: route.validator,
-                path: (base + route.path).replace('//', '/')
+                path: (base + route.path).replace('//', '/'),
+                actions: app.getActions(route)
             });
         }
 
@@ -102,8 +110,8 @@ export class Byte<Record extends RoutesRecord = []> {
         const { routes } = this;
 
         for (let i = 0, { length } = routes; i < length; ++i) {
-            const route = routes[i],
-                handler = compileRoute(route, this.actions);
+            const route = routes[i];
+            const handler = compileRoute(route, this.getActions(routes[i]));
 
             if (route.method === '$')
                 this.router.handle(route.path, handler);
@@ -122,7 +130,7 @@ function createMethodRegister(method: string) {
         const handler = args.length === 1 ? args[0] : args[1];
         const validator = args.length === 2 ? args[0] : undefined;
 
-        this.routes.push({ path, handler, method, validator });
+        this.routes.push({ path, handler, method, validator, actions: [] });
         return this;
     }
 };

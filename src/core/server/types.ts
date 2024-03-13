@@ -40,6 +40,7 @@ export interface Route<
     path: Path;
     handler: Handler;
     validator: Validator;
+    actions: Fn[]
 }
 
 export type BaseRoute = Route<any, any, any, any>;
