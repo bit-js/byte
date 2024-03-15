@@ -1,8 +1,6 @@
-import { $ } from 'bun';
-
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_';
 const charactersLength = characters.length;
-export const routesCount = 100;
+export const routesCount = 2e5;
 
 // Make everything as random as possible
 function makePart() {
@@ -25,21 +23,28 @@ export function makePath(idx) {
     return `/${parts.join('/')}`;
 }
 
-export const routes = new Array(routesCount);
+const routes = new Array(routesCount);
 for (let i = 0; i < routesCount; ++i)
     routes[i] = { part: makePart(i), value: `"${Math.random()}"` };
 
 export async function exec(name, content, chain) {
-    for (let i = 0; i < routesCount; ++i)
-        content.push(chain(routes[i]));
-
-    content.push('fetch(new Request("http://localhost:3000"))')
-    content.push('performance.mark("Build end")');
-    content.push('console.log(fetch.toString())');
-    content.push(`console.log(performance.measure("${name}: Build ${routesCount} routes", "Build start", "Build end"))`);
-
     const path = `./dist/${name}.js`;
 
-    await Bun.write(path, content.join('\n'));
-    await $`bun run ${path}`;
+    if (process.argv[2] !== 'test') {
+        content.unshift(`console.time("Build ${name}")`);
+
+        for (let i = 0; i < routesCount; ++i)
+            content.push(chain(routes[i]));
+
+        if (!name.startsWith('blitz')) content.push('app.fetch(new Request("http://localhost:3000"))');
+        else content.push('app.build()');
+
+        content.push(`console.timeEnd("Build ${name}")`);
+        await Bun.write(path, content.join('\n'));
+    }
+
+    Bun.spawn(['bun', 'run', path], {
+        stdout: 'inherit'
+    });
 }
+

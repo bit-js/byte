@@ -2,19 +2,16 @@ import { exec } from './lib';
 
 exec('Byte', [
     'import { Byte, send } from "../.."',
-    'performance.mark("Build start")',
     'const { fetch } = new Byte()'
-], (route) => `\t.get('${route.path}', () => send.body(${route.value}))`);
+], (route) => `\t.get('${route.part}', () => send.body(${route.value}))`);
 
 exec('Hono', [
     'import { Hono } from "hono"',
     'import { LinearRouter as Router } from "hono/router/linear-router"',
-    'performance.mark("Build start")',
     'const { fetch } = new Hono({ router: new Router() })'
-], (route) => `\t.get('${route.path}', (ctx) => ctx.body(${route.value}))`);
+], (route) => `\t.get('${route.part}', (ctx) => ctx.body(${route.value}))`);
 
 exec('Elysia', [
     'import { Elysia } from "elysia"',
-    'performance.mark("Build start")',
     'const { fetch } = new Elysia()'
-], (route) => `\t.get('${route.path}', () => ${route.value})`);
+], (route) => `\t.get('${route.part}', () => ${route.value})`);
