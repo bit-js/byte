@@ -1,6 +1,6 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_';
 const charactersLength = characters.length;
-export const routesCount = 2e5;
+export const routesCount = 1e4;
 
 // Make everything as random as possible
 function makePart() {

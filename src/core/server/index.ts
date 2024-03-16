@@ -147,6 +147,8 @@ Byte.prototype.any = createMethodRegister('$');
 // Other neccessary stuff
 export * from './types';
 
+export * from './utils/csrf';
+export * from './utils/cors';
 export * from './utils/parsers';
 export * from './utils/responses';
 export * from './utils/query';

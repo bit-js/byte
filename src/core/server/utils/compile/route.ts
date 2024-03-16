@@ -12,7 +12,8 @@ export default function compileRoute(route: BaseRoute, actions: Fn[]) {
 
     // Compile actions and check result
     for (let i = 0, { length } = actions; i < length; ++i) {
-        const fn = actions[i], fnKey = 'f' + idx;
+        const fn = actions[i];
+        const fnKey = 'f' + idx;
 
         keys.push(fnKey);
         values.push(fn);
@@ -35,8 +36,8 @@ export default function compileRoute(route: BaseRoute, actions: Fn[]) {
         ++idx;
     }
 
+    // Compile validators and check result
     if (typeof validator !== 'undefined') {
-        // Compile validators and check result
         for (const key in validator) {
             if (!isVariableName(key))
                 throw new Error(`State name ${key} must be a valid JavaScript variable name!`);

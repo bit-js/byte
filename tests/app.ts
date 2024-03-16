@@ -1,5 +1,5 @@
 // Server
-import { Byte, send, parse, query } from '@bit-js/byte';
+import { Byte, send, parse, query, cors, csrf } from '@bit-js/byte';
 
 export const basicApis = new Byte()
     .get('/', () => send.body('Hi'))
@@ -10,3 +10,11 @@ export const jsonApis = new Byte()
     .post('/json', {
         body: parse.json()
     }, (ctx) => send.json(ctx.state.body, ctx));
+
+export const apiWithCors = new Byte()
+    .action(cors())
+    .get('/', (ctx) => send.body('Hi', ctx));
+
+export const apiWithCsrf = new Byte()
+    .action(csrf())
+    .get('/', () => send.body('Hi'));

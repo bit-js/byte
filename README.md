@@ -235,4 +235,49 @@ const getCats = query.values('category'); // string[]
 const result = query.get(ctx);
 ```
 
-The query parser utils do not `decodeURLComponent` the result by default.
+The query parsers (except `query.get`) utils do not `decodeURIComponent` the result by default.
+
+### CORS
+Set CORS headers on every requests.
+```ts
+import { cors } from '@bit-js/byte';
+
+// Allow all origins
+app.action(cors());
+
+// Custom options
+app.action(cors(options));
+```
+
+Available options are:
+```ts
+interface CORSOptions {
+    allowOrigin?: string; // Defaults to '*'
+    allowMethods?: string | string[];
+    exposeHeaders?: string | string[];
+    maxAge?: number;
+    allowCredentials?: boolean;
+    allowHeaders?: string | string[];
+}
+```
+
+### CSRF
+A CSRF protection layer by checking request origin.
+```ts
+import { csrf } from '@bit-js/byte';
+
+// Check with current request URL origin
+app.action(csrf());
+
+// Custom options
+app.action(csrf(options));
+```
+
+Available options are:
+```ts
+interface CSRFOptions {
+    origins?: string;
+    verify?: (origin: string) => boolean;
+    fallback?: (ctx: BaseContext) => any;
+}
+```
