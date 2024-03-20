@@ -37,7 +37,7 @@ export default function compileRoute(route: BaseRoute, actions: Fn[]) {
     }
 
     // Compile validators and check result
-    if (typeof validator !== 'undefined') {
+    if (validator !== null) {
         for (const key in validator) {
             if (!isVariableName(key))
                 throw new Error(`State name ${key} must be a valid JavaScript variable name!`);

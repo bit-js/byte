@@ -1,4 +1,4 @@
-import Blitz, { type ContextOptions, extendContext } from '@bit-js/blitz';
+import Blitz from '@bit-js/blitz';
 
 import {
     type BaseHandler, type RoutesRecord, type Route, type BaseRoute,
@@ -12,13 +12,13 @@ import compileRoute from './utils/compile/route';
 interface Register<Method extends string, T extends RoutesRecord> {
     <
         const Path extends string,
-        const Validator extends ValidatorRecord<Path> | undefined,
+        const Validator extends ValidatorRecord<Path>,
         const Handler extends BaseHandler<Path, InferValidator<Validator>>,
     >(path: Path, validator: Validator, handler: Handler): Byte<[...T, Route<Method, Path, Handler, Validator>]>
     <
         const Path extends string,
         const Handler extends BaseHandler<Path>,
-    >(path: Path, handler: Handler): Byte<[...T, Route<Method, Path, Handler, undefined>]>
+    >(path: Path, handler: Handler): Byte<[...T, Route<Method, Path, Handler, null>]>
 };
 
 type HandlerRegisters<T extends RoutesRecord> = {
@@ -32,12 +32,12 @@ type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Cur
     ? [Omit<Current, 'path'> & { path: NormalizePath<`${Base}${Current['path']}`> }, ...SetBase<Base, Rest>]
     : [];
 
+const doubleSlashRegex = /\/\//g;
+
 /**
  * Create a Byte app
  */
 export class Byte<Record extends RoutesRecord = []> {
-    readonly contextOptions: ContextOptions = { headers: {} };
-
     readonly actions: Fn[] = [];
 
     /**
@@ -71,14 +71,14 @@ export class Byte<Record extends RoutesRecord = []> {
     /**
      * Get actions
      */
-    getActions(route: BaseRoute) {
-        return this.actions.concat(route.actions);
+    #concatActions(actions: BaseRoute['actions']) {
+        return actions === null ? this.actions : this.actions.concat(actions);
     }
 
     /**
      * Register subroutes
      */
-    route<Path extends string, App extends Byte<any>>(base: Path, app: App): Byte<[...Record, ...SetBase<Path, App['routes']>]> {
+    route<Path extends string, App extends BaseByte>(base: Path, app: App): Byte<[...Record, ...SetBase<Path, App['routes']>]> {
         const { routes } = app;
 
         for (let i = 0, { length } = routes; i < length; ++i) {
@@ -90,11 +90,11 @@ export class Byte<Record extends RoutesRecord = []> {
                 method: route.method,
                 validator: route.validator,
 
-                // Concat path
-                path: (base + route.path).replace('//', '/'),
+                // Concat and normalize
+                path: (base + route.path).replace(doubleSlashRegex, '/'),
 
                 // Get all actions
-                actions: app.getActions(route)
+                actions: app.#concatActions(route.actions)
             });
         }
 
@@ -118,7 +118,7 @@ export class Byte<Record extends RoutesRecord = []> {
         for (let i = 0, { length } = routes; i < length; ++i) {
             const route = routes[i];
             // Compile the handler before adding to the router
-            const handler = compileRoute(route, this.getActions(routes[i]));
+            const handler = compileRoute(route, this.#concatActions(route.actions));
 
             if (route.method === '$')
                 this.router.handle(route.path, handler);
@@ -126,18 +126,24 @@ export class Byte<Record extends RoutesRecord = []> {
                 this.router.put(route.method, route.path, handler);
         }
 
-        return this.router.build(extendContext(Context, this.contextOptions));
+        return this.router.build(Context);
     }
 }
 
 export interface Byte<Record> extends HandlerRegisters<Record> { };
 
-function createMethodRegister(method: string) {
-    return function(this: Byte<any>, path: string, ...args: any[]) {
-        const handler = args.length === 1 ? args[0] : args[1];
-        const validator = args.length === 2 ? args[0] : undefined;
+export type BaseByte = Byte<RoutesRecord>;
 
-        this.routes.push({ path, handler, method, validator, actions: [] });
+// Register method handler registers
+function createMethodRegister(method: string): any {
+    return function(this: BaseByte, path: string, ...args: any[]) {
+        this.routes.push({
+            handler: args.length === 1 ? args[0] : args[1],
+            validator: args.length === 2 ? args[0] : null,
+
+            path, method, actions: null
+        });
+
         return this;
     }
 };

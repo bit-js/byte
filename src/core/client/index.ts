@@ -1,4 +1,4 @@
-import type { Byte } from '../server';
+import type { BaseByte } from '../server';
 import type { Fetcher, InferClient } from './types';
 import serialize from './serialize';
 
@@ -100,13 +100,13 @@ injectProto(BitClient, method => {
     }
 });
 
-export type Client<T extends Byte<any>> = InferClient<T> & BitClient;
+export type Client<T extends BaseByte> = InferClient<T> & BitClient;
 
 const fetchFn = fetch.bind(globalThis);
 /**
  * A fast type safe client
  */
-export function bit<T extends Byte<any>>(url: string, fetcher: Fetcher = fetchFn): Client<T> {
+export function bit<T extends BaseByte>(url: string, fetcher: Fetcher = fetchFn): Client<T> {
     return new BitClient(url, fetcher) as any;
 }
 
