@@ -8,5 +8,8 @@ test('CORS', async () => {
     const res = await client.get('/');
 
     expect(await res.text()).toBe('Hi');
+
+    // CORS headers checking
     expect(res.headers.get('Access-Control-Allow-Origins')).toBe('*');
+    expect(res.headers.get('Access-Control-Allow-Methods')).toBe('GET');
 });

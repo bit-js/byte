@@ -1,12 +1,6 @@
 import type { ParamsKey } from '@bit-js/blitz';
 import type { BaseRoute, RoutesRecord, ValidatorProp, ValidatorRecord, BaseByte } from '../server';
-
-// Utils type
-type UnionToIntersection<T> =
-    (T extends any ? (x: T) => any : never) extends
-    (x: infer R) => any ? R : never;
-
-type ReturnOf<T> = T extends (...args: any[]) => infer R ? R : never;
+import type { Promisify, RequiredKeys, ReturnOf, UnionToIntersection } from '../utils/types';
 
 // Infer body from validator
 type SetBody<T extends ValidatorRecord> = T extends null ? {} : (
@@ -28,18 +22,17 @@ interface RequestBaseProps extends Omit<RequestInit, 'body'> {
 };
 export type RequestProps<T extends BaseRoute> = RequestBaseProps & SetParams<T['path']> & SetBody<T['validator']>;
 
-type Promisify<T> = T extends Promise<any> ? T : Promise<T>;
-type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];
-
 // Infer a single route
 type RouteFunc<Path extends string, Init, Return> =
+    // Force to provide additional fields if exists
     RequiredKeys<Init> extends never
     ? (path: Path, init?: RequestBaseProps) => Promisify<Return>
     : (path: Path, init: Init) => Promisify<Return>;
 
 export type InferRoute<T extends BaseRoute> = {
     [K in T['method']]: RouteFunc<
-        T['path'], RequestProps<T>,
+        T['path'],
+        RequestProps<T>,
         ReturnOf<T['handler']>
     >;
 };

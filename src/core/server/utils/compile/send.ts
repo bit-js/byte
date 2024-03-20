@@ -1,15 +1,14 @@
-import accessor from '../../../utils/accessor';
-
-export default function createSend(headers: Record<string, string>, f: any): any {
-    const body = f === null
+export default function createSend(headers: Record<string, string>, bodyWrapper: any): any {
+    // Response body wrapper
+    const body = bodyWrapper === null
         ? 'b'
-        : typeof f === 'string'
-            ? `${f}(b)`
+        : typeof bodyWrapper === 'string'
+            ? `${bodyWrapper}(b)`
             : 'f(b)';
 
     const propAssigns = [];
     for (const key in headers)
-        propAssigns.push(`headers${accessor(key)}??=${JSON.stringify(headers[key])}`);
+        propAssigns.push(`headers[${JSON.stringify(key)}]??=${JSON.stringify(headers[key])}`);
 
     // h is default response headers
     // i is default response init
@@ -19,5 +18,5 @@ export default function createSend(headers: Record<string, string>, f: any): any
     return Function(
         'h', 'i', 'f',
         `return (b,t)=>{if(typeof t==='undefined')return new Response(${body},i);const{headers}=t;if(typeof headers==='undefined')t.headers=h;else{${propAssigns.join(';')}}return new Response(${body},t)}`
-    )(headers, { headers }, f);
+    )(headers, { headers }, bodyWrapper);
 }

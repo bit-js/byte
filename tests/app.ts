@@ -12,7 +12,7 @@ export const jsonApis = new Byte()
     }, (ctx) => send.json(ctx.state.body, ctx));
 
 export const apiWithCors = new Byte()
-    .action(cors())
+    .action(cors({ allowMethods: 'GET' }))
     .get('/', (ctx) => send.body('Hi', ctx));
 
 export const apiWithCsrf = new Byte()

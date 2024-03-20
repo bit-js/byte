@@ -20,9 +20,11 @@ const defaultCors: Fn = $pass((c) => {
     c.headers['Access-Control-Allow-Origins'] = '*';
 });
 
+/**
+ * Create a CORS action function
+ */
 export function cors(options?: CORSOptions) {
     if (typeof options === 'undefined') return defaultCors;
-
     const builder: string[] = [];
 
     // Check basic properties
@@ -43,5 +45,5 @@ export function cors(options?: CORSOptions) {
     else
         builder.push(`c.headers['Access-Control-Allow-Origins']='*';`);
 
-    return $pass(Function(builder.join())());
+    return $pass(Function(`return (c)=>{${builder.join('')}}`)());
 }

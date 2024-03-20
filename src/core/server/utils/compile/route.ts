@@ -1,5 +1,4 @@
 import type { BaseRoute, Fn } from '../../types';
-import isVariableName from '../../../utils/isVariableName';
 import { isAsync, passChecks } from '../macro';
 
 export default function compileRoute(route: BaseRoute, actions: Fn[]) {
@@ -39,9 +38,6 @@ export default function compileRoute(route: BaseRoute, actions: Fn[]) {
     // Compile validators and check result
     if (validator !== null) {
         for (const key in validator) {
-            if (!isVariableName(key))
-                throw new Error(`State name ${key} must be a valid JavaScript variable name!`);
-
             // Validators
             const fn = validator[key], fnKey = 'f' + idx;
 

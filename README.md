@@ -81,7 +81,9 @@ Parsed data is passed into `ctx.state` as a property.
 
 If a `Response` object is returned from the validator, it will be used instead of the handler response.
 
-If the function returns a `Promise` it should be properly marked as `async` for the compiler to detect.
+If the validator returns a `Promise` it should be properly marked as `async` for the compiler to detect.
+
+The validator name **must** be a valid JavaScript variable name.
 
 ### Actions
 Actions are functions that executes before validators.
@@ -150,7 +152,7 @@ await msg.text(); // '90'
 const body = await app.post('/text', {
     body: 'Hi'
 });
-await body.text(); // Hi
+await body.text(); // 'Hi'
 ```
 
 You can also pass in a custom `fetch` function.
