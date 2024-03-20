@@ -1,37 +1,24 @@
 type Serializer = (input: any) => any;
 
-const yieldInput: Serializer = input => input;
-const inputToString: Serializer = input => input.toString();
-const noop: Serializer = () => null;
-
 const objectSerializers: Record<string, Serializer> = {
     // Stringify object literal
     Object: JSON.stringify,
     // Try serialize promise
-    Promise: async input => serialize(await input),
-
-    URLSearchParams: yieldInput,
-    ArrayBuffer: yieldInput,
-    FormData: yieldInput,
-    Blob: yieldInput,
-    ReadableStream: yieldInput,
-    Response: yieldInput
+    Promise: async input => serialize(await input)
 };
 
-const serializers = {
-    string: yieldInput,
-
-    boolean: inputToString,
-    symbol: inputToString,
-    bigint: inputToString,
-    number: inputToString,
-
-    function: noop,
-    undefined: noop,
-
-    object: t => t === null ? null : (objectSerializers[t.constructor.name] ?? yieldInput)(t)
-} satisfies Record<string, Serializer>;
-
 export default function serialize(input: any) {
-    return serializers[typeof input](input);
+    switch (typeof input) {
+        case 'string': return input;
+
+        case 'object': return input === null ? null : objectSerializers[input.constructor.name]?.(input) ?? input
+
+        case 'undefined': return null;
+        case 'function': return null;
+
+        case 'number': return input.toString();
+        case 'bigint': return input.toString();
+        case 'symbol': return input.toString();
+        case 'boolean': return input.toString();
+    }
 }
