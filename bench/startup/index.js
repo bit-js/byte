@@ -7,7 +7,7 @@ exec('Byte', [
 
 exec('Hono', [
     'import { Hono } from "hono"',
-    'import { RegExpRouter as Router } from "hono/router/reg-exp-router"',
+    'import { LinearRouter as Router } from "hono/router/linear-router"',
     'const app = new Hono({ router: new Router() })'
 ], (route) => `\t.get('${route.part}', (ctx) => ctx.body(${route.value}))`);
 
