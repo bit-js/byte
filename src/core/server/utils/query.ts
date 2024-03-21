@@ -32,6 +32,7 @@ export const query: {
     },
 
     get: $pass(({ pathEnd, req: { url } }) => {
+        const { length } = url;
         if (length === pathEnd) return {};
 
         let startingIndex = pathEnd;
