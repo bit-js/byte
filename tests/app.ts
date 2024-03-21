@@ -16,5 +16,4 @@ export const apiWithCors = new Byte()
     .get('/', (ctx) => send.body('Hi', ctx));
 
 export const apiWithCsrf = new Byte()
-    .action(csrf())
-    .get('/', () => send.body('Hi'));
+    .get('/', csrf(), () => send.body('Hi'));

@@ -14,11 +14,11 @@ interface Register<Method extends string, T extends RoutesRecord> {
         const Path extends string,
         const Validator extends ValidatorRecord<Path>,
         const Handler extends BaseHandler<Path, InferValidator<Validator>>,
-    >(path: Path, validator: Validator, handler: Handler): Byte<[...T, Route<Method, Path, Handler, Validator>]>
+    >(path: Path, validator: Validator, ...handlers: [...Fn[], Handler]): Byte<[...T, Route<Method, Path, Handler, Validator>]>
     <
         const Path extends string,
         const Handler extends BaseHandler<Path>,
-    >(path: Path, handler: Handler): Byte<[...T, Route<Method, Path, Handler, null>]>
+    >(path: Path, ...handlers: [...Fn[], Handler]): Byte<[...T, Route<Method, Path, Handler, null>]>
 };
 
 type HandlerRegisters<T extends RoutesRecord> = {
@@ -72,7 +72,7 @@ export class Byte<Record extends RoutesRecord = []> {
      * Get actions
      */
     #concatActions(actions: BaseRoute['actions']) {
-        return actions === null ? this.actions : this.actions.concat(actions);
+        return actions.length === 0 ? this.actions : this.actions.concat(actions);
     }
 
     /**
@@ -137,11 +137,16 @@ export type BaseByte = Byte<RoutesRecord>;
 // Register method handler registers
 function createMethodRegister(method: string): any {
     return function(this: BaseByte, path: string, ...args: any[]) {
-        this.routes.push({
-            handler: args.length === 1 ? args[0] : args[1],
-            validator: args.length === 2 ? args[0] : null,
+        // If first arg is a handler
+        const startIdx = typeof args[0] === 'function' ? 0 : 1;
+        const lastIdx = args.length - 1;
 
-            path, method, actions: null
+        this.routes.push({
+            handler: args[lastIdx],
+            actions: args.slice(startIdx, lastIdx),
+            validator: startIdx === 1 ? args[0] : null,
+
+            path, method,
         });
 
         return this;
