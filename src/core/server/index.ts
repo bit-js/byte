@@ -1,7 +1,7 @@
 import Blitz from '@bit-js/blitz';
 
 import {
-    type BaseHandler, type RoutesRecord, type Route, type BaseRoute,
+    type BaseHandler, type RoutesRecord, Route, type BaseRoute,
     type InferValidator, type ValidatorRecord, Context, type Fn, type Plugin
 } from './types';
 
@@ -31,8 +31,6 @@ type NormalizePath<T extends string> = NormalizeEnd<T extends `${infer Start}//$
 type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Current extends BaseRoute, ...infer Rest extends RoutesRecord]
     ? [Omit<Current, 'path'> & { path: NormalizePath<`${Base}${Current['path']}`> }, ...SetBase<Base, Rest>]
     : [];
-
-const doubleSlashRegex = /\/\//g;
 
 /**
  * Create a Byte app
@@ -71,7 +69,7 @@ export class Byte<Record extends RoutesRecord = []> {
     /**
      * Get actions
      */
-    #concatActions(actions: BaseRoute['actions']) {
+    concatActions(actions: BaseRoute['actions']) {
         return actions.length === 0 ? this.actions : this.actions.concat(actions);
     }
 
@@ -80,23 +78,10 @@ export class Byte<Record extends RoutesRecord = []> {
      */
     route<Path extends string, App extends BaseByte>(base: Path, app: App): Byte<[...Record, ...SetBase<Path, App['routes']>]> {
         const { routes } = app;
+        const currentRoutes = this.routes;
 
-        for (let i = 0, { length } = routes; i < length; ++i) {
-            const route = routes[i];
-
-            this.routes.push({
-                // Basically copy
-                handler: route.handler,
-                method: route.method,
-                validator: route.validator,
-
-                // Concat and normalize
-                path: (base + route.path).replace(doubleSlashRegex, '/'),
-
-                // Get all actions
-                actions: app.#concatActions(route.actions)
-            });
-        }
+        for (let i = 0, { length } = routes; i < length; ++i)
+            currentRoutes.push(routes[i].clone(base, app));
 
         return this as any;
     }
@@ -118,7 +103,7 @@ export class Byte<Record extends RoutesRecord = []> {
         for (let i = 0, { length } = routes; i < length; ++i) {
             const route = routes[i];
             // Compile the handler before adding to the router
-            const handler = compileRoute(route, this.#concatActions(route.actions));
+            const handler = compileRoute(route, this.concatActions(route.actions));
 
             if (route.method === '$')
                 this.router.handle(route.path, handler);
@@ -131,7 +116,6 @@ export class Byte<Record extends RoutesRecord = []> {
 }
 
 export interface Byte<Record> extends HandlerRegisters<Record> { };
-
 export type BaseByte = Byte<RoutesRecord>;
 
 // Register method handler registers
@@ -141,13 +125,19 @@ function createMethodRegister(method: string): any {
         const startIdx = typeof args[0] === 'function' ? 0 : 1;
         const lastIdx = args.length - 1;
 
-        this.routes.push({
-            handler: args[lastIdx],
-            actions: args.slice(startIdx, lastIdx),
-            validator: startIdx === 1 ? args[0] : null,
+        const route = new Route();
 
-            path, method,
-        });
+        if (startIdx !== lastIdx)
+            route.actions = args.slice(startIdx, lastIdx);
+        if (startIdx === 1)
+            route.validator = args[0];
+
+        // Set other required props
+        route.handler = args[lastIdx];
+        route.path = path;
+        route.method = method;
+
+        this.routes.push(route);
 
         return this;
     }

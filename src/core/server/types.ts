@@ -3,7 +3,7 @@ import { Context as TypedContext, type Params } from '@bit-js/blitz';
 import type { AwaitedReturn } from '../utils/types';
 import type { GenericResponse } from './utils/responses';
 
-import type { Byte } from '.';
+import type { BaseByte, Byte } from '.';
 
 // Basic handler
 export type BaseHandler<Path extends string, State = undefined> = (c: Context<Params<Path>, State>) => GenericResponse;
@@ -31,18 +31,38 @@ export class Context<Params, State = undefined> extends TypedContext<Params> {
 export type BaseContext = Context<any, any>;
 
 // A singular route record
-export interface Route<
+const emptyList: Fn[] = [];
+const doubleSlashRegex = /\/\//g;
+
+export class Route<
     Method extends string,
     Path extends string,
     Handler extends Fn,
     Validator extends ValidatorRecord<Path>,
 > {
-    method: Method;
-    path: Path;
-    handler: Handler;
-    validator: Validator;
-    actions: Fn[];
+    method!: Method;
+    path!: Path;
+    handler!: Handler;
+    validator: Validator = null as Validator;
+    actions: Fn[] = emptyList;
+
+    clone(base: string, app: BaseByte) {
+        const route = new Route<Method, any, Handler, Validator>();
+
+        // Merge actions
+        route.actions = app.concatActions(this.actions);
+
+        // Merge path
+        route.path = (base + this.path).replace(doubleSlashRegex, '/');
+
+        route.method = this.method;
+        route.handler = this.handler;
+        route.validator = this.validator;
+
+        return route;
+    }
 }
+
 export type BaseRoute = Route<any, any, any, any>;
 
 // Route list
