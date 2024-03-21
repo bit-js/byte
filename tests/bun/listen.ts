@@ -13,5 +13,6 @@ export default function listen<App extends Byte<any>>(app: App, port: number | s
     // Router debug
     console.log(JSON.stringify(app.router, replacer, 4));
 
+    // Return the app client
     return bit<App>(server.url.href);
 }
