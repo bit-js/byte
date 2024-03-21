@@ -31,13 +31,10 @@ export const query: {
         return $pass(Function(`return ({pathEnd,req:{url}})=>{const r=[];let i=url.indexOf(${search},pathEnd+1)+${searchLen};while(i!===${searchLen - 1}${typeof maxValues === 'number' ? `&&r.length<${maxValues}` : ''}){const n=url.indexOf("&",i);if(n===-1){r.push(url.substring(i));return r;}r.push(url.substring(i,n));i=url.indexOf(${search},n+1)}return r}`)());
     },
 
-    get: $pass((ctx) => {
-        const { url } = ctx.req;
-        const { length } = url;
+    get: $pass(({ pathEnd, req: { url } }) => {
+        if (length === pathEnd) return {};
 
-        let startingIndex = ctx.pathEnd;
-        if (length === startingIndex) return {};
-
+        let startingIndex = pathEnd;
         let equalityIndex = startingIndex;
 
         let shouldDecodeKey = false;
