@@ -11,3 +11,7 @@ export type UnionToIntersection<T> =
 export type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];
 
 export type LastItem<T extends any[]> = T extends [...any[], infer Last] ? Last : any;
+export type Items<T extends any> = [...T[], T];
+
+export type NormalizeEnd<T extends string> = T extends '/' ? '/' : (T extends `${infer Start}/` ? Start : T);
+export type NormalizePath<T extends string> = NormalizeEnd<T extends `${infer Start}//${infer End}` ? `${Start}/${End}` : T>;

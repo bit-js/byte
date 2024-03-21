@@ -7,27 +7,25 @@ import {
 
 import { type RequestMethod, injectProto } from '../utils/methods';
 import compileRoute from './utils/compile/route';
-import type { LastItem } from '../utils/types';
+
+import type { LastItem, NormalizePath, Items } from '../utils/types';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
     <
         const Path extends string,
         const Validator extends ValidatorRecord<Path>,
-        const Handlers extends BaseHandler<Path, InferValidator<Validator>>[],
+        const Handlers extends Items<BaseHandler<Path, InferValidator<Validator>>>,
     >(path: Path, validator: Validator, ...handlers: Handlers): Byte<[...T, Route<Method, Path, LastItem<Handlers>, Validator>]>
     <
         const Path extends string,
-        const Handlers extends BaseHandler<Path>[],
+        const Handlers extends Items<BaseHandler<Path>>,
     >(path: Path, ...handlers: Handlers): Byte<[...T, Route<Method, Path, LastItem<Handlers>, null>]>
 };
 
 type HandlerRegisters<T extends RoutesRecord> = {
     [Method in RequestMethod | 'any']: Register<Method, T>;
 };
-
-type NormalizeEnd<T extends string> = T extends '/' ? '/' : (T extends `${infer Start}/` ? Start : T);
-type NormalizePath<T extends string> = NormalizeEnd<T extends `${infer Start}//${infer End}` ? `${Start}/${End}` : T>;
 
 type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Current extends BaseRoute, ...infer Rest extends RoutesRecord]
     ? [Omit<Current, 'path'> & { path: NormalizePath<`${Base}${Current['path']}`> }, ...SetBase<Base, Rest>]
