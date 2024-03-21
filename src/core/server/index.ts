@@ -1,14 +1,15 @@
 import Blitz from '@bit-js/blitz';
 
 import {
-    type BaseHandler, type RoutesRecord, Route, type BaseRoute,
-    type InferValidator, type ValidatorRecord, Context, type Fn, type Plugin, type SetBase
+    type BaseHandler, type RoutesRecord, Route,
+    type InferValidator, type ValidatorRecord, Context,
+    type Fn, type Plugin, type SetBase
 } from './types';
 
 import { type RequestMethod, injectProto } from '../utils/methods';
-import compileRoute from './utils/compile/route';
-
 import type { LastItem, Items } from '../utils/types';
+
+import compileRoute from './utils/compile/route';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -120,17 +121,12 @@ function createMethodRegister(method: string): any {
         const startIdx = typeof args[0] === 'function' ? 0 : 1;
         const lastIdx = args.length - 1;
 
-        const route = new Route();
+        const route = new Route(method, path, args[lastIdx]);
 
         if (startIdx !== lastIdx)
             route.actions = args.slice(startIdx, lastIdx);
         if (startIdx === 1)
             route.validator = args[0];
-
-        // Set other required props
-        route.handler = args[lastIdx];
-        route.path = path;
-        route.method = method;
 
         this.routes.push(route);
 

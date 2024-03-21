@@ -40,24 +40,18 @@ export class Route<
     Handler extends Fn,
     Validator extends ValidatorRecord<Path>,
 > {
-    method!: Method;
-    path!: Path;
-    handler!: Handler;
     validator: Validator = null as Validator;
     actions: Fn[] = emptyList;
 
+    constructor(public method: Method, public path: Path, public handler: Handler) { }
+
     clone(base: string, app: BaseByte) {
-        const route = new Route<Method, any, Handler, Validator>();
+        const route = new Route<Method, any, Handler, Validator>(this.method, this.path, this.handler);
 
         // Merge actions
         route.actions = app.concatActions(this.actions);
-
         // Merge path
         route.path = (base + this.path).replace(doubleSlashRegex, '/');
-
-        route.method = this.method;
-        route.handler = this.handler;
-        route.validator = this.validator;
 
         return route;
     }
