@@ -1,6 +1,6 @@
 {
   "name": "@bit-js/byte",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "module": "index.js",
   "devDependencies": {
     "@types/bun": "latest",
