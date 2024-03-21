@@ -2,7 +2,7 @@ import { test, expect } from 'bun:test';
 import listen from './listen';
 import { apiWithCors } from '@app';
 
-const client = listen(apiWithCors, 3002);
+const client = listen(apiWithCors);
 
 test('CORS', async () => {
     const res = await client.get('/');

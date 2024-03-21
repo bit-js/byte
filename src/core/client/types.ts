@@ -45,4 +45,4 @@ export type InferRoutes<T extends RoutesRecord> = T extends [infer Route extends
  */
 export type InferClient<T extends BaseByte> = UnionToIntersection<InferRoutes<T['routes']>>;
 
-export type Fetcher = typeof fetch;
+export type Fetcher = (req: Request) => Promise<any>;

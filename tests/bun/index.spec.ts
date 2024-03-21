@@ -3,7 +3,7 @@ import listen from './listen';
 import { basicApis } from '@app';
 import { test, expect } from 'bun:test';
 
-const client = listen(basicApis, 3000);
+const client = listen(basicApis);
 
 // Main testing
 test('Root', async () => {

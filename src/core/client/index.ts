@@ -72,18 +72,18 @@ class BitClient {
 
     $(path: string, init?: any) {
         if (typeof init === 'undefined')
-            return this.fetch(this.url + path);
+            return this.fetch(new Request(this.url + path));
 
         const { params, body, query } = init;
         if (typeof body !== 'undefined')
             init.body = serialize(body);
 
-        return this.fetch(
+        return this.fetch(new Request(
             // Cast URL parameters
             `${this.url}${typeof params === 'undefined'
                 ? path : (injectPath[path] ?? buildPathInject(path))(params)
             }${typeof query === 'undefined' ? '' : stringifyQuery(query)}`, init
-        );
+        ));
     };
 }
 
