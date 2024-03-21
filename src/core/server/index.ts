@@ -14,11 +14,11 @@ interface Register<Method extends string, T extends RoutesRecord> {
         const Path extends string,
         const Validator extends ValidatorRecord<Path>,
         const Handler extends BaseHandler<Path, InferValidator<Validator>>,
-    >(path: Path, validator: Validator, ...handlers: [...Fn[], Handler]): Byte<[...T, Route<Method, Path, Handler, Validator>]>
+    >(path: Path, validator: Validator, ...handlers: Handler[]): Byte<[...T, Route<Method, Path, Handler, Validator>]>
     <
         const Path extends string,
         const Handler extends BaseHandler<Path>,
-    >(path: Path, ...handlers: [...Fn[], Handler]): Byte<[...T, Route<Method, Path, Handler, null>]>
+    >(path: Path, ...handlers: Handler[]): Byte<[...T, Route<Method, Path, Handler, null>]>
 };
 
 type HandlerRegisters<T extends RoutesRecord> = {
@@ -41,7 +41,7 @@ export class Byte<Record extends RoutesRecord = []> {
     /**
      * Run before validation
      */
-    action(...fns: Fn[]): this {
+    action(...fns: Fn[]) {
         this.actions.push(...fns);
         return this;
     }
@@ -98,7 +98,7 @@ export class Byte<Record extends RoutesRecord = []> {
      * Get the fetch function for use
      */
     get fetch() {
-        const { routes } = this;
+        const { routes, router } = this;
 
         for (let i = 0, { length } = routes; i < length; ++i) {
             const route = routes[i];
@@ -106,12 +106,12 @@ export class Byte<Record extends RoutesRecord = []> {
             const handler = compileRoute(route, this.concatActions(route.actions));
 
             if (route.method === '$')
-                this.router.handle(route.path, handler);
+                router.handle(route.path, handler);
             else
-                this.router.put(route.method, route.path, handler);
+                router.put(route.method, route.path, handler);
         }
 
-        return this.router.build(Context);
+        return router.build(Context);
     }
 }
 
