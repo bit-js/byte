@@ -1,6 +1,6 @@
 import { Context as TypedContext, type Params } from '@bit-js/blitz';
 
-import type { AwaitedReturn } from '../utils/types';
+import type { AwaitedReturn, NormalizePath, TrimEnd } from '../utils/types';
 import type { GenericResponse } from './utils/responses';
 
 import type { BaseByte, Byte } from '.';
@@ -64,6 +64,14 @@ export class Route<
 }
 
 export type BaseRoute = Route<any, any, any, any>;
+
+export type SetBasePath<T extends BaseRoute, Base extends string> = Omit<T, 'path'> & {
+    path: `${TrimEnd<Base>}${NormalizePath<T['path']>}`
+};
+
+export type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Current extends BaseRoute, ...infer Rest extends RoutesRecord]
+    ? [SetBasePath<Current, Base>, ...SetBase<Base, Rest>]
+    : [];
 
 // Route list
 export type RoutesRecord = BaseRoute[];

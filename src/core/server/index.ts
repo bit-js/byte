@@ -2,13 +2,13 @@ import Blitz from '@bit-js/blitz';
 
 import {
     type BaseHandler, type RoutesRecord, Route, type BaseRoute,
-    type InferValidator, type ValidatorRecord, Context, type Fn, type Plugin
+    type InferValidator, type ValidatorRecord, Context, type Fn, type Plugin, type SetBase
 } from './types';
 
 import { type RequestMethod, injectProto } from '../utils/methods';
 import compileRoute from './utils/compile/route';
 
-import type { LastItem, BasePath, TrimEnd, Items } from '../utils/types';
+import type { LastItem, Items } from '../utils/types';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -26,10 +26,6 @@ interface Register<Method extends string, T extends RoutesRecord> {
 type HandlerRegisters<T extends RoutesRecord> = {
     [Method in RequestMethod | 'any']: Register<Method, T>;
 };
-
-type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Current extends BaseRoute, ...infer Rest extends RoutesRecord]
-    ? [Current & { path: `${BasePath<Base>}${TrimEnd<Current['path']>}` }, ...SetBase<Base, Rest>]
-    : [];
 
 /**
  * Create a Byte app
@@ -68,7 +64,7 @@ export class Byte<Record extends RoutesRecord = []> {
     /**
      * Get actions
      */
-    concatActions(actions: BaseRoute['actions']) {
+    concatActions(actions: Fn[]) {
         return actions.length === 0 ? this.actions : this.actions.concat(actions);
     }
 

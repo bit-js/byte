@@ -14,4 +14,4 @@ export type LastItem<T extends any[]> = T extends [...any[], infer Last] ? Last 
 export type Items<T extends any> = [...T[], T];
 
 export type TrimEnd<T extends string> = T extends `${infer Start}/` ? Start : T;
-export type BasePath<T extends string> = T extends '/' ? '/' : TrimEnd<T>;
+export type NormalizePath<T extends string> = T extends '/' ? '/' : TrimEnd<T>;

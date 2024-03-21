@@ -12,30 +12,31 @@ export default function compileRoute(route: BaseRoute, actions: Fn[]) {
     let hasAsync = false, noContext = true, idx = 0;
 
     // Compile actions and check result
-    for (let i = 0, { length } = actions; i < length; ++i) {
-        const fn = actions[i];
-        const fnKey = 'f' + idx;
+    if (actions.length !== 0)
+        for (let i = 0, { length } = actions; i < length; ++i) {
+            const fn = actions[i];
+            const fnKey = 'f' + idx;
 
-        keys.push(fnKey);
-        values.push(fn);
+            keys.push(fnKey);
+            values.push(fn);
 
-        const fnAsync = isAsync(fn);
-        hasAsync = hasAsync || fnAsync;
+            const fnAsync = isAsync(fn);
+            hasAsync = hasAsync || fnAsync;
 
-        const fnNoContext = fn.length === 0;
-        noContext = noContext && fnNoContext;
+            const fnNoContext = fn.length === 0;
+            noContext = noContext && fnNoContext;
 
-        const result = `${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`;
-        if (passChecks(fn)) {
-            statements.push(result);
-            continue;
+            const result = `${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`;
+            if (passChecks(fn)) {
+                statements.push(result);
+                continue;
+            }
+
+            const valKey = `c${idx}`;
+            statements.push(`const ${valKey}=${result};if(${valKey} instanceof Response)return ${valKey}`);
+
+            ++idx;
         }
-
-        const valKey = `c${idx}`;
-        statements.push(`const ${valKey}=${result};if(${valKey} instanceof Response)return ${valKey}`);
-
-        ++idx;
-    }
 
     // Compile validators and check result
     if (validator !== null) {
