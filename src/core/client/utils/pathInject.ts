@@ -31,6 +31,6 @@ function buildPathInject(path: string) {
     return Function(`return p=>\`${parts.join('')}\``)();
 }
 
-export function getInjectFn(path: string) {
+export default function getInjectFn(path: string) {
     return injectPath[path] ??= buildPathInject(path);
 }

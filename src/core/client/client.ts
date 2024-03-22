@@ -1,11 +1,11 @@
 import type { BaseByte } from '../server';
 import type { Fetcher, InferClient } from './types';
-import serialize from './serialize';
+import serialize from './utils/serialize';
 
 import { injectProto } from '../utils/methods';
 
-import { getInjectFn } from './pathInject';
-import stringifyQuery from './stringifyQuery';
+import getInjectFn from './utils/pathInject';
+import stringifyQuery from './utils/stringifyQuery';
 
 // Bit client prototype
 export class BitClient {
