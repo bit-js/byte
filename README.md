@@ -117,6 +117,17 @@ new Byte().use(plugin);
 
 Plugins are meant to be used by third party libraries to add functionalities.
 
+### Fetch
+To obtain the `fetch` handler:
+```ts
+app.fetch;
+```
+
+To rebuild the fetch function:
+```ts
+app.rebuild();
+```
+
 ### Client
 Byte provides a client implementation with type inference.
 
@@ -153,10 +164,26 @@ const body = await app.post('/text', {
 await body.text(); // 'Hi'
 ```
 
-You can also pass in a custom `fetch` function.
+You can also pass in a custom `fetch` function which accepts a `Request` object and returns a `Promise<Response>` object.
 ```ts
 const app = bit<App>('http://localhost:3000', myFetch);
 ```
+
+#### Unit testing
+Use this client for server-side unit testing only.
+```ts
+import { tester } from '@bit-js/byte';
+import server from './server';
+
+// This loads server-side code
+const app = tester(server);
+
+// Use like Bit client
+const res = await app.get('/');
+```
+
+Only one test client should be created for each `Byte` instance.
+
 
 ## Utilities
 

@@ -2,8 +2,8 @@ import Blitz from '@bit-js/blitz';
 
 import {
     type BaseHandler, type RoutesRecord, Route,
-    type InferValidator, type ValidatorRecord, Context,
-    type Fn, type Plugin, type SetBase, type ActionList
+    type InferValidatorRecord, type ValidatorRecord,
+    type Fn, type Plugin, type SetBase, type ActionList, Context
 } from './types';
 
 import { type RequestMethod, injectProto } from '../utils/methods';
@@ -15,12 +15,20 @@ interface Register<Method extends string, T extends RoutesRecord> {
     <
         const Path extends string,
         const Validator extends ValidatorRecord<Path>,
-        const Handler extends BaseHandler<Path, InferValidator<Validator>>,
-    >(path: Path, validator: Validator, ...handlers: [...ActionList<Path, InferValidator<Validator>>, Handler]): Byte<[...T, Route<Method, Path, Handler, Validator>]>
+        const Handler extends BaseHandler<Path, InferValidatorRecord<Validator>>,
+    >(
+        path: Path,
+        validator: Validator,
+        ...handlers: [...ActionList<Path, InferValidatorRecord<Validator>>, Handler]
+    ): Byte<[...T, Route<Method, Path, Handler, Validator>]>;
+
     <
         const Path extends string,
         const Handler extends BaseHandler<Path>,
-    >(path: Path, ...handlers: [...ActionList<Path>, Handler]): Byte<[...T, Route<Method, Path, Handler, null>]>
+    >(
+        path: Path,
+        ...handlers: [...ActionList<Path>, Handler]
+    ): Byte<[...T, Route<Method, Path, Handler, null>]>;
 };
 
 type HandlerRegisters<T extends RoutesRecord> = {
@@ -90,9 +98,9 @@ export class Byte<Record extends RoutesRecord = []> {
     }
 
     /**
-     * Get the fetch function for use
+     * Build the fetch function
      */
-    get fetch() {
+    rebuild() {
         const { routes, router } = this;
 
         for (let i = 0, { length } = routes; i < length; ++i) {
@@ -106,10 +114,20 @@ export class Byte<Record extends RoutesRecord = []> {
                 router.put(route.method, route.path, handler);
         }
 
-        return router.build(Context);
+        // Cache the value
+        const value = router.build(Context);
+        Object.defineProperty(this, 'fetch', { value, writable: false });
+
+        return value;
+    }
+
+    /**
+     * Get the fetch function for use
+     */
+    get fetch() {
+        return this.rebuild();
     }
 }
-
 export interface Byte<Record> extends HandlerRegisters<Record> { };
 export type BaseByte = Byte<RoutesRecord>;
 

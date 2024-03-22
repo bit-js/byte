@@ -3,7 +3,7 @@ import { Context as TypedContext, type Params } from '@bit-js/blitz';
 import type { AwaitedReturn, NormalizePath, TrimEnd } from '../utils/types';
 import type { GenericResponse } from './utils/responses';
 
-import type { BaseByte, Byte } from '.';
+import type { BaseByte } from '.';
 
 // Basic handler and actions
 export type BaseHandler<Path extends string, State = undefined> = (c: Context<Params<Path>, State>) => GenericResponse;
@@ -13,15 +13,13 @@ export type ActionList<Path extends string, State = undefined> = ((c: Context<Pa
 export type Fn<R = any> = (c: BaseContext) => R;
 
 // Validator
+export type ValidatorResult<T> = Exclude<AwaitedReturn<T>, GenericResponse>;
 export type ValidatorProp<T, Prop extends string> = { [K in Prop]: ValidatorResult<T> };
-export type ValidatorResult<T> = Exclude<AwaitedReturn<T>, Response>;
 
-// Validators group of a route
 export type ValidatorRecord<Path extends string = any> = Record<string, (c: Context<Params<Path>>) => any> | null;
 
-// Infer validator type
-export type InferValidator<T extends ValidatorRecord> = T extends null ? undefined : {
-    [K in Extract<keyof T, string>]: Exclude<AwaitedReturn<T[K]>, GenericResponse>;
+export type InferValidatorRecord<T extends ValidatorRecord> = T extends null ? undefined : {
+    [K in Extract<keyof T, string>]: ValidatorResult<T[K]>;
 }
 
 // Base context
@@ -49,9 +47,8 @@ export class Route<
     clone(base: string, app: BaseByte) {
         const route = new Route<Method, any, Handler, Validator>(this.method, this.path, this.handler);
 
-        // Merge actions
+        // Merge actions and path
         route.actions = app.concatActions(this.actions);
-        // Merge path
         route.path = (base + this.path).replace(doubleSlashRegex, '/');
 
         return route;
@@ -75,5 +72,5 @@ export type RoutesRecord = BaseRoute[];
  * A plugin
  */
 export interface Plugin {
-    plug(app: Byte<any>): any;
+    plug(app: BaseByte): any;
 }
