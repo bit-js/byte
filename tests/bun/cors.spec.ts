@@ -1,8 +1,8 @@
 import { test, expect } from 'bun:test';
-import listen from './listen';
+import { tester } from '@bit-js/byte';
 import { apiWithCors } from '@app';
 
-const client = listen(apiWithCors);
+const client = tester(apiWithCors);
 
 test('CORS', async () => {
     const res = await client.get('/');

@@ -1,9 +1,9 @@
 // Client
-import listen from './listen';
 import { basicApis } from '@app';
 import { test, expect } from 'bun:test';
+import { tester } from '@bit-js/byte';
 
-const client = listen(basicApis);
+const client = tester(basicApis);
 
 // Main testing
 test('Root', async () => {

@@ -1,8 +1,8 @@
 import { test, expect } from 'bun:test';
-import listen from './listen';
+import { tester } from '@bit-js/byte';
 import { apiWithCsrf } from '@app';
 
-const client = listen(apiWithCsrf);
+const client = tester(apiWithCsrf);
 
 test('CSRF', async () => {
     const res = await client.get('/');

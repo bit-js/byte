@@ -1,9 +1,9 @@
 // Client
-import listen from './listen';
+import { tester } from '@bit-js/byte';
 import { jsonApis } from '@app';
 import { test, expect } from 'bun:test';
 
-const client = listen(jsonApis);
+const client = tester(jsonApis);
 
 test('JSON', async () => {
     const res = await client.post('/json', {
