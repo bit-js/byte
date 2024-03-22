@@ -9,6 +9,3 @@ export type UnionToIntersection<T> =
     (x: infer R) => any ? R : never;
 
 export type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];
-
-export type TrimEnd<T extends string> = T extends `${infer Start}/` ? Start : T;
-export type NormalizePath<T extends string> = T extends '/' ? '/' : TrimEnd<T>;

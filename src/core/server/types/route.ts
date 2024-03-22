@@ -1,7 +1,5 @@
 import type { BaseByte } from '..';
 
-import type { NormalizePath, TrimEnd } from '../../utils/types';
-
 import type { Fn } from './handler';
 import type { ValidatorRecord } from './validator';
 
@@ -15,17 +13,24 @@ export class Route<
     Handler extends Fn,
     Validator extends ValidatorRecord<Path>,
 > {
-    validator: Validator = null as Validator;
     actions: Fn[] = emptyList;
 
-    constructor(public method: Method, public path: Path, public handler: Handler) { }
+    constructor(
+        public method: Method,
+        public path: Path,
+        public handler: Handler,
+        public validator: Validator
+    ) { }
 
     clone(base: string, app: BaseByte) {
-        const route = new Route<Method, any, Handler, Validator>(this.method, this.path, this.handler);
+        const route = new Route(
+            this.method, this.path,
+            this.handler, this.validator
+        );
 
         // Merge actions and path
         route.actions = app.concatActions(this.actions);
-        route.path = (base + this.path).replace(doubleSlashRegex, '/');
+        route.path = (base + this.path).replace(doubleSlashRegex, '/') as Path;
 
         return route;
     }
@@ -33,8 +38,11 @@ export class Route<
 
 export type BaseRoute = Route<any, any, any, any>;
 
+type TrimEndSlash<T extends string> = T extends `${infer Start}/` ? Start : T;
+type NormalizePath<T extends string> = T extends '/' ? '/' : TrimEndSlash<T>;
+
 type SetBasePath<T extends BaseRoute, Base extends string> = Omit<T, 'path'> & {
-    path: `${TrimEnd<Base>}${NormalizePath<T['path']>}`
+    path: `${NormalizePath<Base>}${TrimEndSlash<T['path']>}`
 };
 
 export type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Current extends BaseRoute, ...infer Rest extends RoutesRecord]

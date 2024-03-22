@@ -143,12 +143,13 @@ function createMethodRegister(method: string): any {
         const startIdx = typeof args[0] === 'function' ? 0 : 1;
         const lastIdx = args.length - 1;
 
-        const route = new Route(method, path, args[lastIdx]);
+        const route = new Route(
+            method, path, args[lastIdx],
+            startIdx === 1 ? args[0] : null
+        );
 
         if (startIdx !== lastIdx)
             route.actions = args.slice(startIdx, lastIdx);
-        if (startIdx === 1)
-            route.validator = args[0];
 
         this.routes.push(route);
 
