@@ -4,12 +4,12 @@ import { Byte, send, parse, query, cors, csrf } from '@bit-js/byte';
 export const basicApis = new Byte()
     .get('/', () => send.body('Hi'))
     .get('/:id', (ctx) => send.body(ctx.params.id))
-    .get('/user', { query: query.get }, (ctx) => send.json(ctx.state.query));
+    .get('/user', (ctx) => send.json(query.get(ctx)));
 
 export const jsonApis = new Byte()
     .post('/json', {
         body: parse.json()
-    }, (ctx) => send.json(ctx.state.body, ctx));
+    }, (ctx) => send.json(ctx.state.body));
 
 export const apiWithCors = new Byte()
     .action(cors({ allowMethods: 'GET' }))
