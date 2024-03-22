@@ -199,7 +199,7 @@ send.body('Hi');
 send.text('Hi'): 
 
 // new Response(JSON.stringify({ hello: 'world' }), { headers: { 'Content-Type': 'application/json' } })
-send.json({ hello: world });
+send.json({ hello: 'world' });
 
 // new Response(null, { headers: { Location: '/home' }, status: 302 })
 send.link('/home', 302);
@@ -208,7 +208,7 @@ send.link('/home', 302);
 send.events(readable);
 ```
 
-All response utilities (except `send.link`) has two arguments.
+All response utilities (except `send.link`) accepts a response body and a `ResponseInit` object.
 ```ts
 send(body: any, init?: ResponseInit): any;
 ```
@@ -231,6 +231,7 @@ app.post('/text', {
             // If a `Response` object is returned.
             // It will be used instead of the handler response.
         },
+
         // Handle error if specified
         catch(error) {
             // Should return a Response or Promise<Response>
