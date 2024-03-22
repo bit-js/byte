@@ -1,4 +1,4 @@
-import { $pass, type Fn } from '../core/server';
+import { $pass, type Fn } from '../../core/server';
 
 type Values = string | string[];
 

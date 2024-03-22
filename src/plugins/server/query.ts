@@ -1,4 +1,4 @@
-import { $pass, type BaseContext } from '../core/server';
+import { $pass, type BaseContext } from '../../core/server';
 
 export const query: {
     /**

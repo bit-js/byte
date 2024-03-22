@@ -1,4 +1,4 @@
-import type { Fn } from '../core/server';
+import type { Fn } from '../../core/server';
 
 /**
  * CSRF action options
@@ -52,7 +52,7 @@ export function csrf(options?: CSRFOptions): Fn {
         keys.push('h');
         values.push(forbidden);
 
-        fallbackCall = 'new Response(null,h)'
+        fallbackCall = 'new Response(null,h)';
     } else {
         const { fallback } = options;
 

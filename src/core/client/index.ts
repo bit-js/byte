@@ -11,12 +11,5 @@ export function bit<T extends BaseByte>(url: string, fetcher: Fetcher = fetchFn)
     return new BitClient(url, fetcher) as any;
 }
 
-/**
- * Create a type safe test client (use for unit testing)
- */
-export function tester<T extends BaseByte>(app: T): Client<T> {
-    return new BitClient('http://127.0.0.1', app.fetch) as any;
-}
-
 export * from './types';
 export * from './client';
