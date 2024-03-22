@@ -1,15 +1,15 @@
-import type { Fn } from '../types';
+import type { Fn } from '../types/handler';
 import type { AwaitedReturn, MaybePromise } from '../../utils/types';
 import type { GenericResponse } from './responses';
 
 import { $async, $pass } from './macro';
 
-export interface ParserOptions<T, R = T> {
+interface ParserOptions<T, R = T> {
     then?(data: T): MaybePromise<R> | GenericResponse;
     catch?(error: any): GenericResponse;
 }
 
-export type InferParser<T extends ParserOptions<any>> = Fn<
+type InferParser<T extends ParserOptions<any>> = Fn<
     Promise<AwaitedReturn<T['then']> | AwaitedReturn<T['catch']> | GenericResponse>
 >;
 

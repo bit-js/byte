@@ -1,14 +1,12 @@
 import Blitz from '@bit-js/blitz';
 
-import {
-    type BaseHandler, type RoutesRecord, Route,
-    type InferValidatorRecord, type ValidatorRecord,
-    type Fn, type Plugin, type SetBase, type ActionList, Context
-} from './types';
-
 import { type RequestMethod, injectProto } from '../utils/methods';
 
 import compileRoute from './utils/compile/route';
+
+import { Route, type RoutesRecord, type SetBase } from './types/route';
+import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
+import { Context, type ActionList, type BaseHandler, type Fn } from './types/handler';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -34,6 +32,13 @@ interface Register<Method extends string, T extends RoutesRecord> {
 type HandlerRegisters<T extends RoutesRecord> = {
     [Method in RequestMethod | 'any']: Register<Method, T>;
 };
+
+/**
+ * A plugin
+ */
+export interface Plugin {
+    plug(app: BaseByte): any;
+}
 
 /**
  * Create a Byte app
@@ -153,9 +158,12 @@ function createMethodRegister(method: string): any {
 injectProto(Byte, createMethodRegister);
 Byte.prototype.any = createMethodRegister('$');
 
-// Other neccessary stuff
-export * from './types';
+// Types
+export * from './types/handler';
+export * from './types/route';
+export * from './types/validator';
 
+// Internals and utils
 export * from './utils/parsers';
 export * from './utils/responses';
 export * from './utils/macro';

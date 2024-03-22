@@ -1,4 +1,6 @@
-import type { BaseRoute, Fn } from '../../types';
+import type { BaseRoute } from '../../types/route';
+import type { Fn } from '../../types/handler';
+
 import { isAsync, passChecks } from '../macro';
 
 export default function compileRoute(route: BaseRoute, actions: Fn[]) {

@@ -1,11 +1,18 @@
 import type { BaseByte } from '../server';
-import type { Fetcher, InferClient } from './types';
+
 import serialize from './utils/serialize';
-
 import { injectProto } from '../utils/methods';
-
 import getInjectFn from './utils/pathInject';
 import stringifyQuery from './utils/stringifyQuery';
+
+import type { UnionToIntersection } from '../utils/types';
+
+import type { InferRoutes } from './types/route';
+
+/**
+ * Infer client type
+ */
+export type InferClient<T extends BaseByte> = UnionToIntersection<InferRoutes<T['routes']>>;
 
 // Bit client prototype
 export class BitClient {
@@ -14,7 +21,7 @@ export class BitClient {
      */
     readonly url: string;
 
-    constructor(url: string, readonly fetch: Fetcher) {
+    constructor(url: string, readonly fetch: (req: Request) => Promise<any>) {
         // Normalize URL
         const lastIdx = url.length - 1;
         this.url = url.charCodeAt(lastIdx) === 47 ? url.substring(0, lastIdx) : url;
