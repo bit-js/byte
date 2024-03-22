@@ -1,5 +1,4 @@
-import { $pass } from '..';
-import type { BaseContext } from '../types';
+import { $pass, type BaseContext } from '../core/server';
 
 export const query: {
     /**
@@ -97,3 +96,4 @@ export const query: {
         return result;
     })
 };
+

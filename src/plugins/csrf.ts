@@ -1,4 +1,4 @@
-import type { Fn } from '../types';
+import type { Fn } from '../core/server';
 
 /**
  * CSRF action options
@@ -63,4 +63,5 @@ export function csrf(options?: CSRFOptions): Fn {
     }
 
     return Function(...keys, `return (c)=>{const _=c.req.headers.get('Origin');return ${literals.join('&&')}?null:${fallbackCall};}`)(...values);
-} 
+}
+

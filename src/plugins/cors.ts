@@ -1,5 +1,4 @@
-import { $pass } from './macro';
-import { type Fn } from '../types';
+import { $pass, type Fn } from '../core/server';
 
 type Values = string | string[];
 
@@ -47,3 +46,4 @@ export function cors(options?: CORSOptions) {
 
     return $pass(Function(`return (c)=>{${builder.join('')}}`)());
 }
+
