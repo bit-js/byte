@@ -172,18 +172,16 @@ const app = bit<App>('http://localhost:3000', myFetch);
 #### Unit testing
 Use this client for server-side unit testing only.
 ```ts
-import { tester } from '@bit-js/byte';
 import server from './server';
 
 // This loads server-side code
-const app = tester(server);
+const app = server.client();
 
 // Use like Bit client
 const res = await app.get('/');
 ```
 
 Only one test client should be created for each `Byte` instance.
-
 
 ## Utilities
 

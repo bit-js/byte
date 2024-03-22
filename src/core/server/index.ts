@@ -8,6 +8,8 @@ import { Route, type RoutesRecord, type SetBase } from './types/route';
 import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
 import { Context, type ActionList, type BaseHandler, type Fn } from './types/handler';
 
+import { bit } from '../client';
+
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
     <
@@ -103,6 +105,15 @@ export class Byte<Record extends RoutesRecord = []> {
     }
 
     /**
+     * Overwrite a getter with a cached non-writable value
+     */
+    private writeGetter<K extends keyof this>(name: K, value: this[K]): this[K] {
+        // Cache the last value of the getter
+        Object.defineProperty(this, name, { value, writable: false });
+        return value;
+    }
+
+    /**
      * Build the fetch function
      */
     rebuild() {
@@ -119,18 +130,21 @@ export class Byte<Record extends RoutesRecord = []> {
                 router.put(route.method, route.path, handler);
         }
 
-        // Cache the value
-        const value = router.build(Context);
-        Object.defineProperty(this, 'fetch', { value, writable: false });
-
-        return value;
+        return this.writeGetter('fetch', router.build(Context));
     }
 
     /**
      * Get the fetch function for use
      */
-    get fetch() {
+    get fetch(): (req: Request) => any {
         return this.rebuild();
+    }
+
+    /**
+     * Create a test client
+     */
+    client() {
+        return bit<this>('http://127.0.0.1', this.fetch);
     }
 }
 export interface Byte<Record> extends HandlerRegisters<Record> { };
