@@ -5,8 +5,9 @@ import type { GenericResponse } from './utils/responses';
 
 import type { BaseByte, Byte } from '.';
 
-// Basic handler
+// Basic handler and actions
 export type BaseHandler<Path extends string, State = undefined> = (c: Context<Params<Path>, State>) => GenericResponse;
+export type ActionList<Path extends string, State = undefined> = ((c: Context<Params<Path>, State>) => any)[];
 
 // A function with one argument
 export type Fn<R = any> = (c: BaseContext) => R;

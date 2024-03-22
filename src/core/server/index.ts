@@ -3,11 +3,10 @@ import Blitz from '@bit-js/blitz';
 import {
     type BaseHandler, type RoutesRecord, Route,
     type InferValidator, type ValidatorRecord, Context,
-    type Fn, type Plugin, type SetBase
+    type Fn, type Plugin, type SetBase, type ActionList
 } from './types';
 
 import { type RequestMethod, injectProto } from '../utils/methods';
-import type { LastItem, Items } from '../utils/types';
 
 import compileRoute from './utils/compile/route';
 
@@ -16,12 +15,12 @@ interface Register<Method extends string, T extends RoutesRecord> {
     <
         const Path extends string,
         const Validator extends ValidatorRecord<Path>,
-        const Handlers extends Items<BaseHandler<Path, InferValidator<Validator>>>,
-    >(path: Path, validator: Validator, ...handlers: Handlers): Byte<[...T, Route<Method, Path, LastItem<Handlers>, Validator>]>
+        const Handler extends BaseHandler<Path, InferValidator<Validator>>,
+    >(path: Path, validator: Validator, ...handlers: [...ActionList<Path, InferValidator<Validator>>, Handler]): Byte<[...T, Route<Method, Path, Handler, Validator>]>
     <
         const Path extends string,
-        const Handlers extends Items<BaseHandler<Path>>,
-    >(path: Path, ...handlers: Handlers): Byte<[...T, Route<Method, Path, LastItem<Handlers>, null>]>
+        const Handler extends BaseHandler<Path>,
+    >(path: Path, ...handlers: [...ActionList<Path>, Handler]): Byte<[...T, Route<Method, Path, Handler, null>]>
 };
 
 type HandlerRegisters<T extends RoutesRecord> = {
