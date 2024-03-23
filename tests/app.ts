@@ -1,10 +1,16 @@
 // Server
 import { Byte, send, parse, query, cors, csrf } from '@bit-js/byte';
 
+const parseQuery = query.schema({
+    id: 'number',
+    darkMode: 'bool'
+});
+console.log(parseQuery.toString());
+
 export const basicApis = new Byte()
     .get('/', () => send.body('Hi'))
     .get('/:id', (ctx) => send.body(ctx.params.id))
-    .get('/user', (ctx) => send.json(query.get(ctx)));
+    .get('/user', (ctx) => send.json(parseQuery(ctx)));
 
 export const jsonApis = new Byte()
     .post('/json', {

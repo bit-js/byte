@@ -1,4 +1,5 @@
 import type { Fn } from '../../core/server';
+import { forbidden } from '../../utils/defaultOptions';
 
 /**
  * CSRF action options
@@ -8,8 +9,6 @@ export interface CSRFOptions {
     verify?: (origin: string) => boolean;
     fallback?: Fn;
 }
-
-const forbidden = { status: 403 };
 
 const defaultCSRF: Fn = (ctx) => {
     if (ctx.req.headers.get('Origin') !== ctx.req.url.substring(0, ctx.pathStart))

@@ -23,6 +23,8 @@ export interface BasicForm<T extends FormRecord> extends FormData {
     get(name: string): null;
 }
 
+type NullableBody = BodyInit | null;
+
 /**
  * Basic response format
  */
@@ -30,12 +32,12 @@ export const send: {
     /**
      * Send a `BodyInit` as response
      */
-    body<const T extends BodyInit>(body: T, init?: ResponseInit): BasicResponse<T>;
+    body<const T extends NullableBody>(body: T, init?: ResponseInit): BasicResponse<T>;
 
     /**
      * Send response as plain text
      */
-    text<const T extends BodyInit>(body: T, init?: ResponseInit): BasicResponse<T>;
+    text<const T extends NullableBody>(body: T, init?: ResponseInit): BasicResponse<T>;
 
     /**
      * Send response as JSON
@@ -45,17 +47,17 @@ export const send: {
     /**
      * Send binary response
      */
-    binary<const T extends BodyInit>(body: T, init?: ResponseInit): BasicResponse<T>;
+    binary<const T extends NullableBody>(body: T, init?: ResponseInit): BasicResponse<T>;
 
     /**
      * Send XML response
      */
-    xml<const T extends BodyInit>(body: T, init?: ResponseInit): BasicResponse<T>;
+    xml<const T extends NullableBody>(body: T, init?: ResponseInit): BasicResponse<T>;
 
     /**
      * Send HTML response
      */
-    html<const T extends BodyInit>(body: T, init?: ResponseInit): BasicResponse<T>;
+    html<const T extends NullableBody>(body: T, init?: ResponseInit): BasicResponse<T>;
 
     /**
      * Stream server-sent events

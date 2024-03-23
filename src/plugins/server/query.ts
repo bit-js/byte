@@ -1,99 +1,74 @@
-import { $pass, type BaseContext } from '../../core/server';
+import { $pass, type BaseContext, type GenericResponse } from '../../core/server';
+import { forbidden } from '../../utils/defaultOptions';
 
-export const query: {
+export type QuerySchemaTypes = 'string' | 'number' | 'bool';
+
+interface TypeMap {
+    string: string;
+    number: number;
+    bool: boolean;
+}
+
+export interface QuerySchema extends Record<string, QuerySchemaTypes> { }
+export type InferQuerySchema<T extends QuerySchema> = {
+    [K in keyof T]: TypeMap[T[K]];
+}
+
+export const query = {
     /**
      * Get a single value of the key from the query
      */
-    value(name: string): (ctx: BaseContext) => string | null;
-
-    /**
-     * Get multiple values of the key from the query
-     */
-    values(name: string, maxValues?: number): (ctx: BaseContext) => string[];
-
-    /**
-     * Get the query string from context
-     */
-    get(ctx: BaseContext): Record<string, string>;
-} = {
-    value: (name) => {
+    value(name: string): (ctx: BaseContext) => string | null {
         const search = JSON.stringify(encodeURIComponent(name) + '=');
         const searchLen = search.length - 2;
 
         return $pass(Function(`return ({pathEnd,req:{url}})=>{const i=url.indexOf(${search},pathEnd+1)+${searchLen};if(i===${searchLen - 1})return null;const n=url.indexOf("&",i);return n===-1?url.substring(i):url.substring(i,n);}`)());
     },
 
-    values: (name, maxValues) => {
+    /**
+     * Get multiple values of the key from the query
+     */
+    values(name: string, maxValues: number): (ctx: BaseContext) => string[] {
         const search = JSON.stringify(encodeURIComponent(name) + '=');
         const searchLen = search.length - 2;
 
         return $pass(Function(`return ({pathEnd,req:{url}})=>{const r=[];let i=url.indexOf(${search},pathEnd+1)+${searchLen};while(i!===${searchLen - 1}${typeof maxValues === 'number' ? `&&r.length<${maxValues}` : ''}){const n=url.indexOf("&",i);if(n===-1){r.push(url.substring(i));return r;}r.push(url.substring(i,n));i=url.indexOf(${search},n+1)}return r}`)());
     },
 
-    get: $pass(({ pathEnd, req: { url } }) => {
-        const { length } = url;
-        if (length === pathEnd) return {};
+    /**
+     * Parse multiple keys
+     */
+    schema<Schema extends QuerySchema>(schema: Schema, fallback?: (ctx: BaseContext) => GenericResponse): (ctx: BaseContext) => InferQuerySchema<Schema> | GenericResponse {
+        const checks = ['++pathEnd;'], idxCheck = [], objParts = [];
+        let idx = 0;
 
-        let startingIndex = pathEnd;
-        let equalityIndex = startingIndex;
+        const noFallback = typeof fallback === 'undefined';
+        const hasArgs = !noFallback && fallback.length !== 0;
+        const fallbackCall = noFallback ? 'new Response(null,h)' : (hasArgs ? 'f(c)' : 'f()');
 
-        let shouldDecodeKey = false;
-        let shouldDecodeValue = false;
+        for (const key in schema) {
+            const type = schema[key];
 
-        const result: Record<string, string> = {};
+            if (type === 'bool') {
+                const search = JSON.stringify(encodeURIComponent(key));
+                objParts.push(`${key}:url.indexOf(${search},pathEnd)!==-1`);
+            } else {
+                const search = JSON.stringify(encodeURIComponent(key) + '=');
+                const searchLen = search.length - 2;
 
-        // Have a boundary of input.length + 1 to access last pair inside the loop.
-        for (let i = startingIndex + 1; i < length; ++i)
-            // Handle '&' and end of line to pass the current values to result
-            switch (url.charCodeAt(i)) {
-                case 38:
-                    if (equalityIndex > startingIndex)
-                        result[shouldDecodeKey
-                            ? decodeURIComponent(url.substring(startingIndex + 1, equalityIndex))
-                            : url.substring(startingIndex + 1, equalityIndex)
-                        ] = shouldDecodeValue
-                                ? decodeURIComponent(url.substring(equalityIndex + 1, i))
-                                : url.substring(equalityIndex + 1, i);
-                    else
-                        result[shouldDecodeKey
-                            ? decodeURIComponent(url.substring(startingIndex + 1, i))
-                            : url.substring(startingIndex + 1, i)
-                        ] = '';
+                if (type === 'string') {
+                    checks.push(`const s${idx}=url.indexOf(${search},pathEnd)+${searchLen};if(s${idx}===${searchLen - 1})return ${fallbackCall};`);
+                    idxCheck.push(`const i${idx}=url.indexOf("&",s${idx});`);
+                    objParts.push(`${key}:i${idx}===-1?url.substring(s${idx}):url.substring(s${idx},i${idx})`);
+                } else {
+                    checks.push(`const s${idx}=url.indexOf(${search},pathEnd)+${searchLen};if(s${idx}===${searchLen - 1})return ${fallbackCall};const i${idx}=url.indexOf("&",s${idx});const ${key}=i${idx}===-1?+url.substring(s${idx}):+url.substring(s${idx},i${idx});if(Number.isNaN(${key}))return ${fallbackCall};`);
+                    objParts.push(key);
+                }
 
-                    startingIndex = i;
-                    equalityIndex = i;
-
-                    shouldDecodeKey = false;
-                    shouldDecodeValue = false;
-                    break;
-                // Check '='
-                case 61:
-                    if (equalityIndex <= startingIndex) equalityIndex = i;
-                    // If '=' character occurs again, we should decode the input.
-                    else shouldDecodeValue = true;
-                    break;
-                // Check '%' character for encoding
-                case 37:
-                    if (equalityIndex > startingIndex) shouldDecodeValue = true;
-                    else shouldDecodeKey = true;
-                    break;
+                ++idx;
             }
+        }
 
-        // Handle last KV pair
-        if (equalityIndex > startingIndex)
-            result[shouldDecodeKey
-                ? decodeURIComponent(url.substring(startingIndex + 1, equalityIndex))
-                : url.substring(startingIndex + 1, equalityIndex)
-            ] = shouldDecodeValue
-                    ? decodeURIComponent(url.substring(equalityIndex + 1))
-                    : url.substring(equalityIndex + 1);
-        else
-            result[shouldDecodeKey
-                ? decodeURIComponent(url.substring(startingIndex + 1))
-                : url.substring(startingIndex + 1)
-            ] = '';
-
-        return result;
-    })
+        return Function('f', 'h', `return (${hasArgs ? 'c' : '{pathEnd,req:{url}}'})=>{${checks.join('')}${idxCheck.join('')}return {${objParts.join()}};}`)(fallback, forbidden);
+    }
 };
-
