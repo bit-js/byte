@@ -28,22 +28,22 @@ export function cors(options?: CORSOptions) {
 
     // Check basic properties
     if (typeof options.allowHeaders !== 'undefined')
-        builder.push(`c.headers['Access-Control-Allow-Headers']=${parseValue(options.allowHeaders)};`);
+        builder.push(`headers['Access-Control-Allow-Headers']=${parseValue(options.allowHeaders)};`);
     if (typeof options.allowMethods !== 'undefined')
-        builder.push(`c.headers['Access-Control-Allow-Methods']=${parseValue(options.allowMethods)};`);
+        builder.push(`headers['Access-Control-Allow-Methods']=${parseValue(options.allowMethods)};`);
     if (typeof options.exposeHeaders !== 'undefined')
-        builder.push(`c.headers['Access-Control-Expose-Headers']=${parseValue(options.exposeHeaders)};`);
+        builder.push(`headers['Access-Control-Expose-Headers']=${parseValue(options.exposeHeaders)};`);
     if (typeof options.maxAge === 'number')
-        builder.push(`c.headers['Access-Control-Max-Age']=${options.maxAge.toString()};`);
+        builder.push(`headers['Access-Control-Max-Age']=${options.maxAge.toString()};`);
     if (options.allowCredentials === true)
-        builder.push(`c.headers['Access-Control-Allow-Credentials']='true';`);
+        builder.push(`headers['Access-Control-Allow-Credentials']='true';`);
 
     // Check allow origins
     if (typeof options.allowOrigin === 'string' && options.allowOrigin !== '*')
-        builder.push(`c.headers['Access-Control-Allow-Origins']=${JSON.stringify(options.allowOrigin)};c.headers.Vary='Origin';`);
+        builder.push(`headers['Access-Control-Allow-Origins']=${JSON.stringify(options.allowOrigin)};c.headers.Vary='Origin';`);
     else
-        builder.push(`c.headers['Access-Control-Allow-Origins']='*';`);
+        builder.push(`headers['Access-Control-Allow-Origins']='*';`);
 
-    return $pass(Function(`return (c)=>{${builder.join('')}}`)());
+    return $pass(Function(`return ({headers})=>{${builder.join('')}}`)());
 }
 
