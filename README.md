@@ -252,13 +252,18 @@ import { query } from '@bit-js/byte';
 
 // getID(ctx) -> Get a single value of parameter 'id' from query
 // Return null if parameter does not exist in query string
-const getID = query.value('id'); // string | null
+const getID = query.get('id'); // string | null
 
 // getCats(ctx) -> Get a multiple values of parameter 'category' from query
-const getCats = query.values('category'); // string[]
+const getCats = query.getAll('category'); // string[]
 
-// Parse query to key-value pair
-const result = query.get(ctx);
+// Create a parser with a schema
+// Return null if any parameter does not match
+const parse = query.schema({
+    name: 'string',
+    age: 'number',
+    darkMode: 'bool'
+});
 ```
 
 The query parsers (except `query.get`) utils do not `decodeURIComponent` the result by default.
