@@ -39,34 +39,42 @@ export const query = {
      * Parse multiple keys
      */
     schema<Schema extends QuerySchema>(schema: Schema): (ctx: BaseContext) => InferQuerySchema<Schema> | null {
-        const checks = ['++pathEnd;'], idxCheck = [], idxs = [], objParts = [];
+        const idxChecks = ['++pathEnd;'], valueChecks = [], idxs = [], objParts = [];
         let idx = 0;
 
         for (const key in schema) {
             const type = schema[key];
 
-            if (type === 'bool')
-                // Check whether the search key exists in the url
-                objParts.push(`${key}:url.indexOf(${JSON.stringify(encodeURIComponent(key))},pathEnd)!==-1`);
-            else {
+            if (type === 'bool') {
+                // '"key="'
+                const search = JSON.stringify(encodeURIComponent(key));
+                const searchLen = search.length - 2;
+
+                idxs.push(`const i${idx}=url.indexOf(${search},pathEnd)+${searchLen};`)
+
+                // Check if the end index of the key is & or end of the string
+                objParts.push(`${key}:i${idx}!==${searchLen - 1}&&(i${idx}===url.length||url.charCodeAt(i${idx})===38)`);
+            } else {
                 // '"key="'
                 const search = JSON.stringify(encodeURIComponent(key) + '=');
                 const searchLen = search.length - 2;
 
                 if (type === 'string') {
-                    checks.push(`const s${idx}=url.indexOf(${search},pathEnd)+${searchLen};if(s${idx}===${searchLen - 1})return null;`);
+                    idxChecks.push(`const s${idx}=url.indexOf(${search},pathEnd)+${searchLen};if(s${idx}===${searchLen - 1})return null;`);
                     idxs.push(`const i${idx}=url.indexOf("&",s${idx});`);
                     objParts.push(`${key}:i${idx}===-1?url.substring(s${idx}):url.substring(s${idx},i${idx})`);
                 } else {
-                    checks.push(`const s${idx}=url.indexOf(${search},pathEnd)+${searchLen};if(s${idx}===${searchLen - 1})return null;`);
-                    idxCheck.push(`const i${idx}=url.indexOf("&",s${idx});const ${key}=i${idx}===-1?+url.substring(s${idx}):+url.substring(s${idx},i${idx});if(Number.isNaN(${key}))return null;`);
+                    idxChecks.push(`const s${idx}=url.indexOf(${search},pathEnd)+${searchLen};if(s${idx}===${searchLen - 1})return null;`);
+                    valueChecks.push(`const i${idx}=url.indexOf("&",s${idx});const ${key}=i${idx}===-1?+url.substring(s${idx}):+url.substring(s${idx},i${idx});if(Number.isNaN(${key}))return null;`);
                     objParts.push(key);
                 }
 
                 ++idx;
             }
+
+            ++idx;
         }
 
-        return Function(`return ({pathEnd,req:{url}})=>{${checks.join('')}${idxCheck.join('')}${idxs.join('')}return {${objParts.join()}};}`)();
+        return Function(`return ({pathEnd,req:{url}})=>{${idxChecks.join('')}${valueChecks.join('')}${idxs.join('')}return {${objParts.join()}};}`)();
     }
 };
