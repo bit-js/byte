@@ -64,10 +64,9 @@ const data = [
     0x7F, 0x3F, 0x3F, 0x3F, 0x00, 0x1F, 0x0F, 0x0F, 0x0F, 0x07, 0x07, 0x07
 ];
 
-export default function decodeURIComponent(uri: string) {
-    let percentPosition = uri.indexOf('%');
-
-    const { length } = uri;
+export default function decodeURIComponent(url: string, start: number, end: number) {
+    let percentPosition = url.indexOf('%', start);
+    if (percentPosition === -1) return url.substring(start, end);
 
     let decoded = '';
     let last = 0;
@@ -75,17 +74,17 @@ export default function decodeURIComponent(uri: string) {
     let startOfOctets = percentPosition;
     let state = 268;
 
-    while (percentPosition < length) {
-        const byte = highHex(uri.charCodeAt(percentPosition + 1)) | lowHex(uri.charCodeAt(percentPosition + 2));
+    while (percentPosition < end) {
+        const byte = highHex(url.charCodeAt(percentPosition + 1)) | lowHex(url.charCodeAt(percentPosition + 2));
         const type = data[byte];
 
         codepoint = (codepoint << 6) | (byte & data[364 + type]);
 
         state = data[state + type];
-        if (state === 256) return null;
+        if (state === 256) return '';
 
         if (state === 268) {
-            decoded += uri.substring(last, startOfOctets);
+            decoded += url.substring(last, startOfOctets);
             decoded += codepoint > 0xFFFF
                 ? String.fromCharCode(
                     (0xD7C0 + (codepoint >> 10)),
@@ -94,18 +93,18 @@ export default function decodeURIComponent(uri: string) {
                 : String.fromCharCode(codepoint);
 
             last = percentPosition + 3;
-            percentPosition = uri.indexOf('%', last);
+            percentPosition = url.indexOf('%', last);
 
             if (percentPosition === -1)
-                return decoded + uri.substring(last);
+                return decoded + url.substring(last);
 
             startOfOctets = percentPosition;
             codepoint = 0;
         } else {
             percentPosition += 3;
-            if (percentPosition >= length || uri.charCodeAt(percentPosition) !== 37) return null;
+            if (percentPosition >= length || url.charCodeAt(percentPosition) !== 37) return url.substring(start, end);
         }
     }
 
-    return decoded + uri.substring(last);
+    return decoded + url.substring(last);
 }

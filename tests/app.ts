@@ -3,7 +3,8 @@ import { Byte, send, parse, query, cors, csrf } from '@bit-js/byte';
 
 const parseQuery = query.schema({
     id: 'number',
-    darkMode: 'bool'
+    darkMode: 'bool',
+    name: 'string',
 });
 console.log(parseQuery.toString());
 
