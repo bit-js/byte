@@ -3,7 +3,6 @@ import { BitClient, type Client } from './client';
 
 const fetchFn = globalThis.fetch.bind(globalThis);
 
-
 /**
  * A type safe client
  */

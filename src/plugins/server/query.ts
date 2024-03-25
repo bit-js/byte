@@ -10,9 +10,7 @@ interface TypeMap {
 }
 
 export interface QuerySchema extends Record<string, QuerySchemaTypes> { }
-export type InferQuerySchema<T extends QuerySchema> =
-    { [K in Exclude<keyof T, `?${string}`>]: TypeMap[T[K]] }
-    & { [K in Extract<keyof T, `?${string}`>]: TypeMap[T[K]] | null };
+export type InferQuerySchema<T extends QuerySchema> = { [K in keyof T]: TypeMap[T[K]] };
 
 export const query = {
     /**
