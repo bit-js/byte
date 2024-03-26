@@ -312,3 +312,36 @@ interface CSRFOptions {
     fallback?: (ctx: BaseContext) => any;
 }
 ```
+
+### Timing
+A `Server-Timing` helper.
+```ts
+import { timing } from "@bit-js/byte";
+
+// Create a timing schema
+const Metrics = timing({
+    // With description
+    db: 'Measure database queries',
+
+    // No description
+    id: null
+});
+
+// Use in requests
+app.get('/users', (ctx) => {
+    const metrics = new Metrics();
+
+    // Start measuring
+    metrics.start('db');
+
+    // Do other stuff
+    const result = queryFromDatabase(ctx);
+
+    // Calculate timing result
+    metrics.end('db');
+
+    // Set `Server-Timing` header to the value
+    ctx.headers['Server-Timing'] = metrics.get();
+    return send.body(result, ctx);
+})
+```
