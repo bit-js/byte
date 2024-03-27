@@ -1,5 +1,8 @@
+import type { BaseContext } from "../..";
+
 export interface TimingInstance<Key extends string = never> {
     get(): string;
+    set(ctx: BaseContext): void;
 
     start(metric: Key): void;
     end(metric: Key): void;
@@ -29,5 +32,5 @@ export function timing<Metrics extends Record<string, string | null>>(metrics: M
         literalParts[i] = `\${typeof ${key}==='undefined'?'':\`,${key}${desc === null ? '' : `;desc=${JSON.stringify(desc)}`};dur=\${${key}}\`}`;
     }
 
-    return Function(`'use strict';return class A{${keys.join(';')};start(m){this[m]=performance.now();};end(m){this[m]=performance.now()-this[m];};get(){const {${keys.join()}}=this;return \`${literalParts.join('')}\`;}}`)();
+    return Function(`'use strict';return class A{${keys.join(';')};start(m){this[m]=performance.now();};end(m){this[m]=performance.now()-this[m];};set(c){const {${keys.join()}}=this;c.headers['Server-Timing']=\`${literalParts.join('')}\`;};get(){const {${keys.join()}}=this;return \`${literalParts.join('')}\`;}}`)();
 }

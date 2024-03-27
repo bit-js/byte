@@ -42,6 +42,6 @@ export const timingApi = new Byte()
         const value = randomUUID();
         metrics.end('createUUID');
 
-        ctx.headers['Server-Timing'] = metrics.get();
+        metrics.set(ctx);
         return send.body(value, ctx);
     });
