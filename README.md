@@ -251,10 +251,10 @@ Use query parsers to get parameter values out of a query string.
 import { query } from '@bit-js/byte';
 
 // Get the first value of parameter 'id' from query as a string
-query.get('id'); // string or null if parameter does not exist
+query.get('id'); // parse to string or null if parameter does not exist
 
 // Get the first value of parameter 'id' from query as a number
-query.get('id', { type: 'number' }); // number or NaN
+query.get('id', { type: 'number' }); // parse to number or NaN
 
 // Get a multiple values of parameter 'category' from query
 query.get('category', {
@@ -262,24 +262,28 @@ query.get('category', {
     type: 'string',
 
     // Maximum values to obtain
-    maxValues: 10
-}); // string[]
+    maxLength: 10
+}); // parse to string[]
 
 // Check whether 'darkMode' parameter exists
 // 'maxValues' is ignored if specified with type 'bool'
-query.get('darkMode', { type: 'bool' }); // boolean
+query.get('darkMode', { type: 'bool' }); // parse to boolean
 
 // Create a parser with a schema
-// Return null if any parameter does not match
 query.schema({
     name: { type: 'string' },
     age: { type: 'number' },
-    items: { type: 'number', maxValues: 10 },
+    items: { type: 'number', maxLength: 10 },
     darkMode: { type: 'bool' },
-});
+}); // parse { name: string, age: number, items: number[], darkMode: boolean } or null if any parameter does not match
 ```
 
-The query parsers (except `query.get`) utils do not `decodeURIComponent` the result by default.
+All query parsers return a function to parse query parameters from a request context.
+```ts
+(ctx: BaseContext) => any;
+```
+
+The results get decoded using a custom `decodeURIComponent` implementation by default. To disable this behavior set `query.decodeValue` to `false`.
 
 ### CORS
 Set CORS headers on every requests.
