@@ -50,9 +50,10 @@ Byte matches routes 5x faster than Hono with RegExpRouter.
 - Byte: 1047ns
 ```
 
-See [benchmarks](./bench) for more details
+See [benchmarks](./bench) for more details.
 
 ## Concepts
+All the basics you need to know to use Byte.
 
 ### Context
 Context is an object represents the current request.
@@ -93,7 +94,7 @@ Parametric and wildcard patterns are supported.
 '/user/:id/*' // All patterns combined
 ```
 
-Like other frameworks, Byte pass the parsed parameter values to `ctx.params`, but wildcard parameter is named `$` instead of `*`.
+Like other frameworks, Byte passes the parsed parameter values to `ctx.params`, but wildcard parameter is named `$` instead of `*`.
 
 ### Fallback
 Use `fallback` to handle the request when the path does not match any registed route.
@@ -122,7 +123,7 @@ new Byte()
     }, ctx => new Response(ctx.state.body));
 ```
 
-Parsed data is passed into `ctx.state` as a property.
+Parsed data is passed into `ctx.state` as a property and can be used in the request handler.
 
 If a `Response` object is returned from the validator, it will be used instead of the handler response.
 
@@ -174,7 +175,7 @@ app.rebuild();
 ```
 
 ### Client
-Byte provides a client implementation with type inference.
+Byte provides a client implementation with route type inference.
 
 To use it, first export the type of your app.
 ```ts
@@ -286,6 +287,7 @@ app.post('/text', {
         // Handle error if specified
         catch(error) {
             // Should return a Response or Promise<Response>
+            // You can omit this and use the native error handler depending on the JS runtime
         }
     })
 });
@@ -338,6 +340,12 @@ All query parsers return a function to parse query parameters from a request con
 
 The results get decoded using a custom `decodeURIComponent` implementation by default. To disable this behavior set `query.decodeValue` to `false`.
 
+You can manually decode a value using `query.decode`.
+```ts
+// Works like decodeURIComponent but it returns the original string if the string is invalid
+query.decode(str);
+```
+
 ### CORS
 Set CORS headers on every requests.
 ```ts
@@ -363,7 +371,7 @@ interface CORSOptions {
 ```
 
 ### CSRF
-A CSRF protection layer by checking request origin.
+A simple CSRF protection layer by checking request origin.
 ```ts
 import { csrf } from '@bit-js/byte';
 
@@ -413,3 +421,6 @@ app.get('/users', (ctx) => {
     return send.body(metrics.db.toString(), ctx);
 });
 ```
+
+### Other utils
+Check out [`@bit-js/web-utils`](//www.npmjs.com/package/@bit-js/web-utils), a performance-focused web utilities library for all runtimes.
