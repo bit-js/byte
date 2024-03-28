@@ -10,8 +10,47 @@ export default new Byte()
 ## Features
 - **Fast**: Internally use [`Blitz`](//www.npmjs.com/package/@bit-js/blitz), the fastest router in the JS ecosystem.
 - **Lightweight**: Under 30kB in size including dependencies.
-- **Multi-runtime**: Works on every JS runtime without any adapters.
-- **DX**: First-class TypeScript support.
+- **Multi-runtime**: Works on all JS runtimes without any adapters.
+
+## Benchmarks
+Byte starts up 2x faster than Hono with LinearRouter.
+```
+[36.23ms] Byte: Build 10000 routes
+[89.89ms] Hono: Build 10000 routes
+```
+
+Byte matches routes 5x faster than Hono with RegExpRouter.
+```
+"/user":
+- Hono: 5377ns
+- Byte: 1064ns
+
+"/user/comments":
+- Hono: 5289ns
+- Byte: 1103ns
+
+"/user/avatar":
+- Hono: 5153ns
+- Byte: 1082ns
+
+"/event/:id":
+- Hono: 5792ns
+- Byte: 1455ns
+
+"/event/:id/comments":
+- Hono: 5726ns
+- Byte: 1631ns
+
+"/status":
+- Hono: 5358ns
+- Byte: 1036ns
+
+"/deeply/nested/route/for/testing":
+- Hono: 5253ns
+- Byte: 1047ns
+```
+
+See [benchmarks](./bench) for more details
 
 ## Concepts
 
@@ -372,5 +411,5 @@ app.get('/users', (ctx) => {
 
     // Send the measured result
     return send.body(metrics.db.toString(), ctx);
-})
+});
 ```
