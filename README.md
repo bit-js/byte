@@ -7,6 +7,12 @@ export default new Byte()
     .get('/', () => send.body('Hi'));
 ```
 
+## Features
+- **Fast**: Internally use [`Blitz`](//www.npmjs.com/package/@bit-js/blitz), the fastest router in the JS ecosystem.
+- **Lightweight**: Under 30kB in size including dependencies.
+- **Multi-runtime**: Works on every JS runtime without any adapters.
+- **DX**: First-class TypeScript support.
+
 ## Concepts
 
 ### Context
@@ -166,7 +172,15 @@ await body.text(); // 'Hi'
 
 You can also pass in a custom `fetch` function which accepts a `Request` object and returns a `Promise<Response>` object.
 ```ts
-const app = bit<App>('http://localhost:3000', myFetch);
+bit<App>('http://localhost:3000', { fetch: myFetch });
+```
+
+To set default request options.
+```ts
+bit<App>('http://localhost:3000', { 
+    // RequestInit
+    init: { keepalive: true }
+});
 ```
 
 #### Unit testing
@@ -275,7 +289,7 @@ query.schema({
     age: { type: 'number' },
     items: { type: 'number', maxLength: 10 },
     darkMode: { type: 'bool' },
-}); // parse { name: string, age: number, items: number[], darkMode: boolean } or null if any parameter does not match
+}); // parse to { name: string, age: number, items: number[], darkMode: boolean } or null if any parameter does not match
 ```
 
 All query parsers return a function to parse query parameters from a request context.

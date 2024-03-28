@@ -144,7 +144,7 @@ export class Byte<Record extends RoutesRecord = []> {
      * Create a test client
      */
     client() {
-        return bit<this>('http://127.0.0.1', this.fetch);
+        return bit<this>('http://127.0.0.1', this);
     }
 }
 export interface Byte<Record> extends HandlerRegisters<Record> { };

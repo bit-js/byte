@@ -1,7 +1,7 @@
 import type { QueryParams } from '../types/requestProps';
 
 export default function stringifyQuery(query?: QueryParams) {
-    if (typeof query == 'undefined') return '';
+    if (typeof query === 'undefined') return '';
 
     const parts = [];
 

@@ -1,13 +1,11 @@
 import type { BaseByte } from '../server';
-import { BitClient, type Client } from './client';
-
-const fetchFn = globalThis.fetch.bind(globalThis);
+import { BitClient, type Client, type ClientOptions } from './client';
 
 /**
  * A type safe client
  */
-export function bit<T extends BaseByte>(url: string, fetcher: (req: Request) => Promise<any> = fetchFn): Client<T> {
-    return new BitClient(url, fetcher) as any;
+export function bit<T extends BaseByte>(url: string, options?: ClientOptions): Client<T> {
+    return typeof options === 'undefined' ? new BitClient(url) : new BitClient(url, options) as any;
 }
 
 // Types

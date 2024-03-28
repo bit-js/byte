@@ -8,11 +8,22 @@ import stringifyQuery from './utils/stringifyQuery';
 import type { UnionToIntersection } from '../utils/types';
 
 import type { InferRoutes } from './types/route';
+import { emptyObj } from '../../utils/defaultOptions';
 
 /**
  * Infer client type
  */
 export type InferClient<T extends BaseByte> = UnionToIntersection<InferRoutes<T['routes']>>;
+
+/**
+ * Customize client
+ */
+export interface ClientOptions {
+    fetch?(req: Request): Promise<any>;
+    init?: RequestInit;
+}
+
+const fetchFn = globalThis.fetch.bind(globalThis);
 
 // Bit client prototype
 export class BitClient {
@@ -21,15 +32,40 @@ export class BitClient {
      */
     readonly url: string;
 
-    constructor(url: string, readonly fetch: (req: Request) => Promise<any>) {
+    /**
+     * Fetch function
+     */
+    readonly fetch: ClientOptions['fetch'] & {};
+
+    /**
+     * Default response init
+     */
+    readonly defaultInit: ClientOptions['init'] & {};
+
+    constructor(url: string, options?: ClientOptions) {
+        if (typeof options === 'undefined') {
+            this.fetch = fetchFn;
+            this.defaultInit = emptyObj;
+        } else {
+            const { fetch, init } = options;
+
+            this.fetch = typeof fetch === 'function' ? fetch : fetchFn;
+            this.defaultInit = typeof init === 'undefined' ? emptyObj : init;
+        }
+
         // Normalize URL
         const lastIdx = url.length - 1;
         this.url = url.charCodeAt(lastIdx) === 47 ? url.substring(0, lastIdx) : url;
     }
 
     $(path: string, init?: any) {
+        const { defaultInit } = this;
         if (typeof init === 'undefined')
-            return this.fetch(new Request(this.url + path));
+            return this.fetch(new Request(this.url + path, defaultInit));
+
+        for (const key in defaultInit)
+            // @ts-expect-error Somehow it errors
+            init[key] ??= defaultInit[key];
 
         const { params, body, query } = init;
         if (typeof body !== 'undefined')
