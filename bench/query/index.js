@@ -10,7 +10,6 @@ const parse = query.schema({
     age: 'number',
     admin: 'bool'
 });
-
 console.log(parse.toString());
 
 group('Query parsing', () => {

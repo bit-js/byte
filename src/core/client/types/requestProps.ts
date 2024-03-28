@@ -16,9 +16,12 @@ type SetParams<V extends string> = ParamsKey<V> extends never ? {} : {
 };
 
 // Main types
+export interface QueryParams extends Record<string, string | string[] | number | number[] | boolean> { };
+
 export interface RequestBaseProps extends Omit<RequestInit, 'body'> {
-    query?: Record<string, string | number | boolean>;
+    query?: QueryParams;
 };
+
 export type RequestProps<T extends BaseRoute> = RequestBaseProps & SetParams<T['path']> & SetBody<T['validator']>;
 
 

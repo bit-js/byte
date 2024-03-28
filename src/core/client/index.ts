@@ -16,3 +16,7 @@ export * from './types/requestProps';
 
 // Client internals
 export * from './client';
+export { default as stringifyQuery } from './utils/stringifyQuery';
+export { default as serialize } from './utils/serialize';
+export { default as getInjectFn } from './utils/pathInject';
+

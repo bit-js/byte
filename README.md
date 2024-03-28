@@ -250,19 +250,32 @@ Use query parsers to get parameter values out of a query string.
 ```ts
 import { query } from '@bit-js/byte';
 
-// getID(ctx) -> Get a single value of parameter 'id' from query
-// Return null if parameter does not exist in query string
-const getID = query.get('id'); // string | null
+// Get the first value of parameter 'id' from query as a string
+query.get('id'); // string or null if parameter does not exist
 
-// getCats(ctx) -> Get a multiple values of parameter 'category' from query
-const getCats = query.getAll('category'); // string[]
+// Get the first value of parameter 'id' from query as a number
+query.get('id', { type: 'number' }); // number or NaN
+
+// Get a multiple values of parameter 'category' from query
+query.get('category', {
+    // Value type
+    type: 'string',
+
+    // Maximum values to obtain
+    maxValues: 10
+}); // string[]
+
+// Check whether 'darkMode' parameter exists
+// 'maxValues' is ignored if specified with type 'bool'
+query.get('darkMode', { type: 'bool' }); // boolean
 
 // Create a parser with a schema
 // Return null if any parameter does not match
-const parse = query.schema({
-    name: 'string',
-    age: 'number',
-    darkMode: 'bool'
+query.schema({
+    name: { type: 'string' },
+    age: { type: 'number' },
+    items: { type: 'number', maxValues: 10 },
+    darkMode: { type: 'bool' },
 });
 ```
 

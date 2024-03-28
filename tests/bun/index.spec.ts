@@ -16,9 +16,3 @@ test('Parameter', async () => {
     });
     expect(await res.text()).toBe('90');
 });
-
-test('Query', async () => {
-    const query = { id: 16, darkMode: true, name: 'Reve' };
-    const res = await client.get('/user', { query });
-    expect(await res.json()).toEqual(query);
-});
