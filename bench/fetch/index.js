@@ -56,8 +56,8 @@ import test from './test';
 console.log('Benchmarking...');
 const { benchmarks } = await test({
     Hono: createHono(),
-    Elysia: createElysia(),
     Byte: createByte(),
+    Elysia: createElysia(),
 });
 
 const groupResult = {};
@@ -71,4 +71,4 @@ for (let i = 0, { length } = benchmarks; i < length; ++i) {
 }
 
 for (const group in groupResult)
-    console.log(`${group}:\n${groupResult[group].join('')}`);
+    console.log(`"${group}":\n${groupResult[group].join('')}`);

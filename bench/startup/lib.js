@@ -31,7 +31,7 @@ export async function exec(name, content, chain) {
     const path = `./dist/${name}.js`;
 
     if (process.argv[2] !== 'test') {
-        content.unshift(`console.time("Build ${name}")`);
+        content.unshift(`console.time("${name}: Build ${routesCount} routes")`);
 
         for (let i = 0; i < routesCount; ++i)
             content.push(chain(routes[i]));
@@ -39,7 +39,7 @@ export async function exec(name, content, chain) {
         if (!name.startsWith('blitz')) content.push('app.fetch(new Request("http://localhost:3000"))');
         else content.push('app.build()');
 
-        content.push(`console.timeEnd("Build ${name}")`);
+        content.push(`console.timeEnd("${name}: Build ${routesCount} routes")`);
         await Bun.write(path, content.join('\n'));
     }
 
