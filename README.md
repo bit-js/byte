@@ -353,8 +353,8 @@ app.get('/users', (ctx) => {
     // Calculate timing result
     metrics.end('db');
 
-    // Set `Server-Timing` header to the value
-    ctx.headers['Server-Timing'] = metrics.get();
+    // Set `Server-Timing` header
+    metrics.set(ctx)
     return send.body(result, ctx);
 })
 ```
