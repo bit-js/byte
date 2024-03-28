@@ -346,15 +346,13 @@ app.get('/users', (ctx) => {
 
     // Start measuring
     metrics.start('db');
-
-    // Do other stuff
     const result = queryFromDatabase(ctx);
-
-    // Calculate timing result
     metrics.end('db');
 
     // Set `Server-Timing` header
-    metrics.set(ctx)
-    return send.body(result, ctx);
+    metrics.set(ctx);
+
+    // Send the measured result
+    return send.body(metrics.db.toString(), ctx);
 })
 ```
