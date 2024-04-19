@@ -1,0 +1,23 @@
+{
+  "name": "fetch",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0",
+    "mitata": "^0.1.11"
+  },
+  "dependencies": {
+    "blitz-new": "npm:@bit-js/blitz@1.0.19",
+    "blitz-old": "npm:@bit-js/blitz@1.0.15",
+    "elysia": "1.0.13",
+    "hono": "^4.2.5"
+  },
+  "scripts": {
+    "jit": "BUN_JSC_jitPolicyScale=0.0 BUN_JSC_thresholdForOptimizeSoon=0.0 BUN_JSC_thresholdForJITSoon=0.0 bun run",
+    "jitless": "BUN_JSC_UseJit=0 bun run",
+    "startup": "bun run ./startup/index.js",
+    "fetch": "bun jit ./fetch/index.js"
+  }
+}

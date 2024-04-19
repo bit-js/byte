@@ -1,0 +1,17 @@
+{
+  "name": "@bit-js/byte",
+  "version": "1.1.6",
+  "module": "index.js",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "latest"
+  },
+  "type": "module",
+  "types": "types/index.d.ts",
+  "dependencies": {
+    "@bit-js/blitz": "^1.0.19"
+  },
+  "scripts": {
+    "build-test": "bun build.ts && bun test && tsc --noEmit -p ./tests/tsconfig.json"
+  }
+}

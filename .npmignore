@@ -1,0 +1,15 @@
+bun.lockb
+node_modules
+
+.git
+.gitignore
+
+tsconfig.json
+
+src
+tests
+examples
+
+build.ts
+
+bench
