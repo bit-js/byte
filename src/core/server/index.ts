@@ -1,4 +1,4 @@
-import Blitz from '@bit-js/blitz';
+import Blitz, { BaseRouter } from '@bit-js/blitz';
 
 import { type RequestMethod } from '../utils/methods';
 
@@ -73,8 +73,10 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
     /**
      * Get actions
      */
-    concatActions(actions: Fn[]) {
-        return actions.length === 0 ? this.actions : this.actions.concat(actions);
+    concatActions(route: BaseRoute) {
+        const { actions } = route;
+        if (actions.length === 0) route.actions = this.actions;
+        else actions.unshift(...this.actions);
     }
 
     /**
@@ -90,17 +92,13 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
         return this as any;
     }
 
-    fallback?: Fn;
     #fetch?: any;
+
     /**
      * Build the fetch function
      */
-    rebuild() {
+    build(router: BaseRouter = new Blitz()) {
         const { routes } = this;
-        const router = new Blitz();
-
-        if (typeof this.fallback === 'function')
-            router.fallback = this.fallback as any;
 
         for (let i = 0, { length } = routes; i < length; ++i)
             routes[i].register(this, router);
@@ -112,7 +110,7 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
      * Get the fetch function for use
      */
     get fetch(): (req: Request) => any {
-        return this.#fetch ??= this.rebuild();
+        return this.#fetch ??= this.build();
     }
 
     /**

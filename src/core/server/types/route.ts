@@ -30,13 +30,14 @@ export class Route<
             this.method, base.length < 1 ? path : (path.length < 2 ? base : base + path) as Path,
             this.handler, this.validator
         );
-        route.actions = app.concatActions(this.actions);
 
+        app.concatActions(route);
         return route;
     }
 
     register(app: BaseByte, router: BaseRouter) {
-        const handler = compileRoute(this, app.concatActions(this.actions));
+        app.concatActions(this);
+        const handler = compileRoute(this);
 
         if (this.method === null)
             router.handle(this.path, handler);

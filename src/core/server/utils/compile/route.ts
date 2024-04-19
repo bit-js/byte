@@ -1,10 +1,9 @@
 import type { BaseRoute } from '../../types/route';
-import type { Fn } from '../../types/handler';
 
 import { isAsync, passChecks } from '../macro';
 
-export default function compileRoute(route: BaseRoute, actions: Fn[]) {
-    const { handler, validator } = route;
+export default function compileRoute(route: BaseRoute) {
+    const { handler, validator, actions } = route;
     // Return the raw handler
     if (validator === null && actions.length === 0) return handler;
 
