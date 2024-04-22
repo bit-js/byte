@@ -5,12 +5,11 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0",
     "mitata": "^0.1.11"
   },
   "dependencies": {
-    "blitz-new": "npm:@bit-js/blitz@1.0.19",
-    "blitz-old": "npm:@bit-js/blitz@1.0.15",
+    "blitz-new": "npm:@bit-js/blitz@1.2.0",
+    "blitz-old": "npm:@bit-js/blitz@1.0.19",
     "elysia": "1.0.13",
     "hono": "^4.2.5"
   },

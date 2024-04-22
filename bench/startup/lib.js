@@ -1,6 +1,6 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_';
 const charactersLength = characters.length;
-export const routesCount = 1e4;
+export const routesCount = 1e3;
 
 // Make everything as random as possible
 function makePart() {
@@ -25,7 +25,7 @@ export function makePath(idx) {
 
 const routes = new Array(routesCount);
 for (let i = 0; i < routesCount; ++i)
-    routes[i] = { part: makePart(i), value: `"${Math.random()}"` };
+    routes[i] = { part: makePath(i), value: `"${Math.random()}"` };
 
 export async function exec(name, content, chain) {
     const path = `./dist/${name}.js`;

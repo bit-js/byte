@@ -1,5 +1,10 @@
 import { exec } from './lib';
 
+exec('blitz-edge', [
+    'import { EdgeRouter } from "blitz-new"',
+    'const app = new EdgeRouter()'
+], (route) => `app.put('GET', '${route.part}', () => new Response('${route.value}'))`);
+
 exec('blitz-new', [
     'import Blitz from "blitz-new"',
     'const app = new Blitz()'
