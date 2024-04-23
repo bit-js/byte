@@ -13,14 +13,14 @@ export class Route<
     Handler extends Fn,
     Validator extends ValidatorRecord<Path>,
 > {
-    appActions?: Fn[][];
+    appActions: Fn[][] = [];
 
     /**
      * Init actions
      */
-    initActions(list: Fn[]) {
+    load(list: Fn[]) {
         if (list.length !== 0)
-            this.appActions = [list];
+            this.appActions.push(list);
     }
 
     /**
@@ -31,7 +31,6 @@ export class Route<
         readonly path: Path,
         readonly handler: Handler,
         readonly validator: Validator,
-        readonly actions: Fn[],
     ) { }
 
     /**
@@ -45,25 +44,20 @@ export class Route<
             // Merge pathname
             base.length === 1 ? path : (path.length === 1 ? base : base + path) as Path,
             // Copy other props
-            this.handler, this.validator, this.actions
+            this.handler, this.validator
         );
 
         // Assign a new list
-        if (typeof this.appActions === 'undefined')
-            route.initActions(otherAppActions);
-
         // Copy the previous list with a new item
-        else {
-            const { appActions } = this;
-            const { length } = appActions;
-            const list = route.appActions = new Array(length + 1);
+        const { appActions } = this;
+        const { length } = appActions;
 
-            for (let i = 0; i < length; ++i)
-                list[i] = appActions[i];
+        const list = route.appActions = new Array(length + 1);
 
-            list[length] = otherAppActions;
-        }
+        for (let i = 0; i < length; ++i)
+            list[i] = appActions[i];
 
+        list[length] = otherAppActions;
         return route;
     }
 

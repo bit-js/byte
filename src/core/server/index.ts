@@ -8,7 +8,6 @@ import { Context, type ActionList, type BaseHandler, type Fn } from './types/han
 
 import { bit } from '../client';
 import ServerProto from './utils/serverProto';
-import { emptyList } from '../../utils/defaultOptions';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -19,7 +18,7 @@ interface Register<Method extends string, T extends RoutesRecord> {
     >(
         path: Path,
         validator: Validator,
-        ...handlers: [...ActionList<Path, InferValidatorRecord<Validator>>, Handler]
+        ...handlers: [...ActionList<Path>, Handler]
     ): Byte<[...T, Route<Method, Path, Handler, Validator>]>;
 
     <
@@ -123,12 +122,12 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
             method, path, args[lastIdx],
             // Check for validator
             startIdx === 1 ? args[0] : null,
-            // @ts-ignore Initialize route actions
-            startIdx === lastIdx ? emptyList : args.slice(startIdx, lastIdx)
         );
 
-        // Try to load the current actions
-        route.initActions(this.actions);
+        if (startIdx !== lastIdx)
+            route.load(args.slice(startIdx, lastIdx));
+        route.load(this.actions);
+
         this.routes.push(route);
 
         return this;
