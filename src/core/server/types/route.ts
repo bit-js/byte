@@ -1,10 +1,13 @@
 import type { BaseRouter } from '@bit-js/blitz';
-import type { BaseByte } from '..';
 import compileRoute from '../utils/compile/route';
 
 import type { Fn } from './handler';
 import type { ValidatorRecord } from './validator';
 
+/**
+ * Store route actions: [(route actions), (app actions), (parent app actions), ...]
+ * @internal
+ */
 export class RouteActions {
     defers: Fn[][] = [];
 
@@ -17,6 +20,9 @@ export class RouteActions {
     }
 }
 
+/**
+ * Represent a route
+ */
 export class Route<
     Method extends string,
     Path extends string,
@@ -38,14 +44,14 @@ export class Route<
     /**
      * Clone the route with a new base path
      */
-    clone(base: string, app: BaseByte) {
+    clone(base: string, prevActions: Fn[]) {
         const { path } = this;
 
         const route = new Route(
             this.method, base.length === 1 ? path : (path.length === 1 ? base : base + path) as Path,
             this.handler, this.validator
         );
-        route.actions.defer(app.actions);
+        route.actions.defer(prevActions);
 
         return route;
     }
@@ -53,9 +59,7 @@ export class Route<
     /**
      * Register the handler to the underlying router
      */
-    register(app: BaseByte, router: BaseRouter) {
-        this.actions.defer(app.actions);
-
+    register(router: BaseRouter) {
         if (this.method === null)
             router.handle(this.path, compileRoute(this));
         else

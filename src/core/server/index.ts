@@ -73,12 +73,11 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
     /**
      * Register subroutes
      */
-    route<Path extends string, App extends BaseByte>(base: Path, app: App): Byte<[...Record, ...SetBase<Path, InferByteRecord<App>>]> {
-        const { routes } = app;
+    route<Path extends string, App extends BaseByte>(base: Path, { routes, actions }: App): Byte<[...Record, ...SetBase<Path, InferByteRecord<App>>]> {
         const currentRoutes = this.routes;
 
         for (let i = 0, { length } = routes; i < length; ++i)
-            currentRoutes.push(routes[i].clone(base, app));
+            currentRoutes.push(routes[i].clone(base, actions));
 
         return this as any;
     }
@@ -92,7 +91,7 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
         const { routes } = this;
 
         for (let i = 0, { length } = routes; i < length; ++i)
-            routes[i].register(this, router);
+            routes[i].register(router);
 
         return this.#fetch = router.build(Context);
     }
@@ -123,12 +122,29 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
             method, path, args[lastIdx],
             startIdx === 1 ? args[0] : null
         );
+
+        // Slice handlers
         if (startIdx !== lastIdx)
             route.actions.defer(args.slice(startIdx, lastIdx));
 
+        route.actions.defer(this.actions);
         this.routes.push(route);
 
         return this;
+    }
+
+    /**
+     * Create a validator
+     */
+    static validate<const T extends ValidatorRecord>(validator: T) {
+        return validator;
+    }
+
+    /**
+     * Create a handler
+     */
+    static handle<const T extends Fn>(fn: T) {
+        return fn;
     }
 }
 

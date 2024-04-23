@@ -4,10 +4,12 @@ import { isAsync, passChecks } from '../macro';
 export default function compileRoute(route: BaseRoute) {
     const { handler, validator, actions } = route;
 
+    // Conditions
     const noDefer = actions.defers.length === 0;
+    const noValidator = validator === null;
 
     // Return the raw handler
-    if (validator === null && noDefer) return handler;
+    if (noValidator && noDefer) return handler;
 
     const keys = [], statements = [],
         values = [], paramsKeys = [];
@@ -50,7 +52,7 @@ export default function compileRoute(route: BaseRoute) {
     }
 
     // Compile validators and check result
-    if (validator !== null) {
+    if (!noValidator) {
         for (const key in validator) {
             // Validators
             const fn = validator[key], fnKey = 'f' + idx;

@@ -18,6 +18,7 @@ export interface JsonResponse<T> extends Response {
 
 type NullableBody = BodyInit | null;
 
+// Default headers and init values
 const textHeaders = { 'Content-Type': 'text/plain' };
 const textInit = { headers: textHeaders };
 
