@@ -1,6 +1,6 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_';
 const charactersLength = characters.length;
-export const routesCount = 1e3;
+export const routesCount = 1e4;
 
 // Make everything as random as possible
 function makePart() {
@@ -10,7 +10,7 @@ function makePart() {
     for (let cnt = 0; cnt < length; ++cnt)
         result.push(characters[Math.floor(Math.random() * charactersLength)]);
 
-    return result.join('');
+    return `/${result.join('')}`;
 }
 
 export function makePath(idx) {
@@ -19,13 +19,13 @@ export function makePath(idx) {
         parts[i] = makePart();
 
     // Put URL params randomly to force the paths to be registered on the radix tree
-    parts[idx] = `:${parts[idx]}`;
-    return `/${parts.join('/')}`;
+    parts[idx] = `/:${parts[idx].substring(1)}`;
+    return parts.join('');
 }
 
 const routes = new Array(routesCount);
 for (let i = 0; i < routesCount; ++i)
-    routes[i] = { part: makePath(i), value: `"${Math.random()}"` };
+    routes[i] = { part: makePart(i), value: `"${Math.random()}"` };
 
 export async function exec(name, content, chain) {
     const path = `./dist/${name}.js`;
