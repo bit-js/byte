@@ -13,10 +13,10 @@ export default new Byte()
 - **Multi-runtime**: Works on all JS runtimes without any adapters.
 
 ## Benchmarks
-Byte starts up 2x faster than Hono with LinearRouter.
+Byte starts up 1.5x faster than Hono with LinearRouter.
 ```
-[36.23ms] Byte: Build 10000 routes
-[89.89ms] Hono: Build 10000 routes
+[446.37ms] Byte: Build 1000 routes
+[635.84ms] Hono: Build 1000 routes
 ```
 
 Byte matches routes 5x faster than Hono with RegExpRouter.
@@ -57,7 +57,7 @@ All the basics you need to know to use Byte.
 
 ### Context
 Context is an object represents the current request.
-- `ctx.path`: The parsed request pathname, doesn't have a slash at the start.
+- `ctx.path`: The parsed request pathname.
 - `ctx.pathStart`: The start index of the pathname in the full URL string (`req.url`). This property can be useful for subdomain matching.
 - `ctx.pathEnd`: The end index of the path. When query parameters are presented, path end is set to the start of the query, otherwise it is set to the length of the URL.
 - `ctx.params`: The parsed URL parameters. Defaults to `undefined` with static routes.
@@ -101,7 +101,7 @@ Parametric and wildcard patterns are supported.
 ```ts
 '/:id' // Only one parameter
 '/user/:id/name/:name' // Multiple parameter
-'/nav/*' // Wildcard parameter
+'/nav/*' // Wildcard parameter (does not match /nav)
 '/user/:id/*' // All patterns combined
 ```
 
@@ -136,16 +136,15 @@ The validator name **must** be a valid JavaScript variable name.
 Actions are functions that executes before validators.
 ```ts
 new Byte()
-    .action((ctx) => {
+    .use((ctx) => {
         // Preparations
     })
-    .action((ctx) => {
+    .use((ctx) => {
         // Do something else
     });
 ```
 
 If a `Response` object is returned from any action function, it will be used directly.
-
 If the action returns a `Promise` it should be properly marked as `async` for the compiler to detect.
 
 ### Plugins
@@ -161,7 +160,7 @@ const plugin = {
     };
 };
 
-new Byte().use(plugin);
+new Byte().register(plugin);
 ```
 
 Plugins are meant to be used by third party libraries to add functionalities.
@@ -373,10 +372,10 @@ Set CORS headers on every requests.
 import { cors } from '@bit-js/byte';
 
 // Allow all origins
-app.action(cors());
+app.use(cors());
 
 // Custom options
-app.action(cors(options));
+app.use(cors(options));
 ```
 
 Available options are:
@@ -397,10 +396,10 @@ A simple CSRF protection layer by checking request origin.
 import { csrf } from '@bit-js/byte';
 
 // Check with current request URL origin
-app.action(csrf());
+app.use(csrf());
 
 // Custom options
-app.action(csrf(options));
+app.use(csrf(options));
 ```
 
 Available options are:

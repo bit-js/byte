@@ -5,22 +5,6 @@ import type { Fn } from './handler';
 import type { ValidatorRecord } from './validator';
 
 /**
- * Store route actions: [(route actions), (app actions), (parent app actions), ...]
- * @internal
- */
-export class RouteActions {
-    defers: Fn[][] = [];
-
-    /**
-     * Push all actions of the app into a defer list
-     */
-    defer(actions: Fn[]) {
-        if (actions.length !== 0)
-            this.defers.push(actions);
-    }
-}
-
-/**
  * Represent a route
  */
 export class Route<
@@ -29,29 +13,56 @@ export class Route<
     Handler extends Fn,
     Validator extends ValidatorRecord<Path>,
 > {
-    actions: RouteActions = new RouteActions();
+    appActions?: Fn[][];
+
+    /**
+     * Init actions
+     */
+    initActions(list: Fn[]) {
+        if (list.length !== 0)
+            this.appActions = [list];
+    }
 
     /**
      * Create a route procedure
      */
     constructor(
-        public method: Method,
-        public path: Path,
-        public handler: Handler,
-        public validator: Validator
+        readonly method: Method,
+        readonly path: Path,
+        readonly handler: Handler,
+        readonly validator: Validator,
+        readonly actions: Fn[],
     ) { }
 
     /**
      * Clone the route with a new base path
      */
-    clone(base: string, prevActions: Fn[]) {
+    clone(base: string, otherAppActions: Fn[]) {
         const { path } = this;
 
         const route = new Route(
-            this.method, base.length === 1 ? path : (path.length === 1 ? base : base + path) as Path,
-            this.handler, this.validator
+            this.method,
+            // Merge pathname
+            base.length === 1 ? path : (path.length === 1 ? base : base + path) as Path,
+            // Copy other props
+            this.handler, this.validator, this.actions
         );
-        route.actions.defer(prevActions);
+
+        // Assign a new list
+        if (typeof this.appActions === 'undefined')
+            route.initActions(otherAppActions);
+
+        // Copy the previous list with a new item
+        else {
+            const { appActions } = this;
+            const { length } = appActions;
+            const list = route.appActions = new Array(length + 1);
+
+            for (let i = 0; i < length; ++i)
+                list[i] = appActions[i];
+
+            list[length] = otherAppActions;
+        }
 
         return route;
     }

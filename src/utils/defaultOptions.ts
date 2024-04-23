@@ -1,2 +1,4 @@
-export const forbidden: ResponseInit = { status: 403 };
-export const emptyObj = {};
+export const forbidden: ResponseInit = { status: 403 } as const;
+export const emptyObj = {} as const;
+export const emptyList = [] as const;
+

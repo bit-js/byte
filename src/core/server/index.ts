@@ -8,6 +8,7 @@ import { Context, type ActionList, type BaseHandler, type Fn } from './types/han
 
 import { bit } from '../client';
 import ServerProto from './utils/serverProto';
+import { emptyList } from '../../utils/defaultOptions';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -50,7 +51,7 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
     /**
      * Run before validation
      */
-    action(...fns: Fn[]) {
+    use(...fns: Fn[]) {
         this.actions.push(...fns);
         return this;
     }
@@ -58,7 +59,7 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
     /**
      * Register plugins
      */
-    use(...plugin: Plugin[]) {
+    register(...plugin: Plugin[]) {
         for (let i = 0, { length } = plugin; i < length; ++i)
             plugin[i].plug(this);
 
@@ -120,14 +121,14 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
 
         const route = new Route(
             method, path, args[lastIdx],
-            startIdx === 1 ? args[0] : null
+            // Check for validator
+            startIdx === 1 ? args[0] : null,
+            // @ts-ignore Initialize route actions
+            startIdx === lastIdx ? emptyList : args.slice(startIdx, lastIdx)
         );
 
-        // Slice handlers
-        if (startIdx !== lastIdx)
-            route.actions.defer(args.slice(startIdx, lastIdx));
-
-        route.actions.defer(this.actions);
+        // Try to load the current actions
+        route.initActions(this.actions);
         this.routes.push(route);
 
         return this;
@@ -145,6 +146,13 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
      */
     static handle<const T extends Fn>(fn: T) {
         return fn;
+    }
+
+    /**
+     * Create a plugin
+     */
+    static plugin(plugin: Plugin) {
+        return plugin;
     }
 }
 

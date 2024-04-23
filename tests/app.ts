@@ -15,7 +15,7 @@ export const jsonApis = new Byte()
 
 // CORS
 export const apiWithCors = new Byte()
-    .action(cors({ allowMethods: 'GET' }))
+    .use(cors({ allowMethods: 'GET' }))
     .get('/', (ctx) => send.body('Hi', ctx));
 
 // CSRF protection

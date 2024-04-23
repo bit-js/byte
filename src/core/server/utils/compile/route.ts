@@ -2,14 +2,14 @@ import type { BaseRoute } from '../../types/route';
 import { isAsync, passChecks } from '../macro';
 
 export default function compileRoute(route: BaseRoute) {
-    const { handler, validator, actions } = route;
+    const { handler, validator, appActions, actions } = route;
 
     // Conditions
-    const noDefer = actions.defers.length === 0;
+    const noDefer = typeof appActions === 'undefined';
+    const noSelfActions = actions.length === 0;
     const noValidator = validator === null;
 
-    // Return the raw handler
-    if (noValidator && noDefer) return handler;
+    if (noValidator && noSelfActions && noDefer) return handler;
 
     const keys = [], statements = [],
         values = [], paramsKeys = [];
@@ -17,12 +17,10 @@ export default function compileRoute(route: BaseRoute) {
     let hasAsync = false, noContext = true, idx = 0;
 
     // Compile actions and check result
-    if (!noDefer) {
-        const { defers } = actions;
-
+    if (!noDefer)
         // Loop in reverse each app action
-        for (let i = defers.length - 1; i > -1; --i) {
-            const list = defers[i];
+        for (let i = appActions.length - 1; i > -1; --i) {
+            const list = appActions[i];
 
             for (let i = 0, { length } = list; i < length; ++i) {
                 const fn = list[i];
@@ -49,7 +47,6 @@ export default function compileRoute(route: BaseRoute) {
                 ++idx;
             }
         }
-    }
 
     // Compile validators and check result
     if (!noValidator) {
@@ -82,6 +79,33 @@ export default function compileRoute(route: BaseRoute) {
         statements.push(`c.state={${paramsKeys.join()}}`);
     }
 
+    // Load self actions
+    if (!noSelfActions)
+        for (let i = 0, { length } = actions; i < length; ++i) {
+            const fn = actions[i];
+            const fnKey = `f${idx}`;
+
+            keys.push(fnKey);
+            values.push(fn);
+
+            const fnAsync = isAsync(fn);
+            hasAsync = hasAsync || fnAsync;
+
+            const fnNoContext = fn.length === 0;
+            noContext = noContext && fnNoContext;
+
+            const result = `${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`;
+            if (passChecks(fn)) {
+                statements.push(result);
+                continue;
+            }
+
+            const valKey = `c${idx}`;
+            statements.push(`const ${valKey}=${result};if(${valKey} instanceof Response)return ${valKey}`);
+
+            ++idx;
+        }
+
     // Restricted variable for the main handler
     keys.push('$');
     values.push(handler);
@@ -91,6 +115,7 @@ export default function compileRoute(route: BaseRoute) {
 
     // Save some milliseconds if the function is async
     statements.push(`return ${isAsync(handler) && hasAsync ? 'await ' : ''}$(${fnNoContext ? '' : 'c'})`);
+
     // Build the function
     return Function(...keys, `return ${hasAsync ? 'async ' : ''}(${noContext ? '' : 'c'})=>{${statements.join(';')}}`)(...values);
 }
