@@ -9,7 +9,7 @@
   "type": "module",
   "types": "types/index.d.ts",
   "dependencies": {
-    "@bit-js/blitz": "^1.0.19"
+    "@bit-js/blitz": "^1.2.0"
   },
   "scripts": {
     "build-test": "bun build.ts && bun test && tsc --noEmit -p ./tests/tsconfig.json"

@@ -5,8 +5,17 @@ import compileRoute from '../utils/compile/route';
 import type { Fn } from './handler';
 import type { ValidatorRecord } from './validator';
 
-// A singular route record
-const emptyList: Fn[] = [];
+export class RouteActions {
+    defers: Fn[][] = [];
+
+    /**
+     * Push all actions of the app into a defer list
+     */
+    defer(actions: Fn[]) {
+        if (actions.length !== 0)
+            this.defers.push(actions);
+    }
+}
 
 export class Route<
     Method extends string,
@@ -14,8 +23,11 @@ export class Route<
     Handler extends Fn,
     Validator extends ValidatorRecord<Path>,
 > {
-    actions: Fn[] = emptyList;
+    actions: RouteActions = new RouteActions();
 
+    /**
+     * Create a route procedure
+     */
     constructor(
         public method: Method,
         public path: Path,
@@ -23,26 +35,31 @@ export class Route<
         public validator: Validator
     ) { }
 
+    /**
+     * Clone the route with a new base path
+     */
     clone(base: string, app: BaseByte) {
         const { path } = this;
 
         const route = new Route(
-            this.method, base.length < 1 ? path : (path.length < 2 ? base : base + path) as Path,
+            this.method, base.length === 1 ? path : (path.length === 1 ? base : base + path) as Path,
             this.handler, this.validator
         );
+        route.actions.defer(app.actions);
 
-        app.concatActions(route);
         return route;
     }
 
+    /**
+     * Register the handler to the underlying router
+     */
     register(app: BaseByte, router: BaseRouter) {
-        app.concatActions(this);
-        const handler = compileRoute(this);
+        this.actions.defer(app.actions);
 
         if (this.method === null)
-            router.handle(this.path, handler);
+            router.handle(this.path, compileRoute(this));
         else
-            router.put(this.method, this.path, handler);
+            router.put(this.method, this.path, compileRoute(this));
     }
 }
 

@@ -71,15 +71,6 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
     readonly routes: BaseRoute[] = [];
 
     /**
-     * Get actions
-     */
-    concatActions(route: BaseRoute) {
-        const { actions } = route;
-        if (actions.length === 0) route.actions = this.actions;
-        else actions.unshift(...this.actions);
-    }
-
-    /**
      * Register subroutes
      */
     route<Path extends string, App extends BaseByte>(base: Path, app: App): Byte<[...Record, ...SetBase<Path, InferByteRecord<App>>]> {
@@ -132,11 +123,11 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
             method, path, args[lastIdx],
             startIdx === 1 ? args[0] : null
         );
-
         if (startIdx !== lastIdx)
-            route.actions = args.slice(startIdx, lastIdx);
+            route.actions.defer(args.slice(startIdx, lastIdx));
 
         this.routes.push(route);
+
         return this;
     }
 }

@@ -24,7 +24,7 @@ export default abstract class ClientProto implements ProtoSchema {
         if (typeof init === 'undefined')
             return this.$(path, headInit);
 
-        init.method = 'GET';
+        init.method = 'HEAD';
         return this.$(path, init);
     }
 
