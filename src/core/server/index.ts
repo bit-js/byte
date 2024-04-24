@@ -2,7 +2,7 @@ import Blitz, { BaseRouter } from '@bit-js/blitz';
 
 import { type RequestMethod } from '../utils/methods';
 
-import { Route, type BaseRoute, type RoutesRecord, type SetBase } from './types/route';
+import { Route, type BaseRoute, type RoutesRecord, type SetBase } from './route';
 import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
 import { Context, type ActionList, type BaseHandler, type Fn } from './types/handler';
 
@@ -169,8 +169,9 @@ export type BaseByte = Byte<RoutesRecord>;
 export type InferByteRecord<T extends BaseByte> = T extends Byte<infer R> ? R : [];
 
 // Types
+export * from './route';
+
 export * from './types/handler';
-export * from './types/route';
 export * from './types/validator';
 export * from './types/responseInit';
 
