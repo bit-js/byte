@@ -13,5 +13,11 @@
   },
   "scripts": {
     "build-test": "bun build.ts && bun test && tsc --noEmit -p ./tests/tsconfig.json"
-  }
+  },
+  "keywords": [
+    "framework",
+    "web",
+    "minimal",
+    "fast"
+  ]
 }
