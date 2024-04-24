@@ -6,6 +6,7 @@ import type { ValidatorRecord } from './validator';
 
 /**
  * Represent a route
+ * @internal
  */
 export class Route<
     Method extends string,
@@ -13,16 +14,6 @@ export class Route<
     Handler extends Fn,
     Validator extends ValidatorRecord<Path>,
 > {
-    appActions: Fn[][] = [];
-
-    /**
-     * Init actions
-     */
-    load(list: Fn[]) {
-        if (list.length !== 0)
-            this.appActions.push(list);
-    }
-
     /**
      * Create a route procedure
      */
@@ -31,7 +22,16 @@ export class Route<
         readonly path: Path,
         readonly handler: Handler,
         readonly validator: Validator,
+        readonly actions: Fn[][]
     ) { }
+
+    /**
+     * Load an action list
+     */
+    loadActions(list: Fn[]) {
+        if (list.length !== 0)
+            this.actions.push(list);
+    }
 
     /**
      * Clone the route with a new base path
@@ -39,26 +39,15 @@ export class Route<
     clone(base: string, otherAppActions: Fn[]) {
         const { path } = this;
 
-        const route = new Route(
+        return new Route(
             this.method,
             // Merge pathname
             base.length === 1 ? path : (path.length === 1 ? base : base + path) as Path,
             // Copy other props
-            this.handler, this.validator
+            this.handler, this.validator,
+            // Push other stuff
+            [otherAppActions, ...this.actions]
         );
-
-        // Assign a new list
-        // Copy the previous list with a new item
-        const { appActions } = this;
-        const { length } = appActions;
-
-        const list = route.appActions = new Array(length + 1);
-
-        for (let i = 0; i < length; ++i)
-            list[i] = appActions[i];
-
-        list[length] = otherAppActions;
-        return route;
     }
 
     /**

@@ -2,10 +2,10 @@ import type { BaseRoute } from '../../types/route';
 import { isAsync, passChecks } from '../macro';
 
 export default function compileRoute(route: BaseRoute) {
-    const { handler, validator, appActions } = route;
+    const { handler, validator, actions } = route;
 
     // Conditions
-    const noDefer = appActions.length === 0;
+    const noDefer = actions.length === 0;
     const noValidator = validator === null;
 
     if (noValidator && noDefer) return handler;
@@ -18,8 +18,8 @@ export default function compileRoute(route: BaseRoute) {
     // Compile actions and check result
     if (!noDefer)
         // Loop in reverse each app action
-        for (let i = appActions.length - 1; i > -1; --i) {
-            const list = appActions[i];
+        for (let i = actions.length - 1; i > -1; --i) {
+            const list = actions[i];
 
             for (let i = 0, { length } = list; i < length; ++i) {
                 const fn = list[i];

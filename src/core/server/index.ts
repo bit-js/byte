@@ -73,7 +73,10 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
     /**
      * Register subroutes
      */
-    route<Path extends string, App extends BaseByte>(base: Path, { routes, actions }: App): Byte<[...Record, ...SetBase<Path, InferByteRecord<App>>]> {
+    route<
+        Path extends string,
+        App extends BaseByte
+    >(base: Path, { routes, actions }: App): Byte<[...Record, ...SetBase<Path, InferByteRecord<App>>]> {
         const currentRoutes = this.routes;
 
         for (let i = 0, { length } = routes; i < length; ++i)
@@ -115,20 +118,24 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
      */
     handle(method: string, path: string, ...args: any[]) {
         // If first arg is a handler
-        const startIdx = typeof args[0] === 'function' ? 0 : 1;
-        const lastIdx = args.length - 1;
+        const actionStartIdx = typeof args[0] === 'function' ? 0 : 1;
+        const handlerIdx = args.length - 1;
 
-        const route = new Route(
-            method, path, args[lastIdx],
-            // Check for validator
-            startIdx === 1 ? args[0] : null,
+        // Load necessary actions
+        const { actions } = this;
+
+        // Push new route
+        this.routes.push(
+            new Route(
+                method, path, args[handlerIdx],
+                // Check for validator
+                actionStartIdx === 1 ? args[0] : null,
+                // Load the actions
+                actions.length === 0
+                    ? (actionStartIdx === handlerIdx ? [] : [args.slice(actionStartIdx, handlerIdx)])
+                    : (actionStartIdx === handlerIdx ? [actions] : [actions, args.slice(actionStartIdx, handlerIdx)])
+            )
         );
-
-        if (startIdx !== lastIdx)
-            route.load(args.slice(startIdx, lastIdx));
-        route.load(this.actions);
-
-        this.routes.push(route);
 
         return this;
     }
