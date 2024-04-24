@@ -4,7 +4,6 @@
             "ESNext",
             "DOM"
         ],
-        "rootDir": ".",
         "target": "ESNext",
         "module": "ESNext",
         "moduleDetection": "force",

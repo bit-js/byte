@@ -7,7 +7,6 @@ import { isAsync, passChecks } from './utils/macro';
 
 /**
  * Represent a route
- * @internal
  */
 export class Route<
     Method extends string,
@@ -157,17 +156,6 @@ export class Route<
 }
 
 export type BaseRoute = Route<any, any, any, any>;
-
-type TrimEndSlash<T extends string> = T extends `${infer Start}/` ? Start : T;
-type NormalizePath<T extends string> = T extends '/' ? '/' : TrimEndSlash<T>;
-
-type SetBasePath<T extends BaseRoute, Base extends string> = Omit<T, 'path'> & {
-    path: `${NormalizePath<Base>}${TrimEndSlash<T['path']>}`
-};
-
-export type SetBase<Base extends string, T extends RoutesRecord> = T extends [infer Current extends BaseRoute, ...infer Rest extends RoutesRecord]
-    ? [SetBasePath<Current, Base>, ...SetBase<Base, Rest>]
-    : [];
 
 // Route list
 export type RoutesRecord = BaseRoute[];

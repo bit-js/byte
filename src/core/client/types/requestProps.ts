@@ -2,9 +2,7 @@ import type { ParamsKey } from '@bit-js/blitz';
 import type { BaseRoute, ValidatorProp, ValidatorRecord } from '../../server';
 
 // Infer body from validator
-type SetBody<T extends ValidatorRecord> = T extends null ? {} : (
-    T extends { body: infer F } ? ValidatorProp<F, 'body'> : {}
-);
+type SetBody<T extends ValidatorRecord> = T extends { body: infer F } ? ValidatorProp<F, 'body'> : {}
 
 // Parameter types
 type ParamValue = string | number | boolean;

@@ -2,7 +2,7 @@ import Blitz, { BaseRouter } from '@bit-js/blitz';
 
 import { type RequestMethod } from '../utils/methods';
 
-import { Route, type BaseRoute, type RoutesRecord, type SetBase } from './route';
+import { Route, type BaseRoute, type RoutesRecord } from './route';
 import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
 import { Context, type ActionList, type BaseHandler, type Fn } from './types/handler';
 
@@ -76,13 +76,13 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
     route<
         Path extends string,
         App extends BaseByte
-    >(base: Path, { routes, actions }: App): Byte<[...Record, ...SetBase<Path, InferByteRecord<App>>]> {
+    >(base: Path, { routes, actions }: App) {
         const currentRoutes = this.routes;
 
         for (let i = 0, { length } = routes; i < length; ++i)
             currentRoutes.push(routes[i].clone(base, actions));
 
-        return this as any;
+        return this;
     }
 
     #fetch?: any;
