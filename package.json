@@ -1,6 +1,6 @@
 {
   "name": "@bit-js/byte",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "module": "index.js",
   "devDependencies": {
     "@types/bun": "latest",
@@ -9,7 +9,7 @@
   "type": "module",
   "types": "types/index.d.ts",
   "dependencies": {
-    "@bit-js/blitz": "^1.2.0"
+    "@bit-js/blitz": "^1.2.1"
   },
   "scripts": {
     "build-test": "bun build.ts && bun test && tsc --noEmit -p ./tests/tsconfig.json"

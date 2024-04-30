@@ -8,7 +8,8 @@ import type { UnionToIntersection } from '../utils/types';
 
 import type { InferRoutes } from './types/route';
 import { emptyObj } from '../../utils/defaultOptions';
-import ClientProto from './utils/clientProto';
+
+import type { ProtoSchema } from '../utils/methods';
 
 /**
  * Infer client type
@@ -26,7 +27,7 @@ export interface ClientOptions {
 const fetchFn = globalThis.fetch.bind(globalThis);
 
 // Bit client prototype
-export class BitClient extends ClientProto {
+export class BitClient implements ProtoSchema {
     /**
      * Base URL
      */
@@ -43,8 +44,6 @@ export class BitClient extends ClientProto {
     readonly defaultInit: ClientOptions['init'] & {};
 
     constructor(url: string, options?: ClientOptions) {
-        super();
-
         if (typeof options === 'undefined') {
             this.fetch = fetchFn;
             this.defaultInit = emptyObj;
@@ -76,7 +75,74 @@ export class BitClient extends ClientProto {
             `${this.url}${typeof params === 'undefined' ? path : getInjectFn(path)(params)}${stringifyQuery(query)}`, init
         ));
     };
+
+    /** @internal */
+    get(path: string, init?: any) {
+        if (typeof init === 'undefined')
+            return this.$(path, getInit);
+
+        init.method = 'GET';
+        return this.$(path, init);
+    }
+
+    /** @internal */
+    head(path: string, init?: any) {
+        if (typeof init === 'undefined')
+            return this.$(path, headInit);
+
+        init.method = 'HEAD';
+        return this.$(path, init);
+    }
+
+    /** @internal */
+    post(path: string, init?: any) {
+        if (typeof init === 'undefined')
+            return this.$(path, postInit);
+
+        init.method = 'POST';
+        return this.$(path, init);
+    }
+
+    /** @internal */
+    put(path: string, init?: any) {
+        if (typeof init === 'undefined')
+            return this.$(path, putInit);
+
+        init.method = 'PUT';
+        return this.$(path, init);
+    }
+
+    /** @internal */
+    delete(path: string, init?: any) {
+        if (typeof init === 'undefined')
+            return this.$(path, deleteInit);
+
+        init.method = 'DELETE';
+        return this.$(path, init);
+    }
+
+    /** @internal */
+    options(path: string, init?: any) {
+        if (typeof init === 'undefined')
+            return this.$(path, optionsInit);
+
+        init.method = 'OPTIONS';
+        return this.$(path, init);
+    }
+
+    /** @internal */
+    any(path: string, init?: any) {
+        return typeof init === 'undefined' ? this.$(path) : this.$(path, init);
+    }
 }
+
+// Default request init objects
+const getInit = { method: 'GET' };
+const headInit = { method: 'HEAD' };
+const postInit = { method: 'POST' };
+const putInit = { method: 'PUT' };
+const deleteInit = { method: 'DELETE' };
+const optionsInit = { method: 'OPTIONS' };
 
 export type Client<T extends BaseByte> = InferClient<T> & BitClient;
 

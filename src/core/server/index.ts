@@ -1,13 +1,12 @@
 import Blitz, { BaseRouter } from '@bit-js/blitz';
 
-import { type RequestMethod } from '../utils/methods';
+import type { ProtoSchema, RequestMethod } from '../utils/methods';
 
 import { Route, type BaseRoute, type RoutesRecord } from './route';
 import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
 import { Context, type ActionList, type BaseHandler, type Fn } from './types/handler';
 
 import { bit } from '../client';
-import ServerProto from './utils/serverProto';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -44,7 +43,7 @@ export interface Plugin {
 /**
  * Create a Byte app
  */
-export class Byte<Record extends RoutesRecord = []> extends ServerProto {
+export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     readonly actions: Fn[] = [];
 
     /**
@@ -73,12 +72,8 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
     /**
      * Register subroutes
      */
-    route<
-        Path extends string,
-        App extends BaseByte
-    >(base: Path, { routes, actions }: App) {
+    route(base: string, { routes, actions }: BaseByte) {
         const currentRoutes = this.routes;
-
         for (let i = 0, { length } = routes; i < length; ++i)
             currentRoutes.push(routes[i].clone(base, actions));
 
@@ -160,10 +155,59 @@ export class Byte<Record extends RoutesRecord = []> extends ServerProto {
     static plugin(plugin: Plugin) {
         return plugin;
     }
+
+    /**
+     * Shorthand for registering subroutes
+     */
+    static route(base: string, app: BaseByte): Byte {
+        return new Byte().route(base, app);
+    }
+
+    /** @internal */
+    // @ts-ignore
+    get(...args: any[]): any {
+        // @ts-ignore
+        return this.handle('GET', ...args);
+    }
+    /** @internal */
+    // @ts-ignore
+    head(...args: any[]): any {
+        // @ts-ignore
+        return this.handle('HEAD', ...args);
+    }
+    /** @internal */
+    // @ts-ignore
+    post(...args: any[]): any {
+        // @ts-ignore
+        return this.handle('POST', ...args);
+    }
+    /** @internal */
+    // @ts-ignore
+    put(...args: any[]): any {
+        // @ts-ignore
+        return this.handle('PUT', ...args);
+    }
+    /** @internal */
+    // @ts-ignore
+    delete(...args: any[]): any {
+        // @ts-ignore
+        return this.handle('DELETE', ...args);
+    }
+    /** @internal */
+    // @ts-ignore
+    options(...args: any[]): any {
+        // @ts-ignore
+        return this.handle('OPTIONS', ...args);
+    }
+    /** @internal */
+    // @ts-ignore
+    any(...args: any[]): any {
+        // @ts-ignore
+        return this.handle(null, ...args);
+    }
 }
 
-// @ts-expect-error Declarations of proto will be stripped
-export interface Byte<Record> extends HandlerRegisters<Record> { };
+export interface Byte<Rec> extends HandlerRegisters<Rec> { };
 
 export type BaseByte = Byte<RoutesRecord>;
 export type InferByteRecord<T extends BaseByte> = T extends Byte<infer R> ? R : [];

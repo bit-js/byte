@@ -38,4 +38,3 @@ export const timingApi = new Byte()
         metrics.set(ctx);
         return send.body(value, ctx);
     });
-

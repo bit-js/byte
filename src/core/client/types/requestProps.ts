@@ -21,5 +21,3 @@ export interface RequestBaseProps extends Omit<RequestInit, 'body'> {
 };
 
 export type RequestProps<T extends BaseRoute> = RequestBaseProps & SetParams<T['path']> & SetBody<T['validator']>;
-
-
