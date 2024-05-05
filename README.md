@@ -1,10 +1,10 @@
 # Byte
-A simple, performance-focused web framework that works on Bun, Deno, Cloudflare Workers and browsers.
+A simple, performance-focused web framework that works on Bun, Deno, and browsers.
 ```ts
-import { Byte, send } from '@bit-js/byte';
+import { Byte } from '@bit-js/byte';
 
 export default new Byte()
-    .get('/', () => send.body('Hi'));
+    .get('/', (ctx) => ctx.body('Hi'));
 ```
 
 ## Features
@@ -182,11 +182,11 @@ Byte provides a client implementation with route type inference.
 To use it, first export the type of your app.
 ```ts
 const app = new Byte()
-    .get('/', () => send.body('Hi'))
-    .get('/user/:id', (ctx) => send.body(ctx.params.id))
+    .get('/', (ctx) => ctx.body('Hi'))
+    .get('/user/:id', (ctx) => ctx.body(ctx.params.id))
     .post('/text', {
         body: async ctx => await ctx.req.text()
-    }, (ctx) => send.body(ctx.state.body))
+    }, (ctx) => ctx.body(ctx.state.body))
 
 export type App = typeof app;
 ```
