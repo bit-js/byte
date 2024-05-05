@@ -16,7 +16,7 @@ export interface JsonResponse<T> extends Response {
     clone(): this;
 }
 
-type NullableBody = BodyInit | null;
+export type NullableBody = BodyInit | null;
 
 // Default headers and init values
 const textHeaders = { 'Content-Type': 'text/plain' };
@@ -47,6 +47,7 @@ const eventInit = { headers: eventHeaders };
 export const send = {
     /**
      * Send a `BodyInit` as response
+     * @deprecated use <code>ctx.body</code> instead
      */
     body<const T extends NullableBody>(body: T, init?: CommonResponseInit): BasicResponse<T> {
         return typeof init === 'undefined'
@@ -56,6 +57,7 @@ export const send = {
 
     /**
      * Send a response with only head
+     * @deprecated use <code>ctx.head</code> instead
      */
     head(init: CommonResponseInit): Response {
         return new Response(null, init);
@@ -72,6 +74,7 @@ export const send = {
 
     /**
      * Send a primitive value as response
+     * @deprecated use <code>ctx.value</code> instead
      */
     value<const T extends string | number | bigint | boolean | null | undefined>(body: T, init?: CommonResponseInit): BasicResponse<`${T}`> {
         return typeof init === 'undefined'
@@ -80,14 +83,15 @@ export const send = {
     },
 
     /**
-    * Redirect to provided href
-    */
+     * Redirect to provided href
+     */
     link(Location: string, status: 301 | 302 | 307 | 308): Response {
         return new Response(null, { headers: { Location }, status });
     },
 
     /**
      * Send response as plain text
+     * @deprecated use <code>ctx.text</code> instead
      */
     text<const T extends NullableBody>(body: T, init?: CommonResponseInit): BasicResponse<T> {
         if (typeof init === 'undefined')
@@ -103,6 +107,7 @@ export const send = {
 
     /**
      * Send response as JSON
+     * @deprecated use <code>ctx.json</code> instead
      */
     json<const T>(body: T, init?: CommonResponseInit): JsonResponse<T> {
         if (typeof init === 'undefined')
@@ -118,6 +123,7 @@ export const send = {
 
     /**
      * Send binary response
+     * @deprecated use <code>ctx.binary</code> instead
      */
     binary<const T extends NullableBody>(body: T, init?: CommonResponseInit): BasicResponse<T> {
         if (typeof init === 'undefined')
@@ -133,6 +139,7 @@ export const send = {
 
     /**
      * Send XML response
+     * @deprecated use <code>ctx.xml</code> instead
      */
     xml<const T extends NullableBody>(body: T, init?: CommonResponseInit): BasicResponse<T> {
         if (typeof init === 'undefined')
@@ -148,6 +155,7 @@ export const send = {
 
     /**
      * Send HTML response
+     * @deprecated use <code>ctx.html</code> instead
      */
     html<const T extends NullableBody>(body: T, init?: CommonResponseInit): BasicResponse<T> {
         if (typeof init === 'undefined')
@@ -163,6 +171,7 @@ export const send = {
 
     /**
      * Stream server-sent events
+     * @deprecated use <code>ctx.events</code> instead
      */
     events<const T extends NullableBody>(body: T, init?: CommonResponseInit): BasicResponse<T> {
         if (typeof init === 'undefined')

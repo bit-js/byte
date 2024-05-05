@@ -1,26 +1,26 @@
 // Server
-import { Byte, send, parse, cors, csrf, timing } from '@bit-js/byte';
+import { Byte, parse, cors, csrf, timing } from '@bit-js/byte';
 import { randomUUID } from 'crypto';
 
 // Basic responses
 export const basicApis = new Byte()
-    .get('/', () => send.body('Hi'))
-    .get('/:id', (ctx) => send.body(ctx.params.id));
+    .get('/', (ctx) => ctx.body('Hi'))
+    .get('/:id', (ctx) => ctx.body(ctx.params.id));
 
 // Parse & send JSON
 export const jsonApis = new Byte()
     .post('/json', {
         body: parse.json()
-    }, (ctx) => send.json(ctx.state.body));
+    }, (ctx) => ctx.json(ctx.state.body));
 
 // CORS
 export const apiWithCors = new Byte()
     .use(cors({ allowMethods: 'GET' }))
-    .get('/', (ctx) => send.body('Hi', ctx));
+    .get('/', (ctx) => ctx.body('Hi'));
 
 // CSRF protection
 export const apiWithCsrf = new Byte()
-    .get('/', csrf(), () => send.body('Hi'));
+    .get('/', csrf(), (ctx) => ctx.body('Hi'));
 
 // Server timing
 const createMetrics = timing({
@@ -36,5 +36,5 @@ export const timingApi = new Byte()
         metrics.end('createUUID');
 
         metrics.set(ctx);
-        return send.body(value, ctx);
+        return ctx.body(value);
     });
