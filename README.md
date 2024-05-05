@@ -244,51 +244,43 @@ Only one test client should be created for each `Byte` instance.
 ### Sending response
 Response utilities should be used for client type inference.
 ```ts
-import { send } from '@bit-js/byte';
-
 // Send a response with the provided BodyInit (text, streams, binary format)
-send.body('Hi'); // new Response('Hi') 
+ctx.body('Hi');
 
 // Send a response with no body
-send.head({ status: 404 }); // new Response(null, { status: 404 })
-
-// Return a function that returns the cached value
-send.static('Hi'); // () => new Response('Hi')
+ctx.head();
 
 // Send a primitive value
-send.value(0); // new Response(`${0}`)
+ctx.value(0);
 
 // Send plain text response
-send.text('Hi'); // new Response('Hi', { headers: { 'Content-Type': 'text/plain' } }) 
+ctx.text('Hi');
 
 // Send binary response (Unrecognizable format)
-send.binary(buffer); // new Response(buffer, { headers: { 'Content-Type': 'application/octet-stream' } }) 
+ctx.binary(buffer);
 
 // Send HTML response
-send.html('<p>Hi</p>'); // new Response('<p>Hi</p>', { headers: { 'Content-Type': 'text/html' } })
+ctx.html('<p>Hi</p>');
 
 // Send XML response
-send.xml('<text>Hi</text>'); // new Response('<text>Hi</text>', { headers: { 'Content-Type': 'application/xml' } })
+ctx.xml('<text>Hi</text>'); 
 
 // Send JSON payload
-send.json({ hello: 'world' }); // new Response(JSON.stringify({ hello: 'world' }), { headers: { 'Content-Type': 'application/json' } })
-
-// Redirect
-send.link('/home', 302); // new Response(null, { headers: { Location: '/home' }, status: 302 })
+ctx.json({ hello: 'world' }); 
 
 // Server-sent events
-send.events(stream); // new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } }) 
+ctx.events(stream); 
+
+// Redirection
+ctx.redirect(location, statusCode); 
 ```
 
-All response utilities (except `send.link` and `send.head`) accepts a response body and a `ResponseInit` object.
+### Creating responses
 ```ts
-send(body: any, init?: ResponseInit): any;
-```
+import { send } from '@bit-js/byte';
 
-If a `ResponseInit` is passed in it will be merged with the corresponding headers.
-```ts
-// You should cache the header if it is static
-send.body('Not found', { status: 404 });
+// Return a function that returns the cached values
+send.static('Hi', responseInit?); // () => new Response('Hi')
 ```
 
 ### Body parsers
@@ -438,7 +430,7 @@ app.get('/users', (ctx) => {
     metrics.set(ctx);
 
     // Send the measured result
-    return send.value(metrics.db, ctx);
+    return ctx.value(metrics.db, ctx);
 });
 ```
 

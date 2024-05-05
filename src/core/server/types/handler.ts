@@ -80,6 +80,15 @@ export class Context<Params, State = undefined> extends TypedContext<Params> imp
 
         return new Response(body, this) as any;
     }
+
+    /**
+     * Send HTML response
+     */
+    redirect(location: string, status: 301 | 302 | 307 | 308): Response {
+        this.headers.Location = location;
+        this.status = status;
+        return new Response(null, this);
+    }
 };
 export type BaseContext = Context<any, any>;
 

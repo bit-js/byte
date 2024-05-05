@@ -84,6 +84,7 @@ export const send = {
 
     /**
      * Redirect to provided href
+     * @deprecated use <code>ctx.redirect</code> instead
      */
     link(Location: string, status: 301 | 302 | 307 | 308): Response {
         return new Response(null, { headers: { Location }, status });
