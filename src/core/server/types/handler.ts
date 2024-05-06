@@ -5,6 +5,7 @@ import type { CommonHeaders, CommonResponseInit } from '../types/responseInit';
 // Base context
 export class Context<Params, State = undefined> extends TypedContext<Params> implements CommonResponseInit {
     state!: State;
+    status!: number;
     headers = {} as CommonHeaders;
 
     /**
@@ -90,6 +91,7 @@ export class Context<Params, State = undefined> extends TypedContext<Params> imp
         return new Response(null, this);
     }
 };
+
 export type BaseContext = Context<any, any>;
 
 // Basic handler and actions
