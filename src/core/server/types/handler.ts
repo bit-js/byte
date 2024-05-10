@@ -5,6 +5,7 @@ import type { CommonHeaders, CommonResponseInit } from '../types/responseInit';
 // Base context
 export class Context<Params, State = undefined> extends TypedContext<Params> implements CommonResponseInit {
     state!: State;
+
     status!: number;
     headers = {} as CommonHeaders;
 
@@ -13,20 +14,6 @@ export class Context<Params, State = undefined> extends TypedContext<Params> imp
      */
     body<const T extends NullableBody>(body: T): BasicResponse<T> {
         return new Response(body, this) as any;
-    }
-
-    /**
-     * Send a response with only head
-     */
-    head(): Response {
-        return new Response(null, this);
-    }
-
-    /**
-     * Send a primitive value as response
-     */
-    value<const T extends string | number | bigint | boolean | null | undefined>(body: T): BasicResponse<`${T}`> {
-        return new Response(`${body}`, this) as any;
     }
 
     /**
@@ -46,39 +33,10 @@ export class Context<Params, State = undefined> extends TypedContext<Params> imp
     }
 
     /**
-     * Send binary response
-     */
-    binary<const T extends NullableBody>(body: T): BasicResponse<T> {
-        this.headers['Content-Type'] = 'application/octet-stream';
-        return new Response(body, this) as any;
-    }
-
-    /**
-     * Send XML response
-     */
-    xml<const T extends NullableBody>(body: T): BasicResponse<T> {
-        this.headers['Content-Type'] = 'application/xml';
-        return new Response(body, this) as any;
-    }
-
-    /**
      * Send HTML response
      */
     html<const T extends NullableBody>(body: T): BasicResponse<T> {
         this.headers['Content-Type'] = 'text/html';
-        return new Response(body, this) as any;
-    }
-
-    /**
-     * Stream server-sent events
-     */
-    events<const T extends NullableBody>(body: T): BasicResponse<T> {
-        const { headers } = this;
-
-        headers['Content-Type'] = 'text/event-stream';
-        headers['Cache-Control'] = 'no-cache';
-        headers['Connection'] = 'keep-alive';
-
         return new Response(body, this) as any;
     }
 
