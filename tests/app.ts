@@ -38,3 +38,8 @@ export const timingApi = new Byte()
         metrics.set(ctx);
         return ctx.body(value);
     });
+
+export const testAPI = new Byte()
+    .get('/', cors(), {
+        body: parse.text()
+    }, (ctx) => ctx.json(ctx.state.body));

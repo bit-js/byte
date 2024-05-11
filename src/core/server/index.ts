@@ -4,7 +4,7 @@ import type { ProtoSchema, RequestMethod } from '../utils/methods';
 
 import { Route, type BaseRoute, type RoutesRecord } from './route';
 import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
-import { Context, type ActionList, type BaseHandler, type Fn } from './types/handler';
+import { Context, type BaseHandler, type Fn } from './types/handler';
 
 import { bit } from '../client';
 
@@ -17,16 +17,25 @@ interface Register<Method extends string, T extends RoutesRecord> {
     >(
         path: Path,
         validator: Validator,
-        ...handlers: [...ActionList<Path>, Handler]
-    ): Byte<[...T, Route<Method, Path, Handler, Validator>]>;
+        handler: Handler
+    ): Byte<[...T, Route<Method, Path, Validator, Handler>]>;
+
+    <
+        const Path extends string,
+        const Validator extends ValidatorRecord<Path>,
+        const Handler extends BaseHandler<Path, InferValidatorRecord<Validator>>,
+    >(
+        path: Path,
+        ...handlers: [...NoInfer<BaseHandler<Path>>[], Validator, Handler]
+    ): Byte<[...T, Route<Method, Path, Validator, Handler>]>;
 
     <
         const Path extends string,
         const Handler extends BaseHandler<Path>,
     >(
         path: Path,
-        ...handlers: [...ActionList<Path>, Handler]
-    ): Byte<[...T, Route<Method, Path, Handler, null>]>;
+        ...handlers: [...NoInfer<BaseHandler<Path>>[], Handler]
+    ): Byte<[...T, Route<Method, Path, null, Handler>]>;
 };
 
 type HandlerRegisters<T extends RoutesRecord> = {
@@ -112,9 +121,9 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
      * Register a handler
      */
     handle(method: string, path: string, ...args: any[]) {
-        // If first arg is a handler
-        const actionStartIdx = typeof args[0] === 'function' ? 0 : 1;
-        const handlerIdx = args.length - 1;
+        const { length } = args;
+        const noValidator = typeof args[length - 2] === 'function';
+        const actionEndIdx = noValidator ? length - 1 : length - 2;
 
         // Load necessary actions
         const { actions } = this;
@@ -122,13 +131,14 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
         // Push new route
         this.routes.push(
             new Route(
-                method, path, args[handlerIdx],
+                method, path,
                 // Check for validator
-                actionStartIdx === 1 ? args[0] : null,
+                noValidator ? null : args[actionEndIdx],
+                args[length - 1],
                 // Load the actions
                 actions.length === 0
-                    ? (actionStartIdx === handlerIdx ? [] : [args.slice(actionStartIdx, handlerIdx)])
-                    : (actionStartIdx === handlerIdx ? [actions] : [actions, args.slice(actionStartIdx, handlerIdx)])
+                    ? (actionEndIdx === 0 ? [] : [args.slice(0, actionEndIdx)])
+                    : (actionEndIdx === 0 ? [actions] : [actions, args.slice(0, actionEndIdx)])
             )
         );
 

@@ -9,3 +9,6 @@ export type UnionToIntersection<T> =
     (x: infer R) => any ? R : never;
 
 export type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];
+
+export type DropFirstInTuple<T extends any[]> = ((...args: T) => any) extends (arg: any, ...rest: infer U) => any ? U : T;
+export type LastItem<T extends any[]> = T[DropFirstInTuple<T>['length']];

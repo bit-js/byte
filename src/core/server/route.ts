@@ -11,8 +11,8 @@ import { isAsync, passChecks } from './utils/macro';
 export class Route<
     Method extends string,
     Path extends string,
-    Handler extends Fn,
     Validator extends ValidatorRecord<Path>,
+    Handler extends Fn
 > {
     /**
      * Create a route procedure
@@ -20,8 +20,8 @@ export class Route<
     constructor(
         readonly method: Method,
         readonly path: Path,
-        readonly handler: Handler,
         readonly validator: Validator,
+        readonly handler: Handler,
         readonly actions: Fn[][]
     ) { }
 
@@ -44,7 +44,7 @@ export class Route<
             // Merge pathname
             base.length === 1 ? path : (path.length === 1 ? base : base + path) as Path,
             // Copy other props
-            this.handler, this.validator,
+            this.validator, this.handler,
             // Push other stuff
             [otherAppActions, ...this.actions]
         );
