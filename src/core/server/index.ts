@@ -22,19 +22,10 @@ interface Register<Method extends string, T extends RoutesRecord> {
 
     <
         const Path extends string,
-        const Validator extends ValidatorRecord<Path>,
-        const Handler extends BaseHandler<Path, InferValidatorRecord<Validator>>,
-    >(
-        path: Path,
-        ...handlers: [...NoInfer<BaseHandler<Path>>[], Validator, Handler]
-    ): Byte<[...T, Route<Method, Path, Validator, Handler>]>;
-
-    <
-        const Path extends string,
         const Handler extends BaseHandler<Path>,
     >(
         path: Path,
-        ...handlers: [...NoInfer<BaseHandler<Path>>[], Handler]
+        handlers: Handler
     ): Byte<[...T, Route<Method, Path, null, Handler>]>;
 };
 
@@ -121,9 +112,7 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
      * Register a handler
      */
     handle(method: string, path: string, ...args: any[]) {
-        const { length } = args;
-        const noValidator = typeof args[length - 2] === 'function';
-        const actionEndIdx = noValidator ? length - 1 : length - 2;
+        const noValidator = typeof args[0] === 'function';
 
         // Load necessary actions
         const { actions } = this;
@@ -133,12 +122,10 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
             new Route(
                 method, path,
                 // Check for validator
-                noValidator ? null : args[actionEndIdx],
-                args[length - 1],
+                noValidator ? null : args[0],
+                noValidator ? args[0] : args[1],
                 // Load the actions
-                actions.length === 0
-                    ? (actionEndIdx === 0 ? [] : [args.slice(0, actionEndIdx)])
-                    : (actionEndIdx === 0 ? [actions] : [actions, args.slice(0, actionEndIdx)])
+                actions.length === 0 ? [] : [actions]
             )
         );
 

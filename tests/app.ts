@@ -20,7 +20,8 @@ export const apiWithCors = new Byte()
 
 // CSRF protection
 export const apiWithCsrf = new Byte()
-    .get('/', csrf(), (ctx) => ctx.body('Hi'));
+    .use(csrf())
+    .get('/', (ctx) => ctx.body('Hi'));
 
 // Server timing
 const createMetrics = timing({
@@ -38,8 +39,3 @@ export const timingApi = new Byte()
         metrics.set(ctx);
         return ctx.body(value);
     });
-
-export const testAPI = new Byte()
-    .get('/', cors(), {
-        body: parse.text()
-    }, (ctx) => ctx.json(ctx.state.body));
