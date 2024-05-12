@@ -1,10 +1,10 @@
 // Server
-import { Byte, parse, cors, csrf, timing } from '@bit-js/byte';
+import { Byte, parse, cors, csrf, timing, send } from '@bit-js/byte';
 import { randomUUID } from 'crypto';
 
 // Basic responses
 export const basicApis = new Byte()
-    .get('/', (ctx) => ctx.body('Hi'))
+    .get('/', send.body('Hi'))
     .get('/:id', (ctx) => ctx.body(ctx.params.id));
 
 // Parse & send JSON
@@ -21,7 +21,7 @@ export const apiWithCors = new Byte()
 // CSRF protection
 export const apiWithCsrf = new Byte()
     .use(csrf())
-    .get('/', (ctx) => ctx.body('Hi'));
+    .get('/', send.body('Hi'));
 
 // Server timing
 const createMetrics = timing({

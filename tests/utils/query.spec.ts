@@ -17,13 +17,13 @@ test('Query getters', () => {
 
     const getCats = query.get('category', {
         type: 'string',
-        maxLength: 10
+        maxItems: 10
     });
     expect(getCats(ctx)).toEqual(q.category);
 
     const getRates = query.get('rate', {
         type: 'number',
-        maxLength: 10
+        maxItems: 10
     });
     expect(getRates(ctx)).toEqual(q.rate);
 
@@ -41,11 +41,11 @@ test('Query schema', () => {
         darkMode: { type: 'bool' },
         category: {
             type: 'string',
-            maxLength: 10
+            maxItems: 10
         },
         rate: {
             type: 'number',
-            maxLength: 10
+            maxItems: 10
         }
     });
     expect(q).toMatchObject(parse(ctx)!);

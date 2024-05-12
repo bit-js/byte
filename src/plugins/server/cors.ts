@@ -34,7 +34,7 @@ export function cors(options?: CORSOptions) {
     if (typeof options.exposeHeaders !== 'undefined')
         builder.push(`headers['Access-Control-Expose-Headers']=${parseValue(options.exposeHeaders)};`);
     if (typeof options.maxAge === 'number')
-        builder.push(`headers['Access-Control-Max-Age']=${options.maxAge.toString()};`);
+        builder.push(`headers['Access-Control-Max-Age']=${options.maxAge};`);
     if (options.allowCredentials === true)
         builder.push(`headers['Access-Control-Allow-Credentials']='true';`);
 
@@ -44,6 +44,9 @@ export function cors(options?: CORSOptions) {
     else
         builder.push(`headers['Access-Control-Allow-Origin']='*';`);
 
-    return $pass(Function(`return ({headers})=>{${builder.join('')}}`)());
+    return $pass(Function(builder.length > 1
+        ? `return ({headers})=>{${builder.join('')}}`
+        : `return (c)=>{c.${builder[0]}}`
+    )());
 }
 
