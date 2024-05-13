@@ -32,46 +32,46 @@ const htmlInit = { headers: htmlHeaders };
  */
 export const send = {
     body<const T extends NullableBody>(body: T, init?: CommonResponseInit): () => BasicResponse<T> {
-        return typeof init === 'undefined'
-            ? (): any => new Response(body)
-            : (): any => new Response(body, init);
+        const res = typeof init === 'undefined' ? new Response(body) : new Response(body, init);
+        return (): any => res.clone();
     },
 
     text<const T extends NullableBody>(body: T, init?: CommonResponseInit): () => BasicResponse<T> {
         if (typeof init === 'undefined')
-            return (): any => new Response(body, textInit);
+            init = textInit;
 
         if (typeof init.headers === 'undefined')
             init.headers = textHeaders;
         else
             init.headers['Content-Type'] = 'text/plain';
 
-        return (): any => new Response(body, init);
+        const res = new Response(body, init);
+        return (): any => res.clone();
     },
 
     json<const T>(body: T, init?: CommonResponseInit): () => JsonResponse<T> {
-        const jsonBody = JSON.stringify(body);
-
         if (typeof init === 'undefined')
-            return (): any => new Response(jsonBody, jsonInit);
+            init = jsonInit;
 
         if (typeof init.headers === 'undefined')
             init.headers = jsonHeaders;
         else
             init.headers['Content-Type'] = 'application/json';
 
-        return (): any => new Response(jsonBody, init);
+        const res = new Response(JSON.stringify(body), init);
+        return (): any => res.clone();
     },
 
     html<const T extends NullableBody>(body: T, init?: CommonResponseInit): () => BasicResponse<T> {
         if (typeof init === 'undefined')
-            return (): any => new Response(body, htmlInit);
+            init = htmlInit;
 
         if (typeof init.headers === 'undefined')
             init.headers = htmlHeaders;
         else
             init.headers['Content-Type'] = 'text/html';
 
-        return (): any => new Response(body, init);
+        const res = new Response(body, init);
+        return (): any => res.clone();
     }
 };

@@ -26,14 +26,6 @@ export class Route<
     ) { }
 
     /**
-     * Load an action list
-     */
-    loadActions(list: Fn[]) {
-        if (list.length !== 0)
-            this.actions.push(list);
-    }
-
-    /**
      * Clone the route with a new base path
      */
     clone(base: string, otherAppActions: Fn[]) {

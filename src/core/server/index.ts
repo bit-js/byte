@@ -112,21 +112,26 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
      * Register a handler
      */
     handle(method: string, path: string, ...args: any[]) {
-        const noValidator = typeof args[0] === 'function';
-
         // Load necessary actions
         const { actions } = this;
 
         // Push new route
         this.routes.push(
-            new Route(
-                method, path,
-                // Check for validator
-                noValidator ? null : args[0],
-                noValidator ? args[0] : args[1],
-                // Load the actions
-                actions.length === 0 ? [] : [actions]
-            )
+            typeof args[0] === 'function'
+                ? new Route(
+                    method, path,
+                    // Check for validator
+                    null, args[0],
+                    // Load the actions
+                    actions.length === 0 ? [] : [actions]
+                )
+                : new Route(
+                    method, path,
+                    // Check for validator
+                    args[0], args[1],
+                    // Load the actions
+                    actions.length === 0 ? [] : [actions]
+                )
         );
 
         return this;
@@ -135,7 +140,7 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     /**
      * Create a validator
      */
-    static validate<const T extends ValidatorRecord>(validator: T) {
+    static state<const T extends ValidatorRecord>(validator: T) {
         return validator;
     }
 

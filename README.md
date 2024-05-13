@@ -13,41 +13,41 @@ export default new Byte()
 - **Multi-runtime**: Works on all JS runtimes without any adapters.
 
 ## Benchmarks
-Byte starts up 1.5x faster than Hono with LinearRouter.
+Byte starts up faster than the `hono/quick` preset with LinearRouter.
 ```
-[446.37ms] Byte: Build 1000 routes
-[635.84ms] Hono: Build 1000 routes
+[535.66ms] Byte: Build 1000 routes
+[687.44ms] Hono: Build 1000 routes
 ```
 
-Byte matches routes 5x faster than Hono with RegExpRouter.
+Byte matches routes 7x faster than Hono with RegExpRouter.
 ```
 "/user":
-- Hono: 5377ns
-- Byte: 1064ns
+- Hono: 23416ns
+- Byte: 4463ns
 
 "/user/comments":
-- Hono: 5289ns
-- Byte: 1103ns
+- Hono: 26255ns
+- Byte: 4454ns
 
 "/user/avatar":
-- Hono: 5153ns
-- Byte: 1082ns
+- Hono: 31863ns
+- Byte: 4991ns
 
 "/event/:id":
-- Hono: 5792ns
-- Byte: 1455ns
+- Hono: 33113ns
+- Byte: 7072ns
 
 "/event/:id/comments":
-- Hono: 5726ns
-- Byte: 1631ns
+- Hono: 34888ns
+- Byte: 8257ns
 
 "/status":
-- Hono: 5358ns
-- Byte: 1036ns
+- Hono: 26211ns
+- Byte: 4195ns
 
 "/deeply/nested/route/for/testing":
-- Hono: 5253ns
-- Byte: 1047ns
+- Hono: 22171ns
+- Byte: 3981ns
 ```
 
 See [benchmarks](//github.com/bit-js/byte/tree/main/bench) for more details.

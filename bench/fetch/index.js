@@ -3,13 +3,13 @@ import { Byte, send } from '../..';
 
 function createByte() {
     const app = new Byte()
-        .get('/user', () => send.body('User'))
-        .get('/user/comments', () => send.body('User comments'))
-        .get('/user/avatar', () => send.body('User avatar'))
-        .get('/event/:id', (ctx) => send.body(`Event ${ctx.params.id}`))
-        .get('/event/:id/comments', (ctx) => send.body(`Event ${ctx.params.id} comments`))
-        .get('/status', () => send.body('Status'))
-        .get('/deeply/nested/route/for/testing', () => send.body('Deeply nested route for testing'));
+        .get('/user', send.body('User'))
+        .get('/user/comments', send.body('User comments'))
+        .get('/user/avatar', send.body('User avatar'))
+        .get('/event/:id', (ctx) => ctx.body(`Event ${ctx.params.id}`))
+        .get('/event/:id/comments', (ctx) => ctx.body(`Event ${ctx.params.id} comments`))
+        .get('/status', send.body('Status'))
+        .get('/deeply/nested/route/for/testing', send.body('Deeply nested route for testing'));
 
     app.fetch(new Request('http://localhost:3000'));
     return app.fetch;
@@ -20,13 +20,13 @@ import { Elysia } from 'elysia';
 
 function createElysia() {
     const app = new Elysia()
-        .get('/user', () => 'User')
-        .get('/user/comments', () => 'User comments')
-        .get('/user/avatar', () => 'User avatar')
+        .get('/user', 'User')
+        .get('/user/comments', 'User comments')
+        .get('/user/avatar', 'User avatar')
         .get('/event/:id', (ctx) => `Event ${ctx.params.id}`)
         .get('/event/:id/comments', (ctx) => `Event ${ctx.params.id} comments`)
-        .get('/status', () => 'Status')
-        .get('/deeply/nested/route/for/testing', () => 'Deeply nested route for testing');
+        .get('/status', 'Status')
+        .get('/deeply/nested/route/for/testing', 'Deeply nested route for testing');
 
     app.fetch(new Request('http://localhost:3000'));
     return app.fetch;
@@ -56,8 +56,8 @@ import test from './test';
 console.log('Benchmarking...');
 const { benchmarks } = await test({
     Hono: createHono(),
-    Byte: createByte(),
     Elysia: createElysia(),
+    Byte: createByte(),
 });
 
 const groupResult = {};

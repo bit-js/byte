@@ -54,17 +54,24 @@ export async function check(res, expect) {
     if (await (await res).text() !== expect) throw new Error('A framework failed the test');
 }
 
+const built = {};
+for (const path in routes)
+    built[path] = buildPath(path);
+
 export default function test(frameworks) {
     for (let i = 0; i < 15; ++i) bench('noop', () => { });
 
     for (const path in routes) {
-        const buildResult = buildPath(path);
+        const buildResult = built[path];
         const req = new Request('http://localhost' + buildResult.path);
 
         group(path, () => {
             for (const label in frameworks) {
                 const fn = frameworks[label];
+
                 check(fn(req), routes[path](buildResult.params));
+                console.log(fn.toString());
+
                 bench(label, () => fn(req));
             }
         });
