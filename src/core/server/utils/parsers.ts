@@ -34,7 +34,7 @@ export const parse = {
         const { then: thenFn, catch: catchFn } = options;
 
         // Has: 0 - then & catch, 1 - then, 2 - catch, 3 - nothing
-        switch ((+(typeof thenFn === 'undefined') << 1) & +(typeof catchFn === 'undefined')) {
+        switch ((typeof thenFn === 'undefined' ? 2 : 0) | (typeof catchFn === 'undefined' ? 1 : 0)) {
             // @ts-ignore
             case 0: return $async((ctx) => ctx.req.text().then(thenFn).catch(catchFn));
             // @ts-ignore
@@ -57,7 +57,7 @@ export const parse = {
         const { then: thenFn, catch: catchFn } = options;
 
         // Has: 0 - then & catch, 1 - then, 2 - catch, 3 - nothing
-        switch ((+(typeof thenFn === 'undefined') << 1) & +(typeof catchFn === 'undefined')) {
+        switch ((typeof thenFn === 'undefined' ? 2 : 0) | (typeof catchFn === 'undefined' ? 1 : 0)) {
             // @ts-ignore
             case 0: return $async((ctx) => ctx.req.json().then(thenFn).catch(catchFn));
             // @ts-ignore
@@ -80,7 +80,7 @@ export const parse = {
         const { then: thenFn, catch: catchFn } = options;
 
         // Has: 0 - then & catch, 1 - then, 2 - catch, 3 - nothing
-        switch ((+(typeof thenFn === 'undefined') << 1) & +(typeof catchFn === 'undefined')) {
+        switch ((typeof thenFn === 'undefined' ? 2 : 0) | (typeof catchFn === 'undefined' ? 1 : 0)) {
             // @ts-ignore
             case 0: return $async((ctx) => ctx.req.formData().then(thenFn).catch(catchFn));
             // @ts-ignore
@@ -103,7 +103,7 @@ export const parse = {
         const { then: thenFn, catch: catchFn } = options;
 
         // Has: 0 - then & catch, 1 - then, 2 - catch, 3 - nothing
-        switch ((+(typeof thenFn === 'undefined') << 1) & +(typeof catchFn === 'undefined')) {
+        switch ((typeof thenFn === 'undefined' ? 2 : 0) | (typeof catchFn === 'undefined' ? 1 : 0)) {
             // @ts-ignore
             case 0: return $async((ctx) => ctx.req.blob().then(thenFn).catch(catchFn));
             // @ts-ignore
@@ -126,7 +126,7 @@ export const parse = {
         const { then: thenFn, catch: catchFn } = options;
 
         // Has: 0 - then & catch, 1 - then, 2 - catch, 3 - nothing
-        switch ((+(typeof thenFn === 'undefined') << 1) & +(typeof catchFn === 'undefined')) {
+        switch ((typeof thenFn === 'undefined' ? 2 : 0) | (typeof catchFn === 'undefined' ? 1 : 0)) {
             // @ts-ignore
             case 0: return $async((ctx) => ctx.req.buffer().then(thenFn).catch(catchFn));
             // @ts-ignore
