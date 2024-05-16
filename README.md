@@ -19,7 +19,7 @@ Byte starts up faster than the `hono/quick` preset with LinearRouter.
 [687.44ms] Hono: Build 1000 routes
 ```
 
-Byte matches routes 7x faster than Hono with RegExpRouter.
+Byte matches routes 6x faster than Hono with RegExpRouter.
 ```
 "/user":
 - Hono: 23416ns

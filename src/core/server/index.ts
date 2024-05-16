@@ -70,7 +70,7 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     readonly routes: BaseRoute[] = [];
 
     /**
-     * Register subroutes
+     * Register sub-routes
      */
     route(base: string, { routes, actions }: BaseByte) {
         const currentRoutes = this.routes;

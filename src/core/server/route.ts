@@ -49,7 +49,7 @@ export class Route<
         if (this.method === null)
             router.handle(this.path, this.compile());
         else
-            router.put(this.method, this.path, this.compile());
+            router.on(this.method, this.path, this.compile());
     }
 
     /**
