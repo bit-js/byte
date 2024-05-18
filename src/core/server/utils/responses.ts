@@ -32,7 +32,7 @@ const htmlInit = { headers: htmlHeaders };
  */
 export const send = {
     body<const T extends NullableBody>(body: T, init?: CommonResponseInit): () => BasicResponse<T> {
-        const res = typeof init === 'undefined' ? new Response(body) : new Response(body, init);
+        const res = typeof init === 'undefined' ? new Response(body) : new Response(body, init as ResponseInit);
         return (): any => res.clone();
     },
 
@@ -45,7 +45,7 @@ export const send = {
         else
             init.headers['Content-Type'] = 'text/plain';
 
-        const res = new Response(body, init);
+        const res = new Response(body, init as ResponseInit);
         return (): any => res.clone();
     },
 
@@ -58,7 +58,7 @@ export const send = {
         else
             init.headers['Content-Type'] = 'application/json';
 
-        const res = new Response(JSON.stringify(body), init);
+        const res = new Response(JSON.stringify(body), init as ResponseInit);
         return (): any => res.clone();
     },
 
@@ -71,7 +71,7 @@ export const send = {
         else
             init.headers['Content-Type'] = 'text/html';
 
-        const res = new Response(body, init);
+        const res = new Response(body, init as ResponseInit);
         return (): any => res.clone();
     }
 };

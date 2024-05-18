@@ -13,7 +13,7 @@ export class Context<Params, State = undefined> extends TypedContext<Params> imp
      * Send a `BodyInit` as response
      */
     body<const T extends NullableBody>(body: T): BasicResponse<T> {
-        return new Response(body, this) as any;
+        return new Response(body, this as ResponseInit) as any;
     }
 
     /**
@@ -21,7 +21,7 @@ export class Context<Params, State = undefined> extends TypedContext<Params> imp
      */
     text<const T extends NullableBody>(body: T): BasicResponse<T> {
         this.headers['Content-Type'] = 'text/plain';
-        return new Response(body, this) as any;
+        return new Response(body, this as ResponseInit) as any;
     }
 
     /**
@@ -29,7 +29,7 @@ export class Context<Params, State = undefined> extends TypedContext<Params> imp
      */
     json<const T>(body: T): JsonResponse<T> {
         this.headers['Content-Type'] = 'application/json';
-        return new Response(JSON.stringify(body), this);
+        return new Response(JSON.stringify(body), this as ResponseInit);
     }
 
     /**
@@ -37,7 +37,7 @@ export class Context<Params, State = undefined> extends TypedContext<Params> imp
      */
     html<const T extends NullableBody>(body: T): BasicResponse<T> {
         this.headers['Content-Type'] = 'text/html';
-        return new Response(body, this) as any;
+        return new Response(body, this as ResponseInit) as any;
     }
 
     /**
@@ -46,7 +46,7 @@ export class Context<Params, State = undefined> extends TypedContext<Params> imp
     redirect(location: string, status: 301 | 302 | 307 | 308): Response {
         this.headers.Location = location;
         this.status = status;
-        return new Response(null, this);
+        return new Response(null, this as ResponseInit);
     }
 };
 

@@ -86,17 +86,18 @@ export type CommonHeaders = {
     | 'Access-Control-Expose-Headers' | 'Access-Control-Max-Age'
     | 'Access-Control-Request-Headers' | 'Access-Control-Request-Method'
     | 'Strict-Transport-Security' | 'Content-Security-Policy' | 'Connection'
-    | 'Server-Timing' | 'Keep-Alive' | 'Last-Modified' | 'Expires']?: string;
+    | 'Server-Timing' | 'Keep-Alive' | 'Last-Modified' | 'Expires']?: string | string[];
 } & {
     'Content-Type'?: MIMETypes;
-} & Record<string, string>;
+} & Record<string, string | string[]>;
 
 /**
  * ResponseInit with commonly used props value
  */
-export interface CommonResponseInit extends ResponseInit {
+export interface CommonResponseInit {
     status?: keyof StatusMap | (number & {});
     statusText?: StatusMap[CommonStatus] | (string & {});
 
     headers?: CommonHeaders;
 }
+
