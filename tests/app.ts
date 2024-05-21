@@ -1,6 +1,5 @@
 // Server
-import { Byte, parse, cors, csrf, timing, send } from '@bit-js/byte';
-import { randomUUID } from 'crypto';
+import { Byte, parse, cors, csrf, send } from '@bit-js/byte';
 
 // Basic responses
 export const basicApis = new Byte()
@@ -23,19 +22,3 @@ export const apiWithCsrf = new Byte()
     .use(csrf())
     .get('/', send.body('Hi'));
 
-// Server timing
-const createMetrics = timing({
-    createUUID: 'Create a random UUID v4'
-});
-
-export const timingApi = new Byte()
-    .get('/', (ctx) => {
-        const metrics = createMetrics();
-
-        metrics.start('createUUID');
-        const value = randomUUID();
-        metrics.end('createUUID');
-
-        metrics.set(ctx);
-        return ctx.body(value);
-    });
