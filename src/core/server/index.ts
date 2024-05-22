@@ -37,8 +37,8 @@ type HandlerRegisters<T extends RoutesRecord> = {
 /**
  * A plugin
  */
-export interface Plugin {
-    plug(app: BaseByte): any;
+export abstract class Plugin {
+    abstract plug(app: BaseByte): any;
 }
 
 /**
@@ -158,6 +158,13 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
      * Create a handler
      */
     static handle<const T extends Fn>(fn: T) {
+        return fn;
+    }
+
+    /**
+     * Create an alter handler
+     */
+    static alter<const T extends AlterFn>(fn: T) {
         return fn;
     }
 
