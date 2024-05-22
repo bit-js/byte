@@ -4,9 +4,10 @@ import type { ProtoSchema, RequestMethod } from '../utils/methods';
 
 import { Route, type BaseRoute, type RoutesRecord } from './route';
 import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
-import { Context, type BaseHandler, type Fn } from './types/handler';
+import { Context, type AlterFn, type BaseHandler, type Fn } from './types/handler';
 
 import { bit } from '../client';
+import { emptyList } from '../../utils/defaultOptions';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -45,12 +46,21 @@ export interface Plugin {
  */
 export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     readonly actions: Fn[] = [];
+    readonly alters: AlterFn[] = [];
 
     /**
      * Run before validation
      */
     use(...fns: Fn[]) {
         this.actions.push(...fns);
+        return this;
+    }
+
+    /**
+     * Run after response handler
+     */
+    alter(...fns: AlterFn[]) {
+        this.alters.push(...fns);
         return this;
     }
 
@@ -72,10 +82,10 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     /**
      * Register sub-routes
      */
-    route(base: string, { routes, actions }: BaseByte) {
+    route(base: string, { routes, actions, alters }: BaseByte) {
         const currentRoutes = this.routes;
         for (let i = 0, { length } = routes; i < length; ++i)
-            currentRoutes.push(routes[i].clone(base, actions));
+            currentRoutes.push(routes[i].clone(base, actions, alters));
 
         return this;
     }
@@ -113,7 +123,7 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
      */
     handle(method: string, path: string, ...args: any[]) {
         // Load necessary actions
-        const { actions } = this;
+        const { actions, alters } = this;
 
         // Push new route
         this.routes.push(
@@ -122,15 +132,15 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
                     method, path,
                     // Check for validator
                     null, args[0],
-                    // Load the actions
-                    actions.length === 0 ? [] : [actions]
+                    // Load the actions and alters
+                    actions.length === 0 ? emptyList : [actions], alters
                 )
                 : new Route(
                     method, path,
                     // Check for validator
                     args[0], args[1],
-                    // Load the actions
-                    actions.length === 0 ? [] : [actions]
+                    // Load the actions and alters
+                    actions.length === 0 ? emptyList : [actions], alters
                 )
         );
 

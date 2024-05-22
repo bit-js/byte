@@ -1,6 +1,6 @@
 import type { BaseRouter } from '@bit-js/blitz';
 
-import type { Fn } from './types/handler';
+import type { AlterFn, Fn } from './types/handler';
 import type { ValidatorRecord } from './types/validator';
 
 import { isAsync, passChecks } from './utils/macro';
@@ -22,13 +22,14 @@ export class Route<
         readonly path: Path,
         readonly validator: Validator,
         readonly handler: Handler,
-        readonly actions: Fn[][]
+        readonly actions: Fn[][],
+        readonly alters: AlterFn[]
     ) { }
 
     /**
      * Clone the route with a new base path
      */
-    clone(base: string, otherAppActions: Fn[]) {
+    clone(base: string, otherAppActions: Fn[], otherAppAlters: AlterFn[]) {
         const { path } = this;
 
         return new Route(
@@ -38,7 +39,8 @@ export class Route<
             // Copy other props
             this.validator, this.handler,
             // Push other stuff
-            [otherAppActions, ...this.actions]
+            [otherAppActions, ...this.actions],
+            [...this.alters, ...otherAppAlters]
         );
     }
 
@@ -54,23 +56,29 @@ export class Route<
 
     /**
      * Compile the route into a single function
+     *
      */
     compile() {
-        const { handler, validator, actions } = this;
+        const { handler, validator, actions, alters } = this;
 
         // Conditions
-        const noDefer = actions.length === 0;
+        const noActions = actions.length === 0;
         const noValidator = validator === null;
+        const noAlters = alters.length === 0;
 
-        if (noValidator && noDefer) return handler;
+        if (noValidator && noActions && noAlters) return handler;
 
-        const keys = [], statements = [],
-            values = [], paramsKeys = [];
+        const keys = [];
+        const statements = [];
+        const values = [];
+        const paramsKeys = [];
 
-        let hasAsync = false, noContext = true, idx = 0;
+        let hasAsync = false;
+        let noContext = true;
+        let idx = 0;
 
         // Compile actions and check result
-        if (!noDefer)
+        if (!noActions)
             // Loop in reverse each app action
             for (let i = actions.length - 1; i > -1; --i) {
                 const list = actions[i];
@@ -89,13 +97,12 @@ export class Route<
                     noContext = noContext && fnNoContext;
 
                     const result = `${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`;
-                    if (passChecks(fn)) {
+                    if (passChecks(fn))
                         statements.push(result);
-                        continue;
+                    else {
+                        const valKey = `c${idx}`;
+                        statements.push(`const ${valKey}=${result};if(${valKey} instanceof Response)return ${valKey}`);
                     }
-
-                    const valKey = `c${idx}`;
-                    statements.push(`const ${valKey}=${result};if(${valKey} instanceof Response)return ${valKey}`);
 
                     ++idx;
                 }
@@ -117,13 +124,12 @@ export class Route<
                 noContext = noContext && fnNoContext;
 
                 const result = `${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`;
-                if (passChecks(fn)) {
+                if (passChecks(fn))
                     paramsKeys.push(`${key}:${result}`);
-                    continue;
+                else {
+                    paramsKeys.push(key);
+                    statements.push(`const ${key}=${result};if(${key} instanceof Response)return ${key}`);
                 }
-
-                paramsKeys.push(key);
-                statements.push(`const ${key}=${result};if(${key} instanceof Response)return ${key}`);
 
                 ++idx;
             }
@@ -136,13 +142,39 @@ export class Route<
         keys.push('$');
         values.push(handler);
 
-        const fnNoContext = handler.length === 0;
-        noContext = noContext && fnNoContext;
+        const handlerNoContext = handler.length === 0;
+        noContext = noContext && handlerNoContext;
 
-        // Save some milliseconds if the function is async
-        statements.push(`return ${isAsync(handler) && hasAsync ? 'await ' : ''}$(${fnNoContext ? '' : 'c'})`);
+        // Check for alters
+        if (noAlters)
+            // Save some milliseconds if the function is async
+            statements.push(`return ${isAsync(handler) && hasAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'});`);
+        else {
+            const fnAsync = isAsync(handler);
+            hasAsync = hasAsync || fnAsync;
 
-        // Build the function
+            statements.push(`const r=${fnAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'})`);
+
+            for (let i = 0, { length } = alters; i < length; ++i) {
+                const fn = alters[i];
+                const fnKey = `f${idx}`;
+
+                keys.push(fnKey);
+                values.push(fn);
+
+                const fnAsync = isAsync(fn);
+                hasAsync = hasAsync || fnAsync;
+
+                const fnNoContext = fn.length < 2;
+                noContext = noContext && fnNoContext;
+
+                statements.push(`${fnAsync ? 'await ' : ''}${fnKey}(${fn.length === 0 ? '' : noContext ? 'r' : 'r,c'})`);
+                ++idx;
+            }
+
+            statements.push('return r;');
+        }
+
         return Function(...keys, `return ${hasAsync ? 'async ' : ''}(${noContext ? '' : 'c'})=>{${statements.join(';')}}`)(...values);
     }
 }

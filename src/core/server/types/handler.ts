@@ -55,5 +55,5 @@ export type BaseContext = Context<any, any>;
 // Basic handler and actions
 export type BaseHandler<Path extends string, State = undefined> = (c: Context<Params<Path>, State>) => any;
 
-// A function with one argument
 export type Fn<R = any> = (c: BaseContext) => R;
+export type AlterFn = (res: Response, c: BaseContext) => any;
