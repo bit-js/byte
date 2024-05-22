@@ -56,4 +56,4 @@ export type BaseContext = Context<any, any>;
 export type BaseHandler<Path extends string, State = undefined> = (c: Context<Params<Path>, State>) => any;
 
 export type Fn<R = any> = (c: BaseContext) => R;
-export type AlterFn = (res: Response, c: BaseContext) => any;
+export type DeferFn = (c: BaseContext & { res: Response }) => any;

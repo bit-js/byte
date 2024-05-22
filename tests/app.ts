@@ -23,11 +23,11 @@ export const apiWithCsrf = new Byte()
     .get('/', send.body('Hi'));
 
 // Alters
-export const apiWithAlters = new Byte()
+export const apiWithDefers = new Byte()
     .use((ctx) => console.time(ctx.path))
-    .alter((res, ctx) => {
+    .defer((ctx) => {
         // You should change the response here
-        console.log(res.ok);
+        console.log(ctx.res.ok);
         console.timeEnd(ctx.path);
     })
     .get('/', send.body('Hi'));

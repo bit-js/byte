@@ -4,7 +4,7 @@ import type { ProtoSchema, RequestMethod } from '../utils/methods';
 
 import { Route, type BaseRoute, type RoutesRecord } from './route';
 import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
-import { Context, type AlterFn, type BaseHandler, type Fn } from './types/handler';
+import { Context, type BaseHandler, type DeferFn, type Fn } from './types/handler';
 
 import { bit } from '../client';
 import { emptyList } from '../../utils/defaultOptions';
@@ -46,7 +46,7 @@ export abstract class Plugin {
  */
 export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     readonly actions: Fn[] = [];
-    readonly alters: AlterFn[] = [];
+    readonly defers: DeferFn[] = [];
 
     /**
      * Run before validation
@@ -59,8 +59,8 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     /**
      * Run after response handler
      */
-    alter(...fns: AlterFn[]) {
-        this.alters.push(...fns);
+    defer(...fns: DeferFn[]) {
+        this.defers.push(...fns);
         return this;
     }
 
@@ -82,10 +82,10 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     /**
      * Register sub-routes
      */
-    route(base: string, { routes, actions, alters }: BaseByte) {
+    route(base: string, { routes, actions, defers }: BaseByte) {
         const currentRoutes = this.routes;
         for (let i = 0, { length } = routes; i < length; ++i)
-            currentRoutes.push(routes[i].clone(base, actions, alters));
+            currentRoutes.push(routes[i].clone(base, actions, defers));
 
         return this;
     }
@@ -123,7 +123,7 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
      */
     handle(method: string, path: string, ...args: any[]) {
         // Load necessary actions
-        const { actions, alters } = this;
+        const { actions, defers } = this;
 
         // Push new route
         this.routes.push(
@@ -133,14 +133,16 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
                     // Check for validator
                     null, args[0],
                     // Load the actions and alters
-                    actions.length === 0 ? emptyList : [actions], alters
+                    actions.length === 0 ? emptyList : [actions],
+                    defers.length === 0 ? emptyList : [defers]
                 )
                 : new Route(
                     method, path,
                     // Check for validator
                     args[0], args[1],
                     // Load the actions and alters
-                    actions.length === 0 ? emptyList : [actions], alters
+                    actions.length === 0 ? emptyList : [actions],
+                    defers.length === 0 ? emptyList : [defers]
                 )
         );
 
@@ -164,7 +166,7 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     /**
      * Create an alter handler
      */
-    static alter<const T extends AlterFn>(fn: T) {
+    static defer<const T extends DeferFn>(fn: T) {
         return fn;
     }
 

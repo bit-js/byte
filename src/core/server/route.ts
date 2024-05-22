@@ -1,6 +1,6 @@
 import type { BaseRouter } from '@bit-js/blitz';
 
-import type { AlterFn, Fn } from './types/handler';
+import type { DeferFn, Fn } from './types/handler';
 import type { ValidatorRecord } from './types/validator';
 
 import { isAsync, passChecks } from './utils/macro';
@@ -23,13 +23,13 @@ export class Route<
         readonly validator: Validator,
         readonly handler: Handler,
         readonly actions: Fn[][],
-        readonly alters: AlterFn[]
+        readonly defers: DeferFn[][]
     ) { }
 
     /**
      * Clone the route with a new base path
      */
-    clone(base: string, otherAppActions: Fn[], otherAppAlters: AlterFn[]) {
+    clone(base: string, otherAppActions: Fn[], otherAppDefers: DeferFn[]) {
         const { path } = this;
 
         return new Route(
@@ -39,8 +39,8 @@ export class Route<
             // Copy other props
             this.validator, this.handler,
             // Push other stuff
-            [otherAppActions, ...this.actions],
-            [...this.alters, ...otherAppAlters]
+            otherAppActions.length === 0 ? this.actions : [otherAppActions, ...this.actions],
+            otherAppDefers.length === 0 ? this.defers : [...this.defers, otherAppDefers]
         );
     }
 
@@ -59,14 +59,14 @@ export class Route<
      *
      */
     compile() {
-        const { handler, validator, actions, alters } = this;
+        const { handler, validator, actions, defers } = this;
 
         // Conditions
         const noActions = actions.length === 0;
         const noValidator = validator === null;
-        const noAlters = alters.length === 0;
+        const noDefers = defers.length === 0;
 
-        if (noValidator && noActions && noAlters) return handler;
+        if (noValidator && noActions && noDefers) return handler;
 
         const keys = [];
         const statements = [];
@@ -146,30 +146,35 @@ export class Route<
         noContext = noContext && handlerNoContext;
 
         // Check for alters
-        if (noAlters)
+        if (noDefers)
             // Save some milliseconds if the function is async
             statements.push(`return ${isAsync(handler) && hasAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'});`);
         else {
             const fnAsync = isAsync(handler);
             hasAsync = hasAsync || fnAsync;
 
-            statements.push(`const r=${fnAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'})`);
+            // Hold a ref to the context
+            statements.push(`const r=c.res=${fnAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'})`);
 
-            for (let i = 0, { length } = alters; i < length; ++i) {
-                const fn = alters[i];
-                const fnKey = `f${idx}`;
+            for (let i = 0, { length } = defers; i < length; ++i) {
+                const list = defers[i];
 
-                keys.push(fnKey);
-                values.push(fn);
+                for (let i = list.length - 1; i > -1; --i) {
+                    const fn = list[i];
+                    const fnKey = `f${idx}`;
 
-                const fnAsync = isAsync(fn);
-                hasAsync = hasAsync || fnAsync;
+                    keys.push(fnKey);
+                    values.push(fn);
 
-                const fnNoContext = fn.length < 2;
-                noContext = noContext && fnNoContext;
+                    const fnAsync = isAsync(fn);
+                    hasAsync = hasAsync || fnAsync;
 
-                statements.push(`${fnAsync ? 'await ' : ''}${fnKey}(${fn.length === 0 ? '' : noContext ? 'r' : 'r,c'})`);
-                ++idx;
+                    const fnNoContext = fn.length === 0;
+                    noContext = noContext && fnNoContext;
+
+                    statements.push(`${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
+                    ++idx;
+                }
             }
 
             statements.push('return r;');

@@ -1,10 +1,10 @@
 import { test, expect, spyOn } from 'bun:test';
-import { apiWithAlters } from '@app';
+import { apiWithDefers } from '@app';
 
-const client = apiWithAlters.client();
+const client = apiWithDefers.client();
 
 test('Alters', async () => {
-    const timeSpy = spyOn(console, 'timeEnd')
+    const timeSpy = spyOn(console, 'timeEnd');
 
     const res = await client.get('/');
     expect(await res.text()).toBe('Hi');
