@@ -27,7 +27,7 @@ const routes = new Array(routesCount);
 for (let i = 0; i < routesCount; ++i)
     routes[i] = { part: makePath(i), value: `"${Math.random()}"` };
 
-export async function exec(name, content, chain) {
+export async function exec(name, content, chain, build) {
     const path = `./dist/${name}.js`;
 
     if (process.argv[2] !== 'test') {
@@ -36,8 +36,8 @@ export async function exec(name, content, chain) {
         for (let i = 0; i < routesCount; ++i)
             content.push(chain(routes[i]));
 
-        if (!name.startsWith('blitz')) content.push('app.fetch(new Request("http://localhost:3000"))');
-        else content.push('app.build()');
+        if (build === undefined) content.push('app.fetch(new Request("http://localhost:3000"))');
+        else content.push(build);
 
         content.push(`console.timeEnd("${name}: Build ${routesCount} routes")`);
         await Bun.write(path, content.join('\n'));
