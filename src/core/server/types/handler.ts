@@ -17,14 +17,6 @@ export class Context<Params, State = undefined> extends TypedContext<Params> imp
     }
 
     /**
-     * Send response as plain text
-     */
-    text<const T extends NullableBody>(body: T): BasicResponse<T> {
-        this.headers['Content-Type'] = 'text/plain';
-        return new Response(body, this as ResponseInit) as any;
-    }
-
-    /**
      * Send response as JSON
      */
     json<const T>(body: T): JsonResponse<T> {

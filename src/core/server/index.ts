@@ -243,6 +243,5 @@ export * from './types/validator';
 export * from './types/responseInit';
 
 // Internals and utils
-export * from './utils/parsers';
 export * from './utils/responses';
 export * from './utils/macro';
