@@ -80,7 +80,7 @@ export class Route<
         // Compile actions and check result
         if (!noActions)
             // Loop in reverse each app action
-            for (let i = actions.length - 1; i > -1; --i) {
+            for (let i = 0, { length } = actions; i < length; ++i) {
                 const list = actions[i];
 
                 for (let i = 0, { length } = list; i < length; ++i) {

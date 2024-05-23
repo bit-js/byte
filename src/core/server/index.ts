@@ -82,8 +82,10 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     /**
      * Register sub-routes
      */
-    route(base: string, { routes, actions, defers }: BaseByte) {
+    route(base: string, { routes }: BaseByte) {
         const currentRoutes = this.routes;
+        const { actions, defers } = this;
+
         for (let i = 0, { length } = routes; i < length; ++i)
             currentRoutes.push(routes[i].clone(base, actions, defers));
 
