@@ -1,13 +1,37 @@
-import { Context as TypedContext, type Params } from '@bit-js/blitz';
+import type { Params } from '@bit-js/blitz';
 import type { BasicResponse, JsonResponse, NullableBody } from '../utils/responses';
 import type { CommonHeaders, CommonResponseInit } from '../types/responseInit';
 
 // Base context
-export class Context<Params, State = undefined> extends TypedContext<Params> implements CommonResponseInit {
+export class Context<Params, State = undefined> implements CommonResponseInit {
     state!: State;
-
     status!: number;
-    headers = {} as CommonHeaders;
+    headers: CommonHeaders;
+
+    readonly path: string;
+    readonly pathStart: number;
+    readonly pathEnd: number;
+    readonly params!: Params;
+    readonly req: Request;
+
+    /**
+     * Parse the request
+     */
+    constructor(req: Request) {
+        this.req = req;
+        this.headers = {};
+
+        const { url } = req;
+
+        const start = url.indexOf('/', 12);
+
+        const end = url.indexOf('?', start + 1);
+        const pathEnd = end === -1 ? url.length : end;
+
+        this.pathStart = start;
+        this.pathEnd = pathEnd;
+        this.path = url.substring(start, pathEnd);
+    }
 
     /**
      * Send a `BodyInit` as response

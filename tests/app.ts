@@ -1,5 +1,5 @@
 // Server
-import { Byte, parse, cors, csrf, send } from '@bit-js/byte';
+import { Byte, cors, csrf, send } from '@bit-js/byte';
 
 // Basic responses
 export const basicApis = new Byte()
@@ -8,9 +8,7 @@ export const basicApis = new Byte()
 
 // Parse & send JSON
 export const jsonApis = new Byte()
-    .post('/json', {
-        body: parse.json()
-    }, (ctx) => ctx.json(ctx.state.body));
+    .post('/json', async (ctx) => ctx.json(await ctx.req.json()));
 
 // CORS
 export const apiWithCors = new Byte()
