@@ -95,7 +95,7 @@ export type CommonHeaders = {
  * ResponseInit with commonly used props value
  */
 export interface CommonResponseInit {
-    status?: keyof StatusMap | (number & {});
+    status?: CommonStatus | (number & {});
     statusText?: StatusMap[CommonStatus] | (string & {});
 
     headers?: CommonHeaders;

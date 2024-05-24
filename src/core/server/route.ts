@@ -154,7 +154,7 @@ export class Route<
             hasAsync = hasAsync || fnAsync;
 
             // Hold a ref to the context
-            statements.push(`const r=c.res=${fnAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'})`);
+            statements.push(`c.res=${fnAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'})`);
 
             for (let i = 0, { length } = defers; i < length; ++i) {
                 const list = defers[i];
@@ -177,7 +177,7 @@ export class Route<
                 }
             }
 
-            statements.push('return r;');
+            statements.push('return c.res;');
         }
 
         return Function(...keys, `return ${hasAsync ? 'async ' : ''}(${noContext ? '' : 'c'})=>{${statements.join(';')}}`)(...values);

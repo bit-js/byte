@@ -18,9 +18,6 @@ export interface JsonResponse<T> extends Response {
 
 export type NullableBody = BodyInit | null;
 
-const textHeaders = { 'Content-Type': 'text/plain' };
-const textInit = { headers: textHeaders };
-
 const jsonHeaders = { 'Content-Type': 'application/json' };
 const jsonInit = { headers: jsonHeaders };
 
@@ -33,19 +30,6 @@ const htmlInit = { headers: htmlHeaders };
 export const send = {
     body<const T extends NullableBody>(body: T, init?: CommonResponseInit): () => BasicResponse<T> {
         const res = typeof init === 'undefined' ? new Response(body) : new Response(body, init as ResponseInit);
-        return (): any => res.clone();
-    },
-
-    text<const T extends NullableBody>(body: T, init?: CommonResponseInit): () => BasicResponse<T> {
-        if (typeof init === 'undefined')
-            init = textInit;
-
-        if (typeof init.headers === 'undefined')
-            init.headers = textHeaders;
-        else
-            init.headers['Content-Type'] = 'text/plain';
-
-        const res = new Response(body, init as ResponseInit);
         return (): any => res.clone();
     },
 
