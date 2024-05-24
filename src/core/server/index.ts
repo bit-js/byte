@@ -7,7 +7,7 @@ import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
 import { Context, type BaseHandler, type DeferFn, type Fn } from './types/handler';
 
 import { bit } from '../client';
-import { emptyList } from '../../utils/defaultOptions';
+import { default404, emptyList } from '../../utils/defaultOptions';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord> {
@@ -99,6 +99,7 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
      */
     build(router: BaseRouter = new Blitz()) {
         const { routes } = this;
+        router.fallback ??= default404;
 
         for (let i = 0, { length } = routes; i < length; ++i)
             routes[i].register(router);
