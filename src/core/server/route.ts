@@ -101,7 +101,7 @@ export class Route<
                         statements.push(result);
                     else {
                         const valKey = `c${idx}`;
-                        statements.push(`const ${valKey}=${result};if(${valKey} instanceof Response)return ${valKey}`);
+                        statements.push(`{const ${valKey}=${result};if(${valKey} instanceof Response)return ${valKey};}`);
                     }
 
                     ++idx;
@@ -110,6 +110,8 @@ export class Route<
 
         // Compile validators and check result
         if (!noValidator) {
+            const validatorStatements: string[] = [];
+
             for (const key in validator) {
                 // Validators
                 const fn = validator[key], fnKey = 'f' + idx;
@@ -128,14 +130,15 @@ export class Route<
                     paramsKeys.push(`${key}:${result}`);
                 else {
                     paramsKeys.push(key);
-                    statements.push(`const ${key}=${result};if(${key} instanceof Response)return ${key}`);
+                    validatorStatements.push(`const ${key}=${result};if(${key} instanceof Response)return ${key}`);
                 }
 
                 ++idx;
             }
 
             // Set state
-            statements.push(`c.state={${paramsKeys.join()}}`);
+            validatorStatements.push(`c.state={${paramsKeys.join()}};`);
+            statements.push(`{${validatorStatements.join(';')}}`);
         }
 
         // Restricted variable for the main handler
