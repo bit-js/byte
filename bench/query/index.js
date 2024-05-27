@@ -5,7 +5,7 @@ const params = 'items=1&items=2&name=Reve&age=16&admin';
 const ctx = new Context(new Request('http://localhost:3000/?' + params));
 
 const parse = query.schema({
-    items: { type: 'number', maxLength: 10 },
+    items: { type: 'number', maxItems: 10 },
     name: { type: 'string' },
     age: { type: 'number' },
     admin: { type: 'bool' }
