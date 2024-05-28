@@ -69,7 +69,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
 export type BaseContext = Context<any, any>;
 
 // Basic handler and actions
-export type BaseHandler<Path extends string, State = undefined> = (c: Context<Params<Path>, State>) => any;
+export type BaseHandler<Path extends string, Set, State = undefined> = (c: Context<Params<Path>, State> & Set) => any;
 
-export type Fn<R = any> = (c: BaseContext) => R;
-export type DeferFn = (c: BaseContext & { res: any }) => any;
+export type Fn<T = any> = (c: BaseContext & T) => any;
+export type DeferFn<T = any> = (c: BaseContext & T & { res: any }) => any;

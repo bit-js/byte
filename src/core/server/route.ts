@@ -12,7 +12,7 @@ export class Route<
     Method extends string,
     Path extends string,
     Validator extends ValidatorRecord<Path>,
-    Handler extends Fn
+    Handler extends Fn<any>
 > {
     /**
      * Create a route procedure

@@ -2,19 +2,21 @@ import Blitz, { BaseRouter } from '@bit-js/blitz';
 
 import type { ProtoSchema, RequestMethod } from '../utils/methods';
 
-import { Route, type BaseRoute, type RoutesRecord } from './route';
+import { Route, type RoutesRecord } from './route';
 import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
 import { Context, type BaseHandler, type DeferFn, type Fn } from './types/handler';
 
 import { bit } from '../client';
 import { default404, emptyList } from '../../utils/defaultOptions';
+import { $pass, isAsync } from './utils/macro';
+import type { AwaitedReturn } from '../utils/types';
 
 // Methods to register request handlers
-interface Register<Method extends string, T extends RoutesRecord> {
+interface Register<Method extends string, T extends RoutesRecord, State> {
     <
         const Path extends string,
         const Validator extends ValidatorRecord<Path>,
-        const Handler extends BaseHandler<Path, InferValidatorRecord<Validator>>,
+        const Handler extends BaseHandler<Path, State, InferValidatorRecord<Validator>>,
     >(
         path: Path,
         validator: Validator,
@@ -23,15 +25,15 @@ interface Register<Method extends string, T extends RoutesRecord> {
 
     <
         const Path extends string,
-        const Handler extends BaseHandler<Path>,
+        const Handler extends BaseHandler<Path, State>,
     >(
         path: Path,
         handlers: Handler
     ): Byte<[...T, Route<Method, Path, null, Handler>]>;
 };
 
-type HandlerRegisters<T extends RoutesRecord> = {
-    [Method in RequestMethod | 'any']: Register<Method, T>;
+type HandlerRegisters<T extends RoutesRecord, State> = {
+    [Method in RequestMethod | 'any']: Register<Method, T, State>;
 };
 
 /**
@@ -44,22 +46,33 @@ export abstract class Plugin {
 /**
  * Create a Byte app
  */
-export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
-    readonly actions: Fn[] = [];
-    readonly defers: DeferFn[] = [];
+export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSchema {
+    readonly actions: Fn<State>[] = [];
+    readonly defers: DeferFn<State>[] = [];
 
     /**
      * Run before validation
      */
-    use(...fns: Fn[]) {
+    use(...fns: Fn<State>[]) {
         this.actions.push(...fns);
         return this;
     }
 
     /**
+     * Bind a prop to the context
+     */
+    set<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter): Byte<Rec, State & { [K in Name]: AwaitedReturn<Getter> }> {
+        const fnAsync = isAsync(fn);
+        const noContext = fn.length === 0;
+
+        // @ts-ignore
+        return this.use($pass(Function('f', `return ${fnAsync ? 'async ' : ''}(c)=>{c.${name}=${fnAsync ? 'await ' : ''}f(${noContext ? '' : 'c'});}`)(fn)));
+    }
+
+    /**
      * Run after response handler
      */
-    defer(...fns: DeferFn[]) {
+    defer(...fns: DeferFn<State>[]) {
         this.defers.push(...fns);
         return this;
     }
@@ -77,7 +90,7 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     /**
      * Routes record
      */
-    readonly routes: BaseRoute[] = [];
+    readonly routes: Rec = [] as any;
 
     /**
      * Register sub-routes
@@ -231,10 +244,9 @@ export class Byte<Rec extends RoutesRecord = []> implements ProtoSchema {
     }
 }
 
-export interface Byte<Rec> extends HandlerRegisters<Rec> { };
+export interface Byte<Rec, State> extends HandlerRegisters<Rec, State> { };
 
-export type BaseByte = Byte<RoutesRecord>;
-export type InferByteRecord<T extends BaseByte> = T extends Byte<infer R> ? R : [];
+export type BaseByte = Byte<RoutesRecord, any>;
 
 // Types
 export * from './route';

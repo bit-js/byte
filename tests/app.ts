@@ -20,7 +20,7 @@ export const apiWithCsrf = new Byte()
     .use(csrf())
     .get('/', send.body('Hi'));
 
-// Alters
+// Defers
 export const apiWithDefers = new Byte()
     .use((ctx) => console.time(ctx.path))
     .defer((ctx) => {
@@ -29,3 +29,8 @@ export const apiWithDefers = new Byte()
         console.timeEnd(ctx.path);
     })
     .get('/', send.body('Hi'));
+
+// Set props
+export const apiWithSet = new Byte()
+    .set('startTime', performance.now)
+    .get('/', (ctx) => ctx.body(performance.now() - ctx.startTime + ''));

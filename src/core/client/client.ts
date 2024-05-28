@@ -1,4 +1,4 @@
-import type { BaseByte, InferByteRecord } from '../server';
+import type { BaseByte } from '../server';
 
 import serialize from './utils/serialize';
 import getInjectFn from './utils/pathInject';
@@ -14,7 +14,7 @@ import type { ProtoSchema } from '../utils/methods';
 /**
  * Infer client type
  */
-export type InferClient<T extends BaseByte> = UnionToIntersection<InferRoutes<InferByteRecord<T>>>;
+export type InferClient<T extends BaseByte> = UnionToIntersection<InferRoutes<T['routes']>>;
 
 /**
  * Customize client
