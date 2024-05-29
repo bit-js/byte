@@ -19,7 +19,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
      */
     constructor(req: Request) {
         this.req = req;
-        this.headers = {};
+        this.headers = [];
 
         const { url } = req;
 
@@ -44,7 +44,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
      * Send response as JSON
      */
     json<const T>(body: T): JsonResponse<T> {
-        this.headers['Content-Type'] = 'application/json';
+        this.headers.push(['Content-Type', 'application/json']);
         return new Response(JSON.stringify(body), this as ResponseInit);
     }
 
@@ -52,7 +52,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
      * Send HTML response
      */
     html<const T extends NullableBody>(body: T): BasicResponse<T> {
-        this.headers['Content-Type'] = 'text/html';
+        this.headers.push(['Content-Type', 'text/html']);
         return new Response(body, this as ResponseInit) as any;
     }
 
@@ -60,7 +60,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
      * Send HTML response
      */
     redirect(location: string, status: 301 | 302 | 307 | 308): Response {
-        this.headers.Location = location;
+        this.headers.push(['Location', location]);
         this.status = status;
         return new Response(null, this as ResponseInit);
     }

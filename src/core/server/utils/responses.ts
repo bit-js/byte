@@ -1,4 +1,4 @@
-import type { CommonResponseInit } from '../types/responseInit';
+import type { CommonHeaders, CommonResponseInit } from '../types/responseInit';
 import type { MaybePromise } from '../../utils/types';
 
 // Basic response
@@ -18,10 +18,12 @@ export interface JsonResponse<T> extends Response {
 
 export type NullableBody = BodyInit | null;
 
-const jsonHeaders = { 'Content-Type': 'application/json' };
+const jsonPair = ['Content-Type', 'application/json'] satisfies CommonHeaders[number];
+const jsonHeaders = [jsonPair] satisfies CommonHeaders;
 const jsonInit = { headers: jsonHeaders };
 
-const htmlHeaders = { 'Content-Type': 'text/html' };
+const htmlPair = ['Content-Type', 'text/html'] satisfies CommonHeaders[number];
+const htmlHeaders = [htmlPair] satisfies CommonHeaders;
 const htmlInit = { headers: htmlHeaders };
 
 /**
@@ -36,11 +38,10 @@ export const send = {
     json<const T>(body: T, init?: CommonResponseInit): () => JsonResponse<T> {
         if (typeof init === 'undefined')
             init = jsonInit;
-
-        if (typeof init.headers === 'undefined')
+        else if (typeof init.headers === 'undefined')
             init.headers = jsonHeaders;
         else
-            init.headers['Content-Type'] = 'application/json';
+            init.headers.push(jsonPair);
 
         const res = new Response(JSON.stringify(body), init as ResponseInit);
         return (): any => res.clone();
@@ -49,11 +50,10 @@ export const send = {
     html<const T extends NullableBody>(body: T, init?: CommonResponseInit): () => BasicResponse<T> {
         if (typeof init === 'undefined')
             init = htmlInit;
-
-        if (typeof init.headers === 'undefined')
+        else if (typeof init.headers === 'undefined')
             init.headers = htmlHeaders;
         else
-            init.headers['Content-Type'] = 'text/html';
+            init.headers.push(htmlPair);
 
         const res = new Response(body, init as ResponseInit);
         return (): any => res.clone();

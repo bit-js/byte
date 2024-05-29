@@ -78,18 +78,17 @@ export type MIMETypes = ImageMIMETypes | TextMIMETypes
     | AppMIMETypes | AudioMIMETypes | VideoMIMETypes
     | FontMIMETypes | (string & {});
 
-export type CommonHeaders = {
-    [K in 'Set-Cookie' | 'Cache-Control' | 'Server'
+export type CommonHeaders = ([
+    'Set-Cookie' | 'Cache-Control' | 'Server'
     | 'Location' | 'ETag' | 'Referrer-Policy' | 'Vary' | 'Link'
     | 'Access-Control-Allow-Credentials' | 'Access-Control-Allow-Headers'
     | 'Access-Control-Allow-Methods' | 'Access-Control-Allow-Origin'
     | 'Access-Control-Expose-Headers' | 'Access-Control-Max-Age'
     | 'Access-Control-Request-Headers' | 'Access-Control-Request-Method'
     | 'Strict-Transport-Security' | 'Content-Security-Policy' | 'Connection'
-    | 'Server-Timing' | 'Keep-Alive' | 'Last-Modified' | 'Expires']?: string | string[];
-} & {
-    'Content-Type'?: MIMETypes;
-} & Record<string, string>;
+    | 'Server-Timing' | 'Keep-Alive' | 'Last-Modified' | 'Expires' | (string & {}),
+    string
+] | ['Content-Type', MIMETypes])[];
 
 /**
  * ResponseInit with commonly used props value
