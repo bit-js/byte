@@ -24,7 +24,6 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
         const { url } = req;
 
         const start = url.indexOf('/', 12);
-
         const end = url.indexOf('?', start + 1);
         const pathEnd = end === -1 ? url.length : end;
 
