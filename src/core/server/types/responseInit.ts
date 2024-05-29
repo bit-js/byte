@@ -89,7 +89,7 @@ export type CommonHeaders = {
     | 'Server-Timing' | 'Keep-Alive' | 'Last-Modified' | 'Expires']?: string | string[];
 } & {
     'Content-Type'?: MIMETypes;
-} & Record<string, string | string[]>;
+} & Record<string, string>;
 
 /**
  * ResponseInit with commonly used props value
