@@ -18,11 +18,11 @@ export interface JsonResponse<T> extends Response {
 
 export type NullableBody = BodyInit | null;
 
-const jsonPair = ['Content-Type', 'application/json'] satisfies CommonHeaders[number];
+export const jsonPair = ['Content-Type', 'application/json'] satisfies CommonHeaders[number];
 const jsonHeaders = [jsonPair] satisfies CommonHeaders;
 const jsonInit = { headers: jsonHeaders };
 
-const htmlPair = ['Content-Type', 'text/html'] satisfies CommonHeaders[number];
+export const htmlPair = ['Content-Type', 'text/html'] satisfies CommonHeaders[number];
 const htmlHeaders = [htmlPair] satisfies CommonHeaders;
 const htmlInit = { headers: htmlHeaders };
 

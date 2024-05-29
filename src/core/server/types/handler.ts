@@ -1,5 +1,5 @@
 import type { Params } from '@bit-js/blitz';
-import type { BasicResponse, JsonResponse, NullableBody } from '../utils/responses';
+import { htmlPair, jsonPair, type BasicResponse, type JsonResponse, type NullableBody } from '../utils/responses';
 import type { CommonHeaders, CommonResponseInit } from '../types/responseInit';
 
 // Base context
@@ -44,7 +44,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
      * Send response as JSON
      */
     json<const T>(body: T): JsonResponse<T> {
-        this.headers.push(['Content-Type', 'application/json']);
+        this.headers.push(jsonPair);
         return new Response(JSON.stringify(body), this as ResponseInit);
     }
 
@@ -52,7 +52,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
      * Send HTML response
      */
     html<const T extends NullableBody>(body: T): BasicResponse<T> {
-        this.headers.push(['Content-Type', 'text/html']);
+        this.headers.push(htmlPair);
         return new Response(body, this as ResponseInit) as any;
     }
 
