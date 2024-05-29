@@ -8,7 +8,7 @@ import { Context, type BaseHandler, type DeferFn, type Fn } from './types/handle
 
 import { bit } from '../client';
 import { default404, emptyList } from '../../utils/defaultOptions';
-import { $pass, isAsync } from './utils/macro';
+import { $set } from './utils/macro';
 import type { AwaitedReturn } from '../utils/types';
 
 // Methods to register request handlers
@@ -62,11 +62,8 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
      * Bind a prop to the context
      */
     set<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter): Byte<Rec, State & { [K in Name]: AwaitedReturn<Getter> }> {
-        const fnAsync = isAsync(fn);
-        const noContext = fn.length === 0;
-
         // @ts-ignore
-        return this.use($pass(Function('f', `return ${fnAsync ? 'async ' : ''}(c)=>{c.${name}=${fnAsync ? 'await ' : ''}f(${noContext ? '' : 'c'});}`)(fn)));
+        return this.use($set(name, fn));
     }
 
     /**

@@ -3,7 +3,7 @@ import type { BaseRouter } from '@bit-js/blitz';
 import type { DeferFn, Fn } from './types/handler';
 import type { ValidatorRecord } from './types/validator';
 
-import { isAsync, passChecks } from './utils/macro';
+import { getPropOfSetter, isAsync, passChecks } from './utils/macro';
 
 /**
  * Represent a route
@@ -97,7 +97,13 @@ export class Route<
                     noContext = noContext && fnNoContext;
 
                     const result = `${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`;
-                    if (passChecks(fn))
+
+                    // If this handler sets a request prop
+                    const setterProp = getPropOfSetter(fn);
+                    if (typeof setterProp === 'string')
+                        statements.push(`c.${setterProp}=${result};`);
+                    // If this handler doesn't require checks
+                    else if (passChecks(fn))
                         statements.push(result);
                     else {
                         const valKey = `c${idx}`;

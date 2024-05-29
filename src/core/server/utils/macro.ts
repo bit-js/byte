@@ -1,7 +1,7 @@
 import type { Fn } from '../types/handler';
 
 // Mark async macro
-export const AsyncFunction = (async function() { }).constructor;
+export const AsyncFunction = (async function () { }).constructor;
 export function $async<T extends Fn>(fn: T): T {
     fn.constructor = AsyncFunction;
     return fn;
@@ -19,4 +19,15 @@ export function $pass<T extends Fn>(fn: T): T {
 }
 export function passChecks(fn: any) {
     return passSymbol in fn;
+}
+
+// Setter macro
+const setterSymbol = Symbol('set');
+export function $set<T extends Fn>(prop: string, fn: T): T {
+    // @ts-ignore
+    fn[setterSymbol] = prop;
+    return fn;
+}
+export function getPropOfSetter(fn: any): string | undefined {
+    return fn[setterSymbol];
 }
