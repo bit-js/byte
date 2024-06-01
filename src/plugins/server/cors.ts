@@ -1,4 +1,4 @@
-import { $pass, type CommonHeaders, type Fn } from '../../core/server';
+import type { CommonHeaders, Fn } from '../../core/server';
 
 type Values = string | string[];
 
@@ -19,12 +19,12 @@ const allowCredentials = ['Access-Control-Allow-Credentials', 'true'] satisfies 
 const allowAllOrigins = ['Access-Control-Allow-Origin', '*'] satisfies CommonHeaders[number];
 const varyOrigin = ['Vary', 'Origin'] satisfies CommonHeaders[number];
 
-const defaultCors: Fn = $pass((c) => { c.headers.push(allowAllOrigins); });
+const defaultCors: Fn = (c) => { c.headers.push(allowAllOrigins); };
 
 /**
  * Create a CORS action function
  */
-export function cors(options?: CORSOptions) {
+export function cors(options?: CORSOptions): Fn {
     if (typeof options === 'undefined') return defaultCors;
 
     const builder: CommonHeaders = [];
@@ -51,9 +51,9 @@ export function cors(options?: CORSOptions) {
     // Small optimization
     if (builder.length === 1) {
         const first = builder[0];
-        return $pass((c) => { c.headers.push(first); })
+        return (c) => { c.headers.push(first); };
     }
 
-    return $pass((c) => { c.headers.push(...builder); });
+    return (c) => { c.headers.push(...builder); };
 }
 

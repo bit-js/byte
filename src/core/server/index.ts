@@ -8,7 +8,7 @@ import { Context, type BaseHandler, type DeferFn, type Fn } from './types/handle
 
 import { bit } from '../client';
 import { default404, emptyList } from '../../utils/defaultOptions';
-import { $set } from './utils/macro';
+import { $pass, $set } from './utils/macro';
 import type { AwaitedReturn } from '../utils/types';
 
 // Methods to register request handlers
@@ -51,7 +51,7 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     readonly defers: DeferFn<State>[] = [];
 
     /**
-     * Run before validation
+     * Register middlewares
      */
     use(...fns: Fn<State>[]) {
         this.actions.push(...fns);
@@ -59,11 +59,19 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     }
 
     /**
+     * Register middlewares that doesn't require validations
+     */
+    proc(...fns: Fn<State>[]) {
+        this.actions.push(...fns.map($pass));
+        return this;
+    }
+
+    /**
      * Bind a prop to the context
      */
     set<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter): Byte<Rec, State & { [K in Name]: AwaitedReturn<Getter> }> {
-        // @ts-ignore
-        return this.use($set(name, fn));
+        this.actions.push($set(name, fn));
+        return this as any;
     }
 
     /**
@@ -85,7 +93,7 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     }
 
     /**
-     * Routes record
+     * Routes record. Only use this to infer types
      */
     readonly routes: Rec = [] as any;
 
