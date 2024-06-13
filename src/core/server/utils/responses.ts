@@ -1,4 +1,4 @@
-import type { CommonHeaders, CommonResponseInit } from '../types/responseInit';
+import type { CommonResponseInit } from '../types/responseInit';
 import type { MaybePromise } from '../../utils/types';
 
 // Basic response
@@ -18,12 +18,12 @@ export interface JsonResponse<T> extends Response {
 
 export type NullableBody = BodyInit | null;
 
-export const jsonPair = ['Content-Type', 'application/json'] satisfies CommonHeaders[number];
-const jsonHeaders = [jsonPair] satisfies CommonHeaders;
+export const jsonPair = ['Content-Type', 'application/json'] as const;
+const jsonHeaders = [jsonPair];
 const jsonInit = { headers: jsonHeaders };
 
-export const htmlPair = ['Content-Type', 'text/html'] satisfies CommonHeaders[number];
-const htmlHeaders = [htmlPair] satisfies CommonHeaders;
+export const htmlPair = ['Content-Type', 'text/html'] as const;
+const htmlHeaders = [htmlPair];
 const htmlInit = { headers: htmlHeaders };
 
 /**

@@ -66,6 +66,14 @@ export interface StatusMap {
 }
 
 export type CommonStatus = keyof StatusMap;
+export type CommonHeaderName = 'Set-Cookie' | 'Cache-Control' | 'Server'
+    | 'Location' | 'ETag' | 'Referrer-Policy' | 'Vary' | 'Link'
+    | 'Access-Control-Allow-Credentials' | 'Access-Control-Allow-Headers'
+    | 'Access-Control-Allow-Methods' | 'Access-Control-Allow-Origin'
+    | 'Access-Control-Expose-Headers' | 'Access-Control-Max-Age'
+    | 'Access-Control-Request-Headers' | 'Access-Control-Request-Method'
+    | 'Strict-Transport-Security' | 'Content-Security-Policy' | 'Connection'
+    | 'Server-Timing' | 'Keep-Alive' | 'Last-Modified' | 'Expires'
 
 export type ImageMIMETypes = `image/${'bmp' | 'avif' | 'gif' | 'jpeg' | 'png' | 'svg+xml' | 'webp'}`;
 export type TextMIMETypes = `text/${'css' | 'csv' | 'html' | 'plain' | 'javascript' | 'event-stream'}`;
@@ -78,17 +86,7 @@ export type MIMETypes = ImageMIMETypes | TextMIMETypes
     | AppMIMETypes | AudioMIMETypes | VideoMIMETypes
     | FontMIMETypes | (string & {});
 
-export type CommonHeaders = ([
-    'Set-Cookie' | 'Cache-Control' | 'Server'
-    | 'Location' | 'ETag' | 'Referrer-Policy' | 'Vary' | 'Link'
-    | 'Access-Control-Allow-Credentials' | 'Access-Control-Allow-Headers'
-    | 'Access-Control-Allow-Methods' | 'Access-Control-Allow-Origin'
-    | 'Access-Control-Expose-Headers' | 'Access-Control-Max-Age'
-    | 'Access-Control-Request-Headers' | 'Access-Control-Request-Method'
-    | 'Strict-Transport-Security' | 'Content-Security-Policy' | 'Connection'
-    | 'Server-Timing' | 'Keep-Alive' | 'Last-Modified' | 'Expires' | (string & {}),
-    string
-] | ['Content-Type', MIMETypes])[];
+export type CommonHeaders = (readonly [CommonHeaderName, string] | readonly ['Content-Type', MIMETypes] | readonly [string, string])[];
 
 /**
  * ResponseInit with commonly used props value
@@ -96,7 +94,5 @@ export type CommonHeaders = ([
 export interface CommonResponseInit {
     status?: CommonStatus | (number & {});
     statusText?: StatusMap[CommonStatus] | (string & {});
-
     headers?: CommonHeaders;
 }
-

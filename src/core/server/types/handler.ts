@@ -36,7 +36,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
      * Send a `BodyInit` as response
      */
     body<const T extends NullableBody>(body: T): BasicResponse<T> {
-        return new Response(body, this as ResponseInit) as any;
+        return new Response(body, this as any) as any;
     }
 
     /**
@@ -44,7 +44,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
      */
     json<const T>(body: T): JsonResponse<T> {
         this.headers.push(jsonPair);
-        return new Response(JSON.stringify(body), this as ResponseInit);
+        return new Response(JSON.stringify(body), this as any);
     }
 
     /**
@@ -52,7 +52,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
      */
     html<const T extends NullableBody>(body: T): BasicResponse<T> {
         this.headers.push(htmlPair);
-        return new Response(body, this as ResponseInit) as any;
+        return new Response(body, this as any) as any;
     }
 
     /**
@@ -61,7 +61,7 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
     redirect(location: string, status: 301 | 302 | 307 | 308): Response {
         this.headers.push(['Location', location]);
         this.status = status;
-        return new Response(null, this as ResponseInit);
+        return new Response(null, this as any);
     }
 };
 
