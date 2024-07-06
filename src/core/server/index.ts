@@ -8,8 +8,9 @@ import { Context, type BaseHandler, type DeferFn, type Fn } from './types/handle
 
 import { bit } from '../client';
 import { default404, emptyList } from '../../utils/defaultOptions';
-import { $pass, $set } from './utils/macro';
+import { $pass, $set, $state } from './utils/macro';
 import type { AwaitedReturn } from '../utils/types';
+import type { GenericResponse } from './utils/responses';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord, State> {
@@ -21,7 +22,7 @@ interface Register<Method extends string, T extends RoutesRecord, State> {
         path: Path,
         validator: Validator,
         handler: Handler
-    ): Byte<[...T, Route<Method, Path, Validator, Handler>]>;
+    ): Byte<[...T, Route<Method, Path, Validator, Handler>], State>;
 
     <
         const Path extends string,
@@ -29,7 +30,7 @@ interface Register<Method extends string, T extends RoutesRecord, State> {
     >(
         path: Path,
         handlers: Handler
-    ): Byte<[...T, Route<Method, Path, null, Handler>]>;
+    ): Byte<[...T, Route<Method, Path, null, Handler>], State>;
 };
 
 type HandlerRegisters<T extends RoutesRecord, State> = {
@@ -75,6 +76,14 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     }
 
     /**
+     * Bind a prop to the context
+     */
+    state<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter): Byte<Rec, State & { [K in Name]: Exclude<AwaitedReturn<Getter>, GenericResponse> }> {
+        this.actions.push($state(name, fn));
+        return this as any;
+    }
+
+    /**
      * Run after response handler
      */
     defer(...fns: DeferFn<State>[]) {
@@ -100,7 +109,7 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     /**
      * Register sub-routes
      */
-    route(base: string, { routes }: BaseByte) {
+    route<T extends BaseByte>(base: string, { routes }: T) {
         const currentRoutes = this.routes;
         const { actions, defers } = this;
 
@@ -173,21 +182,21 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     /**
      * Create a validator
      */
-    static state<const T extends ValidatorRecord>(validator: T) {
+    static validate<const T extends ValidatorRecord>(validator: T) {
         return validator;
     }
 
     /**
      * Create a handler
      */
-    static handle<const T extends Fn>(fn: T) {
+    static handle<const T extends Fn<{}>>(fn: T) {
         return fn;
     }
 
     /**
      * Create an alter handler
      */
-    static defer<const T extends DeferFn>(fn: T) {
+    static defer<const T extends DeferFn<{}>>(fn: T) {
         return fn;
     }
 
@@ -201,8 +210,8 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     /**
      * Shorthand for registering subroutes
      */
-    static route(base: string, app: BaseByte): Byte {
-        return new Byte().route(base, app);
+    static route<T extends BaseByte>(base: string, app: T) {
+        return new Byte().route(base, app) as Byte;
     }
 
     /** @internal */

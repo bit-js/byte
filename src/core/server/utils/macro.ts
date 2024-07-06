@@ -31,3 +31,14 @@ export function $set<T extends Fn>(prop: string, fn: T): T {
 export function getPropOfSetter(fn: any): string | undefined {
     return fn[setterSymbol];
 }
+
+// Setter state macro
+const stateSetterSymbol = Symbol('set');
+export function $state<T extends Fn>(prop: string, fn: T): T {
+    // @ts-ignore
+    fn[stateSetterSymbol] = prop;
+    return fn;
+}
+export function getPropOfState(fn: any): string | undefined {
+    return fn[stateSetterSymbol];
+}
