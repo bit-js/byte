@@ -23,7 +23,7 @@ export type InferFormSchema<Schema extends FormSchema> = {
 
 export const form = {
   get<Options extends FormPropertyOptions>(prop: string, { type, multipleItems }: Options): (ctx: BaseContext) => Promise<InferFormPropertyOptions<Options> | null> {
-    return $async(Function(`const p=(f)=>${type === 'string'
+    return $async(Function('n', `const p=(f)=>${type === 'string'
       ? (multipleItems === true
         ? `{const v=f.getAll(${JSON.stringify(prop)});return v.every((x)=>typeof x==='string')?v:null;}`
         : `{const v=f.get(${JSON.stringify(prop)});return typeof v==='string'?v:null;}`)
@@ -36,7 +36,7 @@ export const form = {
             ? `{const v=f.getAll(${JSON.stringify(prop)});return v.every((x)=>x instanceof File)?v:null;}`
             : `{const v=f.get(${JSON.stringify(prop)});return v instanceof File?v:null;}`)
           : `f.has(${JSON.stringify(prop)})`
-      };return (c)=>c.req.formData().then(p);`)())
+      };return (c)=>c.req.formData().then(p).catch(n);`)(noop))
   },
 
   schema<Schema extends FormSchema>(schema: Schema): (ctx: BaseContext) => Promise<InferFormSchema<Schema> | null> {

@@ -3,8 +3,7 @@ import { htmlPair, jsonPair, type BasicResponse, type JsonResponse, type Nullabl
 import type { CommonHeaders, CommonResponseInit } from '../types/responseInit';
 
 // Base context
-export class Context<Params, State = undefined> implements CommonResponseInit {
-    state!: State;
+export class Context<Params> implements CommonResponseInit {
     status!: number;
     headers: CommonHeaders;
 
@@ -65,10 +64,10 @@ export class Context<Params, State = undefined> implements CommonResponseInit {
     }
 };
 
-export type BaseContext = Context<any, any>;
+export type BaseContext = Context<any>;
 
 // Basic handler and actions
-export type BaseHandler<Path extends string, Set, State = undefined> = (c: Context<Params<Path>, State> & Set) => any;
+export type BaseHandler<Path extends string, Set> = (c: Context<Params<Path>> & Set) => any;
 
 export type Fn<T = any> = (c: BaseContext & T) => any;
 export type DeferFn<T = any> = (c: BaseContext & T & { res: any }) => any;

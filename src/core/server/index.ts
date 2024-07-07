@@ -3,7 +3,6 @@ import Blitz, { BaseRouter } from '@bit-js/blitz';
 import type { ProtoSchema, RequestMethod } from '../utils/methods';
 
 import { Route, type RoutesRecord } from './route';
-import type { InferValidatorRecord, ValidatorRecord } from './types/validator';
 import { Context, type BaseHandler, type DeferFn, type Fn } from './types/handler';
 
 import { bit } from '../client';
@@ -16,13 +15,11 @@ import type { GenericResponse } from './utils/responses';
 interface Register<Method extends string, T extends RoutesRecord, State> {
     <
         const Path extends string,
-        const Validator extends ValidatorRecord<Path>,
-        const Handler extends BaseHandler<Path, State, InferValidatorRecord<Validator>>,
+        const Handler extends BaseHandler<Path, State>,
     >(
         path: Path,
-        validator: Validator,
         handler: Handler
-    ): Byte<[...T, Route<Method, Path, Validator, Handler>], State>;
+    ): Byte<[...T, Route<Method, Path, Handler>], State>;
 
     <
         const Path extends string,
@@ -30,7 +27,7 @@ interface Register<Method extends string, T extends RoutesRecord, State> {
     >(
         path: Path,
         handlers: Handler
-    ): Byte<[...T, Route<Method, Path, null, Handler>], State>;
+    ): Byte<[...T, Route<Method, Path, Handler>], State>;
 };
 
 type HandlerRegisters<T extends RoutesRecord, State> = {
@@ -70,17 +67,17 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     /**
      * Bind a prop to the context
      */
-    set<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter): Byte<Rec, State & { [K in Name]: AwaitedReturn<Getter> }> {
+    set<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter) {
         this.actions.push($set(name, fn));
-        return this as any;
+        return this as Byte<Rec, State & { [K in Name]: AwaitedReturn<Getter> }>;
     }
 
     /**
      * Bind a prop to the context
      */
-    state<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter): Byte<Rec, State & { [K in Name]: Exclude<AwaitedReturn<Getter>, GenericResponse> }> {
+    state<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter) {
         this.actions.push($state(name, fn));
-        return this as any;
+        return this as Byte<Rec, State & { [K in Name]: Exclude<AwaitedReturn<Getter>, GenericResponse> }>;
     }
 
     /**
@@ -126,7 +123,7 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
      */
     build(router: BaseRouter = new Blitz()) {
         const { routes } = this;
-        router.fallback ??= default404;
+        router.fallback = default404;
 
         for (let i = 0, { length } = routes; i < length; ++i)
             routes[i].register(router);
@@ -157,33 +154,17 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
 
         // Push new route
         this.routes.push(
-            typeof args[0] === 'function'
-                ? new Route(
-                    method, path,
-                    // Check for validator
-                    null, args[0],
-                    // Load the actions and alters
-                    actions.length === 0 ? emptyList : [actions],
-                    defers.length === 0 ? emptyList : [defers]
-                )
-                : new Route(
-                    method, path,
-                    // Check for validator
-                    args[0], args[1],
-                    // Load the actions and alters
-                    actions.length === 0 ? emptyList : [actions],
-                    defers.length === 0 ? emptyList : [defers]
-                )
+            new Route(
+                method, path,
+                // Check for validator
+                args[0],
+                // Load the actions and alters
+                actions.length === 0 ? emptyList : [actions],
+                defers.length === 0 ? emptyList : [defers]
+            )
         );
 
         return this;
-    }
-
-    /**
-     * Create a validator
-     */
-    static validate<const T extends ValidatorRecord>(validator: T) {
-        return validator;
     }
 
     /**
@@ -266,7 +247,6 @@ export type BaseByte = Byte<RoutesRecord, any>;
 export * from './route';
 
 export * from './types/handler';
-export * from './types/validator';
 export * from './types/responseInit';
 
 // Internals and utils

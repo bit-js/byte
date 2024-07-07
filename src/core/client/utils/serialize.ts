@@ -10,9 +10,7 @@ const objectSerializers: Record<string, Serializer> = {
 export default function serialize(input: any) {
     switch (typeof input) {
         case 'string': return input;
-
         case 'object': return input === null ? null : objectSerializers[input.constructor.name]?.(input) ?? input
-
         case 'number': return `${input}`;
         case 'bigint': return `${input}`;
         case 'boolean': return `${input}`;

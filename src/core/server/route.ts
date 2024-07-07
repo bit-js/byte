@@ -1,7 +1,6 @@
 import type { BaseRouter } from '@bit-js/blitz';
 
 import type { DeferFn, Fn } from './types/handler';
-import type { ValidatorRecord } from './types/validator';
 
 import { getPropOfSetter, getPropOfState, isAsync, passChecks } from './utils/macro';
 
@@ -11,7 +10,6 @@ import { getPropOfSetter, getPropOfState, isAsync, passChecks } from './utils/ma
 export class Route<
     Method extends string,
     Path extends string,
-    Validator extends ValidatorRecord<Path>,
     Handler extends Fn<any>
 > {
     /**
@@ -20,7 +18,6 @@ export class Route<
     constructor(
         readonly method: Method,
         readonly path: Path,
-        readonly validator: Validator,
         readonly handler: Handler,
         readonly actions: Fn[][],
         readonly defers: DeferFn[][]
@@ -37,7 +34,7 @@ export class Route<
             // Merge pathname
             base.length === 1 ? path : (path.length === 1 ? base : base + path) as Path,
             // Copy other props
-            this.validator, this.handler,
+            this.handler,
             // Push other stuff
             otherAppActions.length === 0 ? this.actions : [otherAppActions, ...this.actions],
             otherAppDefers.length === 0 ? this.defers : [...this.defers, otherAppDefers]
@@ -59,19 +56,17 @@ export class Route<
      *
      */
     compile() {
-        const { handler, validator, actions, defers } = this;
+        const { handler, actions, defers } = this;
 
         // Conditions
         const noActions = actions.length === 0;
-        const noValidator = validator === null;
         const noDefers = defers.length === 0;
 
-        if (noValidator && noActions && noDefers) return handler;
+        if (noActions && noDefers) return handler;
 
         const keys = [];
         const statements = [];
         const values = [];
-        const paramsKeys = [];
 
         let hasAsync = false;
         let noContext = true;
@@ -117,36 +112,6 @@ export class Route<
                     ++idx;
                 }
             }
-
-        // Compile validators and check result
-        if (!noValidator) {
-            for (const key in validator) {
-                // Validators
-                const fn = validator[key], fnKey = 'f' + idx;
-
-                keys.push(fnKey);
-                values.push(fn);
-
-                const fnAsync = isAsync(fn);
-                hasAsync = hasAsync || fnAsync;
-
-                const fnNoContext = fn.length === 0;
-                noContext = noContext && fnNoContext;
-
-                const result = `${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`;
-                if (passChecks(fn))
-                    paramsKeys.push(`${key}:${result}`);
-                else {
-                    paramsKeys.push(key);
-                    statements.push(`const ${key}=${result};if(${key} instanceof Response)return ${key}`);
-                }
-
-                ++idx;
-            }
-
-            // Set state
-            statements.push(`c.state={${paramsKeys.join()}}`);
-        }
 
         // Restricted variable for the main handler
         keys.push('$');
@@ -194,7 +159,7 @@ export class Route<
     }
 }
 
-export type BaseRoute = Route<any, any, any, any>;
+export type BaseRoute = Route<any, any, any>;
 
 // Route list
 export type RoutesRecord = BaseRoute[];
