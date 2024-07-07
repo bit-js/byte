@@ -62,6 +62,13 @@ export class Context<Params> implements CommonResponseInit {
         this.status = status;
         return new Response(null, this as any);
     }
+
+    /**
+     * Send an empty response
+     */
+    end(): BasicResponse<''> {
+        return new Response(null, this as any) as any;
+    }
 };
 
 export type BaseContext = Context<any>;
