@@ -1,5 +1,5 @@
 // Server
-import { Byte, cors, csrf, send } from '@bit-js/byte';
+import { Byte, cors, csrf, send, form } from '@bit-js/byte';
 
 // Basic responses
 export const basicApis = new Byte()
@@ -34,3 +34,4 @@ export const apiWithDefers = new Byte()
 export const apiWithSet = new Byte()
     .set('startTime', performance.now)
     .get('/', (ctx) => ctx.body(performance.now() - ctx.startTime + ''));
+
