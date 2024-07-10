@@ -1,8 +1,32 @@
 import type { BaseRouter } from '@bit-js/blitz';
-
 import type { DeferFn, Fn } from './types/handler';
 
-import { getPropOfSetter, getPropOfState, isAsync, passChecks } from './utils/macro';
+import { isAsync } from './utils/macro';
+
+// Action
+export interface Initializer<State> {
+    0: 1;
+    1: Fn<State>[];
+}
+
+export interface Middleware<State> {
+    0: 2;
+    1: Fn<State>[];
+}
+
+export interface Setter<State> {
+    0: 3;
+    1: Fn<State>;
+    2: string;
+}
+
+export interface StateSetter<State> {
+    0: 4;
+    1: Fn<State>;
+    2: string;
+}
+
+export type ActionList<State = any> = (Initializer<State> | Middleware<State> | Setter<State> | StateSetter<State>)[];
 
 /**
  * Represent a route
@@ -19,14 +43,14 @@ export class Route<
         readonly method: Method,
         readonly path: Path,
         readonly handler: Handler,
-        readonly actions: Fn[][],
+        readonly actions: ActionList[],
         readonly defers: DeferFn[][]
     ) { }
 
     /**
      * Clone the route with a new base path
      */
-    clone(base: string, otherAppActions: Fn[], otherAppDefers: DeferFn[]) {
+    clone(base: string, otherAppActions: ActionList, otherAppDefers: DeferFn[]) {
         const { path } = this;
 
         return new Route(
@@ -64,9 +88,9 @@ export class Route<
 
         if (noActions && noDefers) return handler;
 
-        const keys = [];
-        const statements = [];
-        const values = [];
+        const keys: string[] = [];
+        const statements: string[] = [];
+        const values: Fn[] = [];
 
         let hasAsync = false;
         let noContext = true;
@@ -75,41 +99,78 @@ export class Route<
         // Compile actions and check result
         if (!noActions)
             // Loop in reverse each app action
-            for (let i = 0, { length } = actions; i < length; ++i) {
+            for (let i = 0, lI = actions.length; i < lI; ++i) {
                 const list = actions[i];
 
-                for (let i = 0, { length } = list; i < length; ++i) {
-                    const fn = list[i];
-                    const fnKey = 'f' + idx;
+                for (let j = 0, lJ = list.length; j < lJ; ++j) {
+                    const action = list[j];
+                    const actionType = action[0];
 
-                    keys.push(fnKey);
-                    values.push(fn);
+                    if (actionType === 1) {
+                        const fns = action[1];
 
-                    const fnAsync = isAsync(fn);
-                    hasAsync = hasAsync || fnAsync;
+                        for (let k = 0, lK = fns.length; k < lK; ++k, ++idx) {
+                            const fn = fns[k];
+                            const fnKey = 'f' + idx;
 
-                    const fnNoContext = fn.length === 0;
-                    noContext = noContext && fnNoContext;
+                            keys.push(fnKey);
+                            values.push(fn);
 
-                    const result = `${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`;
+                            const fnAsync = isAsync(fn);
+                            hasAsync ||= fnAsync;
 
-                    // If this handler sets a request prop
-                    const setterProp = getPropOfSetter(fn);
-                    const stateSetterProp = getPropOfState(fn);
+                            const fnNoContext = fn.length === 0;
+                            noContext &&= fnNoContext;
 
-                    if (typeof setterProp === 'string')
-                        statements.push(`c.${setterProp}=${result};`);
-                    else if (typeof stateSetterProp === 'string')
-                        statements.push(`const t${idx}=${result};if(t${idx} instanceof Response)return t${idx};c.${stateSetterProp}=t${idx};`)
-                    // If this handler doesn't require checks
-                    else if (passChecks(fn))
-                        statements.push(result);
-                    else {
-                        const valKey = `c${idx}`;
-                        statements.push(`const ${valKey}=${result};if(${valKey} instanceof Response)return ${valKey}`);
+                            statements.push(`${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
+                        }
+                    } else if (actionType === 2) {
+                        const fns = action[1];
+
+                        for (let k = 0, lK = fns.length; k < lK; ++k, ++idx) {
+                            const fn = fns[k];
+                            const fnKey = 'f' + idx;
+
+                            keys.push(fnKey);
+                            values.push(fn);
+
+                            const fnAsync = isAsync(fn);
+                            hasAsync ||= fnAsync;
+
+                            const fnNoContext = fn.length === 0;
+                            noContext &&= fnNoContext;
+
+                            statements.push(`const c${idx}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'});if(c${idx} instanceof Response)return c${idx}`);
+                        }
+                    } else if (actionType === 3) {
+                        const fn = action[1];
+                        const fnKey = 'f' + idx;
+
+                        keys.push(fnKey);
+                        values.push(fn);
+
+                        const fnAsync = isAsync(fn);
+                        hasAsync ||= fnAsync;
+
+                        const fnNoContext = fn.length === 0;
+                        noContext &&= fnNoContext;
+
+                        statements.push(`c.${action[2]}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
+                    } else if (actionType === 4) {
+                        const fn = action[1];
+                        const fnKey = 'f' + idx;
+
+                        keys.push(fnKey);
+                        values.push(fn);
+
+                        const fnAsync = isAsync(fn);
+                        hasAsync ||= fnAsync;
+
+                        const fnNoContext = fn.length === 0;
+                        noContext &&= fnNoContext;
+
+                        statements.push(`const c${idx}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'});if(c${idx} instanceof Response)return c${idx};c.${action[2]}=t${idx}`)
                     }
-
-                    ++idx;
                 }
             }
 
@@ -118,7 +179,7 @@ export class Route<
         values.push(handler);
 
         const handlerNoContext = handler.length === 0;
-        noContext = noContext && handlerNoContext;
+        noContext &&= handlerNoContext;
 
         // Check for alters
         if (noDefers)
@@ -126,7 +187,7 @@ export class Route<
             statements.push(`return ${isAsync(handler) && hasAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'});`);
         else {
             const fnAsync = isAsync(handler);
-            hasAsync = hasAsync || fnAsync;
+            hasAsync ||= fnAsync;
 
             // Hold a ref to the context
             statements.push(`c.res=${fnAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'})`);
@@ -142,10 +203,10 @@ export class Route<
                     values.push(fn);
 
                     const fnAsync = isAsync(fn);
-                    hasAsync = hasAsync || fnAsync;
+                    hasAsync ||= fnAsync;
 
                     const fnNoContext = fn.length === 0;
-                    noContext = noContext && fnNoContext;
+                    noContext &&= fnNoContext;
 
                     statements.push(`${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
                     ++idx;

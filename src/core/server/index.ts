@@ -2,14 +2,14 @@ import Blitz, { BaseRouter } from '@bit-js/blitz';
 
 import type { ProtoSchema, RequestMethod } from '../utils/methods';
 
-import { Route, type RoutesRecord } from './route';
+import { Route, type RoutesRecord, type ActionList } from './route';
 import { Context, type BaseHandler, type DeferFn, type Fn } from './types/handler';
 
 import { bit } from '../client';
 import { default404, emptyList } from '../../utils/defaultOptions';
-import { $pass, $set, $state } from './utils/macro';
 import type { AwaitedReturn } from '../utils/types';
 import type { GenericResponse } from './utils/responses';
+import type { BasePlugin, InferPluginState } from './types/plugin';
 
 // Methods to register request handlers
 interface Register<Method extends string, T extends RoutesRecord, State> {
@@ -35,32 +35,25 @@ type HandlerRegisters<T extends RoutesRecord, State> = {
 };
 
 /**
- * A plugin
- */
-export abstract class Plugin {
-    abstract plug(app: BaseByte): any;
-}
-
-/**
  * Create a Byte app
  */
 export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSchema {
-    readonly actions: Fn<State>[] = [];
+    readonly actions: ActionList<State> = [];
     readonly defers: DeferFn<State>[] = [];
+
+    /**
+     * Register middlewares that doesn't require validations
+     */
+    pass(...fns: Fn<State>[]) {
+        this.actions.push([1, fns]);
+        return this;
+    }
 
     /**
      * Register middlewares
      */
     use(...fns: Fn<State>[]) {
-        this.actions.push(...fns);
-        return this;
-    }
-
-    /**
-     * Register middlewares that doesn't require validations
-     */
-    proc(...fns: Fn<State>[]) {
-        this.actions.push(...fns.map($pass));
+        this.actions.push([2, fns]);
         return this;
     }
 
@@ -68,15 +61,15 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
      * Bind a prop to the context
      */
     set<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter) {
-        this.actions.push($set(name, fn));
+        this.actions.push([3, fn, name]);
         return this as Byte<Rec, State & { [K in Name]: AwaitedReturn<Getter> }>;
     }
 
     /**
      * Bind a prop to the context
      */
-    state<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter) {
-        this.actions.push($state(name, fn));
+    validate<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter) {
+        this.actions.push([4, fn, name]);
         return this as Byte<Rec, State & { [K in Name]: Exclude<AwaitedReturn<Getter>, GenericResponse> }>;
     }
 
@@ -91,11 +84,12 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     /**
      * Register plugins
      */
-    register(...plugin: Plugin[]) {
-        for (let i = 0, { length } = plugin; i < length; ++i)
-            plugin[i].plug(this);
+    register<Plugins extends BasePlugin[]>(...plugins: Plugins) {
+        for (let i = 0, { length } = plugins; i < length; ++i)
+            // @ts-ignore
+            plugins[i].plug(this);
 
-        return this;
+        return this as Byte<Rec, State & InferPluginState<Plugins>>;
     }
 
     /**
@@ -146,8 +140,36 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     }
 
     /**
-     * Register a handler
+     * Create a handler
      */
+    static handle<const T extends Fn<{}>>(fn: T) {
+        return fn;
+    }
+
+    /**
+     * Create an defer handler
+     */
+    static defer<const T extends DeferFn<{}>>(fn: T) {
+        return fn;
+    }
+
+    /**
+     * Create a plugin
+     */
+    static plugin<const Plugin extends BasePlugin>(plugin: Plugin) {
+        return plugin;
+    }
+
+    /**
+     * Shorthand for registering subroutes
+     */
+    static route<T extends BaseByte>(base: string, app: T) {
+        return new Byte().route(base, app) as Byte;
+    }
+
+    /**
+    * Register a handler
+    */
     handle(method: string, path: string, ...args: any[]) {
         // Load necessary actions
         const { actions, defers } = this;
@@ -165,34 +187,6 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
         );
 
         return this;
-    }
-
-    /**
-     * Create a handler
-     */
-    static handle<const T extends Fn<{}>>(fn: T) {
-        return fn;
-    }
-
-    /**
-     * Create an alter handler
-     */
-    static defer<const T extends DeferFn<{}>>(fn: T) {
-        return fn;
-    }
-
-    /**
-     * Create a plugin
-     */
-    static plugin(plugin: Plugin) {
-        return plugin;
-    }
-
-    /**
-     * Shorthand for registering subroutes
-     */
-    static route<T extends BaseByte>(base: string, app: T) {
-        return new Byte().route(base, app) as Byte;
     }
 
     /** @internal */
@@ -243,9 +237,11 @@ export interface Byte<Rec, State> extends HandlerRegisters<Rec, State> { };
 
 export type BaseByte = Byte<RoutesRecord, any>;
 
-// Types
+// Real stuff
 export * from './route';
 
+// Types
+export * from './types/plugin';
 export * from './types/handler';
 export * from './types/responseInit';
 
