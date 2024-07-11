@@ -11,13 +11,13 @@ type RouteFunc<Path extends string, Init, Return> =
 
 type InferReturn<T extends BaseRoute> = Promisify<AwaitedReturn<T['handler']>>;
 
-export type InferRoute<T extends BaseRoute> = {
+export type InferRoute<T extends BaseRoute, FallbackResponse> = {
     [K in T['method']]: RouteFunc<
         T['path'],
         RequestProps<T>,
-        InferReturn<T>
+        FallbackResponse | InferReturn<T>
     >;
 };
 
-export type InferRoutes<T extends RoutesRecord> = T extends [infer Route extends BaseRoute, ...infer Rest extends RoutesRecord]
-    ? InferRoute<Route> | InferRoutes<Rest> : {};
+export type InferRoutes<T extends RoutesRecord, FallbackResponse> = T extends [infer Route extends BaseRoute, ...infer Rest extends RoutesRecord]
+    ? InferRoute<Route, FallbackResponse> | InferRoutes<Rest, FallbackResponse> : {};

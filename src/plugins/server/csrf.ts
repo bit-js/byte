@@ -4,10 +4,10 @@ import { forbidden } from '../../utils/defaultOptions';
 /**
  * CSRF action options
  */
-export interface CSRFOptions {
+export interface CSRFOptions<Fallback extends Fn = Fn> {
     origins?: string[];
     verify?: (origin: string) => boolean;
-    fallback?: Fn;
+    fallback?: Fallback;
 }
 
 const defaultCSRF: Fn = (ctx) => {
@@ -15,7 +15,7 @@ const defaultCSRF: Fn = (ctx) => {
         return new Response(null, forbidden);
 };
 
-export function csrf(options?: CSRFOptions): Fn {
+export function csrf<Options extends CSRFOptions = CSRFOptions>(options?: Options): Options['fallback'] & {} {
     if (typeof options === 'undefined') return defaultCSRF;
 
     const literals = [];

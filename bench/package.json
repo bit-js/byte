@@ -10,8 +10,8 @@
   "dependencies": {
     "blitz-new": "npm:@bit-js/blitz@latest",
     "blitz-old": "npm:@bit-js/blitz@1.0.19",
-    "elysia": "1.0.21",
-    "hono": "^4.3.9"
+    "elysia": "latest",
+    "hono": "latest"
   },
   "scripts": {
     "jit": "BUN_JSC_jitPolicyScale=0.0 BUN_JSC_thresholdForOptimizeSoon=0.0 BUN_JSC_thresholdForJITSoon=0.0 bun run",

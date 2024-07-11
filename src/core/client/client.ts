@@ -14,7 +14,12 @@ import type { ProtoSchema } from '../utils/methods';
 /**
  * Infer client type
  */
-export type InferClient<T extends BaseByte> = UnionToIntersection<InferRoutes<T['routes']>>;
+export type InferClient<T extends BaseByte> = UnionToIntersection<
+    InferRoutes<
+        T['__infer']['routes'],
+        T['__infer']['fallbackResponse']
+    >
+>;
 
 /**
  * Customize client

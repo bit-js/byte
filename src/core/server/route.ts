@@ -6,12 +6,12 @@ import { isAsync } from './utils/macro';
 // Action
 export interface Initializer<State> {
     0: 1;
-    1: Fn<State>[];
+    1: Fn<State>;
 }
 
 export interface Middleware<State> {
     0: 2;
-    1: Fn<State>[];
+    1: Fn<State>;
 }
 
 export interface Setter<State> {
@@ -104,72 +104,36 @@ export class Route<
 
                 for (let j = 0, lJ = list.length; j < lJ; ++j) {
                     const action = list[j];
-                    const actionType = action[0];
 
-                    if (actionType === 1) {
-                        const fns = action[1];
+                    const fn = action[1];
+                    const fnKey = 'f' + idx;
 
-                        for (let k = 0, lK = fns.length; k < lK; ++k, ++idx) {
-                            const fn = fns[k];
-                            const fnKey = 'f' + idx;
+                    keys.push(fnKey);
+                    values.push(fn);
 
-                            keys.push(fnKey);
-                            values.push(fn);
+                    const fnAsync = isAsync(fn);
+                    hasAsync ||= fnAsync;
 
-                            const fnAsync = isAsync(fn);
-                            hasAsync ||= fnAsync;
+                    const fnNoContext = fn.length === 0;
+                    noContext &&= fnNoContext;
 
-                            const fnNoContext = fn.length === 0;
-                            noContext &&= fnNoContext;
-
+                    ++idx;
+                    switch (action[0]) {
+                        case 1:
                             statements.push(`${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
-                        }
-                    } else if (actionType === 2) {
-                        const fns = action[1];
+                            continue;
 
-                        for (let k = 0, lK = fns.length; k < lK; ++k, ++idx) {
-                            const fn = fns[k];
-                            const fnKey = 'f' + idx;
-
-                            keys.push(fnKey);
-                            values.push(fn);
-
-                            const fnAsync = isAsync(fn);
-                            hasAsync ||= fnAsync;
-
-                            const fnNoContext = fn.length === 0;
-                            noContext &&= fnNoContext;
-
+                        case 2:
                             statements.push(`const c${idx}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'});if(c${idx} instanceof Response)return c${idx}`);
-                        }
-                    } else if (actionType === 3) {
-                        const fn = action[1];
-                        const fnKey = 'f' + idx;
+                            continue;
 
-                        keys.push(fnKey);
-                        values.push(fn);
+                        case 3:
+                            statements.push(`c.${action[2]}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
+                            continue;
 
-                        const fnAsync = isAsync(fn);
-                        hasAsync ||= fnAsync;
-
-                        const fnNoContext = fn.length === 0;
-                        noContext &&= fnNoContext;
-
-                        statements.push(`c.${action[2]}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
-                    } else if (actionType === 4) {
-                        const fn = action[1];
-                        const fnKey = 'f' + idx;
-
-                        keys.push(fnKey);
-                        values.push(fn);
-
-                        const fnAsync = isAsync(fn);
-                        hasAsync ||= fnAsync;
-
-                        const fnNoContext = fn.length === 0;
-                        noContext &&= fnNoContext;
-
-                        statements.push(`const c${idx}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'});if(c${idx} instanceof Response)return c${idx};c.${action[2]}=t${idx}`)
+                        case 4:
+                            statements.push(`const c${idx}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'});if(c${idx} instanceof Response)return c${idx};c.${action[2]}=t${idx}`)
+                            continue;
                     }
                 }
             }

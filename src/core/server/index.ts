@@ -37,24 +37,27 @@ type HandlerRegisters<T extends RoutesRecord, State> = {
 /**
  * Create a Byte app
  */
-export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSchema {
+export class Byte<Rec extends RoutesRecord = [], State = {}, FallbackResponse = never> implements ProtoSchema {
     readonly actions: ActionList<State> = [];
     readonly defers: DeferFn<State>[] = [];
 
     /**
      * Register middlewares that doesn't require validations
      */
-    pass(...fns: Fn<State>[]) {
-        this.actions.push([1, fns]);
+    prepare(fn: Fn<State>) {
+        this.actions.push([1, fn]);
         return this;
     }
 
     /**
      * Register middlewares
      */
-    use(...fns: Fn<State>[]) {
-        this.actions.push([2, fns]);
-        return this;
+    use<Middleware extends Fn<State>>(fn: Middleware) {
+        this.actions.push([2, fn]);
+        return this as Byte<
+            Rec, State,
+            FallbackResponse | Extract<AwaitedReturn<Middleware>, GenericResponse>
+        >;
     }
 
     /**
@@ -62,15 +65,23 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
      */
     set<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter) {
         this.actions.push([3, fn, name]);
-        return this as Byte<Rec, State & { [K in Name]: AwaitedReturn<Getter> }>;
+        return this as Byte<
+            Rec,
+            State & { [K in Name]: AwaitedReturn<Getter> },
+            FallbackResponse
+        >;
     }
 
     /**
      * Bind a prop to the context
      */
-    validate<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter) {
+    state<Name extends string, Getter extends Fn<State>>(name: Name, fn: Getter) {
         this.actions.push([4, fn, name]);
-        return this as Byte<Rec, State & { [K in Name]: Exclude<AwaitedReturn<Getter>, GenericResponse> }>;
+        return this as Byte<
+            Rec,
+            State & { [K in Name]: Exclude<AwaitedReturn<Getter>, GenericResponse> },
+            FallbackResponse | Extract<AwaitedReturn<Getter>, GenericResponse>
+        >;
     }
 
     /**
@@ -89,13 +100,13 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
             // @ts-ignore
             plugins[i].plug(this);
 
-        return this as Byte<Rec, State & InferPluginState<Plugins>>;
+        return this as Byte<Rec, State & InferPluginState<Plugins>, FallbackResponse>;
     }
 
     /**
      * Routes record. Only use this to infer types
      */
-    readonly routes: Rec = [] as any;
+    readonly routes: RoutesRecord = [];
 
     /**
      * Register sub-routes
@@ -233,9 +244,15 @@ export class Byte<Rec extends RoutesRecord = [], State = {}> implements ProtoSch
     }
 }
 
-export interface Byte<Rec, State> extends HandlerRegisters<Rec, State> { };
+export interface Byte<Rec, State, FallbackResponse> extends HandlerRegisters<Rec, State> {
+    __infer: {
+        routes: Rec;
+        state: State;
+        fallbackResponse: FallbackResponse;
+    }
+};
 
-export type BaseByte = Byte<RoutesRecord, any>;
+export type BaseByte = Byte<RoutesRecord, any, any>;
 
 // Real stuff
 export * from './route';
