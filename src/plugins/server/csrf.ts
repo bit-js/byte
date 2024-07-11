@@ -1,19 +1,19 @@
 import type { Fn } from '../../core/server';
 import { forbidden } from '../../utils/defaultOptions';
 
+const defaultCSRF = ((ctx) => {
+    if (ctx.req.headers.get('Origin') !== ctx.req.url.substring(0, ctx.pathStart))
+        return new Response(null, forbidden);
+}) satisfies Fn;
+
 /**
  * CSRF action options
  */
-export interface CSRFOptions<Fallback extends Fn = Fn> {
+export interface CSRFOptions<Fallback extends Fn = typeof defaultCSRF> {
     origins?: string[];
     verify?: (origin: string) => boolean;
     fallback?: Fallback;
 }
-
-const defaultCSRF: Fn = (ctx) => {
-    if (ctx.req.headers.get('Origin') !== ctx.req.url.substring(0, ctx.pathStart))
-        return new Response(null, forbidden);
-};
 
 export function csrf<Options extends CSRFOptions = CSRFOptions>(options?: Options): Options['fallback'] & {} {
     if (typeof options === 'undefined') return defaultCSRF;

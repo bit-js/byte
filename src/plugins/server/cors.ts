@@ -24,7 +24,7 @@ const defaultCors: Fn = (c) => { c.headers.push(allowAllOrigins); };
 /**
  * Create a CORS action function
  */
-export function cors(options?: CORSOptions): Fn {
+export function cors(options?: CORSOptions) {
     if (typeof options === 'undefined') return defaultCors;
 
     const builder: CommonHeaders = [];
@@ -51,9 +51,9 @@ export function cors(options?: CORSOptions): Fn {
     // Small optimization
     if (builder.length === 1) {
         const first = builder[0];
-        return (c) => { c.headers.push(first); };
+        return ((c) => { c.headers.push(first); }) satisfies Fn;
     }
 
-    return (c) => { c.headers.push(...builder); };
+    return ((c) => { c.headers.push(...builder); }) satisfies Fn;
 }
 
