@@ -102,7 +102,7 @@ export class Route<
             for (let i = 0, lI = actions.length; i < lI; ++i) {
                 const list = actions[i];
 
-                for (let j = 0, lJ = list.length; j < lJ; ++j) {
+                for (let j = 0, lJ = list.length; j < lJ; ++j, ++idx) {
                     const action = list[j];
 
                     const fn = action[1];
@@ -117,7 +117,6 @@ export class Route<
                     const fnNoContext = fn.length === 0;
                     noContext &&= fnNoContext;
 
-                    ++idx;
                     switch (action[0]) {
                         case 1:
                             statements.push(`${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
@@ -153,13 +152,13 @@ export class Route<
             const fnAsync = isAsync(handler);
             hasAsync ||= fnAsync;
 
-            // Hold a ref to the context
-            statements.push(`const r=${fnAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'})`);
+            // Hold a ref to the response
+            statements.push(`let r=${fnAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'})`);
 
             for (let i = 0, { length } = defers; i < length; ++i) {
                 const list = defers[i];
 
-                for (let i = list.length - 1; i > -1; --i) {
+                for (let i = list.length - 1; i > -1; --i, ++idx) {
                     const fn = list[i];
                     const fnKey = `f${idx}`;
 
@@ -172,8 +171,7 @@ export class Route<
                     const fnNoContext = fn.length < 2;
                     noContext &&= fnNoContext;
 
-                    statements.push(`const c${idx}=${fnAsync ? 'await ' : ''}${fnKey}(${fn.length === 0 ? '' : noContext ? 'r' : 'r,c'});if(c${idx} instanceof Response)return c${idx};`);
-                    ++idx;
+                    statements.push(`const c${idx}=${fnAsync ? 'await ' : ''}${fnKey}(${fn.length === 0 ? '' : noContext ? 'r' : 'r,c'});if(c${idx} instanceof Response)r=c${idx}`);
                 }
             }
 

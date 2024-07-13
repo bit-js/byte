@@ -23,9 +23,9 @@ export const apiWithCsrf = new Byte()
 // Defers
 export const apiWithDefers = new Byte()
     .use((ctx) => console.time(ctx.path))
-    .defer((ctx) => {
+    .defer((res, ctx) => {
         // You should change the response here
-        console.log(ctx.res.ok);
+        console.log(res.ok);
         console.timeEnd(ctx.path);
     })
     .get('/', send.body('Hi'));
