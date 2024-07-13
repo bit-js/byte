@@ -90,7 +90,7 @@ export class Route<
 
         const keys: string[] = [];
         const statements: string[] = [];
-        const values: Fn[] = [];
+        const values: (Fn | DeferFn)[] = [];
 
         let hasAsync = false;
         let noContext = true;
@@ -154,7 +154,7 @@ export class Route<
             hasAsync ||= fnAsync;
 
             // Hold a ref to the context
-            statements.push(`c.res=${fnAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'})`);
+            statements.push(`const r=${fnAsync ? 'await ' : ''}$(${handlerNoContext ? '' : 'c'})`);
 
             for (let i = 0, { length } = defers; i < length; ++i) {
                 const list = defers[i];
@@ -169,15 +169,15 @@ export class Route<
                     const fnAsync = isAsync(fn);
                     hasAsync ||= fnAsync;
 
-                    const fnNoContext = fn.length === 0;
+                    const fnNoContext = fn.length < 2;
                     noContext &&= fnNoContext;
 
-                    statements.push(`${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'})`);
+                    statements.push(`const c${idx}=${fnAsync ? 'await ' : ''}${fnKey}(${fn.length === 0 ? '' : noContext ? 'r' : 'r,c'});if(c${idx} instanceof Response)return c${idx};`);
                     ++idx;
                 }
             }
 
-            statements.push('return c.res;');
+            statements.push('return r;');
         }
 
         return Function(...keys, `return ${hasAsync ? 'async ' : ''}(${noContext ? '' : 'c'})=>{${statements.join(';')}}`)(...values);

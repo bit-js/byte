@@ -103,7 +103,7 @@ export default function decodeURIComponent(url: string, start: number, end: numb
             codepoint = 0;
         } else {
             percentPosition += 3;
-            if (percentPosition >= length || url.charCodeAt(percentPosition) !== 37) return url.substring(start, end);
+            if (percentPosition >= end || url.charCodeAt(percentPosition) !== 37) return url.substring(start, end);
         }
     }
 

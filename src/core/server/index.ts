@@ -87,9 +87,12 @@ export class Byte<Rec extends RoutesRecord = [], State = {}, FallbackResponse = 
     /**
      * Run after response handler
      */
-    defer(...fns: DeferFn<State>[]) {
-        this.defers.push(...fns);
-        return this;
+    defer<Defer extends DeferFn<State>>(fn: Defer) {
+        this.defers.push(fn);
+        return this as Byte<
+            Rec, State,
+            FallbackResponse | Extract<AwaitedReturn<Defer>, GenericResponse>
+        >;
     }
 
     /**

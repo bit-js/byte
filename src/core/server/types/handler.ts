@@ -77,4 +77,4 @@ export type BaseContext = Context<any>;
 export type BaseHandler<Path extends string, Set> = (c: Context<Params<Path>> & Set) => any;
 
 export type Fn<T = any> = (c: BaseContext & T) => any;
-export type DeferFn<T = any> = (c: BaseContext & T & { res: any }) => any;
+export type DeferFn<T = any> = (res: Response, c: BaseContext & T) => any;
