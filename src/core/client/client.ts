@@ -15,130 +15,129 @@ import type { ProtoSchema } from '../utils/methods';
  * Infer client type
  */
 export type InferClient<T extends BaseByte> = UnionToIntersection<
-    InferRoutes<
-        T['__infer']['routes'],
-        T['__infer']['fallbackResponse']
-    >
+  InferRoutes<
+    T['__infer']['routes'],
+    T['__infer']['fallbackResponse']
+  >
 >;
 
 /**
  * Customize client
  */
 export interface ClientOptions {
-    fetch?(req: Request): Promise<any>;
-    init?: RequestInit;
+  fetch?: (req: Request) => Promise<any>;
+  init?: RequestInit;
 }
 
 const fetchFn = globalThis.fetch.bind(globalThis);
 
 // Bit client prototype
 export class BitClient implements ProtoSchema {
-    /**
-     * Base URL
-     */
-    readonly url: string;
+  /**
+   * Base URL
+   */
+  readonly url: string;
 
-    /**
-     * Fetch function
-     */
-    readonly fetch: ClientOptions['fetch'] & {};
+  /**
+   * Fetch function
+   */
+  readonly fetch: ClientOptions['fetch'] & {};
 
-    /**
-     * Default response init
-     */
-    readonly defaultInit: ClientOptions['init'] & {};
+  /**
+   * Default response init
+   */
+  readonly defaultInit: ClientOptions['init'] & {};
 
-    constructor(url: string, options?: ClientOptions) {
-        if (typeof options === 'undefined') {
-            this.fetch = fetchFn;
-            this.defaultInit = emptyObj;
-        } else {
-            this.fetch = options.fetch ?? fetchFn;
-            this.defaultInit = options.init ?? emptyObj;
-        }
-
-        // Normalize URL
-        const lastIdx = url.length - 1;
-        this.url = url.charCodeAt(lastIdx) === 47 ? url.substring(0, lastIdx) : url;
+  constructor(url: string, options?: ClientOptions) {
+    if (typeof options === 'undefined') {
+      this.fetch = fetchFn;
+      this.defaultInit = emptyObj;
+    } else {
+      this.fetch = options.fetch ?? fetchFn;
+      this.defaultInit = options.init ?? emptyObj;
     }
 
-    $(path: string, init?: any) {
-        const { defaultInit } = this;
-        if (typeof init === 'undefined')
-            return this.fetch(new Request(this.url + path, defaultInit));
+    // Normalize URL
+    const lastIdx = url.length - 1;
+    this.url = url.charCodeAt(lastIdx) === 47 ? url.substring(0, lastIdx) : url;
+  }
 
-        for (const key in defaultInit)
-            // @ts-expect-error Set new keys to init
-            init[key] ??= defaultInit[key];
+  async $(path: string, init?: any) {
+    const { defaultInit } = this;
+    if (typeof init === 'undefined')
+      return this.fetch(new Request(this.url + path, defaultInit));
 
-        const { params, body, query } = init;
-        if (typeof body !== 'undefined')
-            init.body = serialize(body);
+    for (const key in defaultInit)
+    // @ts-expect-error Set new keys to init
+      init[key] ??= defaultInit[key];
 
-        return this.fetch(new Request(
-            // Cast URL parameters
-            `${this.url}${typeof params === 'undefined' ? path : getInjectFn(path)(params)}${stringifyQuery(query)}`, init
-        ));
-    };
+    const { params, body, query } = init;
+    if (typeof body !== 'undefined')
+      init.body = serialize(body);
 
-    /** @internal */
-    get(path: string, init?: any) {
-        if (typeof init === 'undefined')
-            return this.$(path, getInit);
+    return this.fetch(new Request(
+      // Cast URL parameters
+      `${this.url}${typeof params === 'undefined' ? path : getInjectFn(path)(params)}${stringifyQuery(query)}`, init));
+  }
 
-        init.method = 'GET';
-        return this.$(path, init);
-    }
+  /** @internal */
+  async get(path: string, init?: any) {
+    if (typeof init === 'undefined')
+      return this.$(path, getInit);
 
-    /** @internal */
-    head(path: string, init?: any) {
-        if (typeof init === 'undefined')
-            return this.$(path, headInit);
+    init.method = 'GET';
+    return this.$(path, init);
+  }
 
-        init.method = 'HEAD';
-        return this.$(path, init);
-    }
+  /** @internal */
+  async head(path: string, init?: any) {
+    if (typeof init === 'undefined')
+      return this.$(path, headInit);
 
-    /** @internal */
-    post(path: string, init?: any) {
-        if (typeof init === 'undefined')
-            return this.$(path, postInit);
+    init.method = 'HEAD';
+    return this.$(path, init);
+  }
 
-        init.method = 'POST';
-        return this.$(path, init);
-    }
+  /** @internal */
+  async post(path: string, init?: any) {
+    if (typeof init === 'undefined')
+      return this.$(path, postInit);
 
-    /** @internal */
-    put(path: string, init?: any) {
-        if (typeof init === 'undefined')
-            return this.$(path, putInit);
+    init.method = 'POST';
+    return this.$(path, init);
+  }
 
-        init.method = 'PUT';
-        return this.$(path, init);
-    }
+  /** @internal */
+  async put(path: string, init?: any) {
+    if (typeof init === 'undefined')
+      return this.$(path, putInit);
 
-    /** @internal */
-    delete(path: string, init?: any) {
-        if (typeof init === 'undefined')
-            return this.$(path, deleteInit);
+    init.method = 'PUT';
+    return this.$(path, init);
+  }
 
-        init.method = 'DELETE';
-        return this.$(path, init);
-    }
+  /** @internal */
+  async delete(path: string, init?: any) {
+    if (typeof init === 'undefined')
+      return this.$(path, deleteInit);
 
-    /** @internal */
-    options(path: string, init?: any) {
-        if (typeof init === 'undefined')
-            return this.$(path, optionsInit);
+    init.method = 'DELETE';
+    return this.$(path, init);
+  }
 
-        init.method = 'OPTIONS';
-        return this.$(path, init);
-    }
+  /** @internal */
+  async options(path: string, init?: any) {
+    if (typeof init === 'undefined')
+      return this.$(path, optionsInit);
 
-    /** @internal */
-    any(path: string, init?: any) {
-        return typeof init === 'undefined' ? this.$(path) : this.$(path, init);
-    }
+    init.method = 'OPTIONS';
+    return this.$(path, init);
+  }
+
+  /** @internal */
+  async any(path: string, init?: any) {
+    return typeof init === 'undefined' ? this.$(path) : this.$(path, init);
+  }
 }
 
 // Default request init objects
@@ -150,5 +149,4 @@ const deleteInit = { method: 'DELETE' };
 const optionsInit = { method: 'OPTIONS' };
 
 export type Client<T extends BaseByte> = InferClient<T> & BitClient;
-
 

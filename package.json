@@ -1,11 +1,7 @@
 {
   "name": "@bit-js/byte",
-  "version": "2.0.0-alpha.5",
+  "version": "2.0.0-alpha.6",
   "module": "index.js",
-  "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "latest"
-  },
   "type": "module",
   "types": "types/index.d.ts",
   "dependencies": {

@@ -5,7 +5,7 @@ import { BitClient, type Client, type ClientOptions } from './client';
  * A type safe client
  */
 export function bit<T extends BaseByte>(url: string, options?: ClientOptions): Client<T> {
-    return typeof options === 'undefined' ? new BitClient(url) : new BitClient(url, options) as any;
+  return typeof options === 'undefined' ? new BitClient(url) : new BitClient(url, options) as any;
 }
 
 // Types

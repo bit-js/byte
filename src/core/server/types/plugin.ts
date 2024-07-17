@@ -2,7 +2,7 @@ import type { Byte } from '..';
 import type { RoutesRecord } from '../route';
 
 export interface Plugin<ResultState = {}> {
-  plug(app: Byte<RoutesRecord>): Byte<RoutesRecord, ResultState> | void | null | undefined;
+  plug: (app: Byte<RoutesRecord>) => Byte<RoutesRecord, ResultState> | void | null | undefined;
 }
 
 export type BasePlugin = Plugin<any>;

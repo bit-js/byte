@@ -12,7 +12,7 @@ export const jsonApis = new Byte()
 
 // CORS
 export const apiWithCors = new Byte()
-    .use(cors({ allowMethods: 'GET' }))
+    .prepare(cors({ allowMethods: 'GET' }))
     .get('/', (ctx) => ctx.body('Hi'));
 
 // CSRF protection
@@ -22,7 +22,7 @@ export const apiWithCsrf = new Byte()
 
 // Defers
 export const apiWithDefers = new Byte()
-    .use((ctx) => console.time(ctx.path))
+    .prepare((ctx) => console.time(ctx.path))
     .defer((res, ctx) => {
         // You should change the response here
         console.log(res.ok);
