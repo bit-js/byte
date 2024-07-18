@@ -62,26 +62,31 @@ export class BitClient implements ProtoSchema {
     this.url = url.charCodeAt(lastIdx) === 47 ? url.substring(0, lastIdx) : url;
   }
 
-  async $(path: string, init?: any) {
+  $(path: string, init?: any) {
     const { defaultInit } = this;
     if (typeof init === 'undefined')
       return this.fetch(new Request(this.url + path, defaultInit));
 
-    for (const key in defaultInit)
-    // @ts-expect-error Set new keys to init
-      init[key] ??= defaultInit[key];
+    if (defaultInit !== emptyObj)
+      for (const key in defaultInit)
+        // @ts-expect-error Set new keys to init
+        init[key] ??= defaultInit[key];
 
     const { params, body, query } = init;
     if (typeof body !== 'undefined')
       init.body = serialize(body);
 
-    return this.fetch(new Request(
-      // Cast URL parameters
-      `${this.url}${typeof params === 'undefined' ? path : getInjectFn(path)(params)}${stringifyQuery(query)}`, init));
+    return this.fetch(
+      new Request(
+        // Cast URL parameters
+        `${this.url}${typeof params === 'undefined' ? path : getInjectFn(path)(params)}${stringifyQuery(query)}`,
+        init
+      )
+    );
   }
 
   /** @internal */
-  async get(path: string, init?: any) {
+  get(path: string, init?: any) {
     if (typeof init === 'undefined')
       return this.$(path, getInit);
 
@@ -90,7 +95,7 @@ export class BitClient implements ProtoSchema {
   }
 
   /** @internal */
-  async head(path: string, init?: any) {
+  head(path: string, init?: any) {
     if (typeof init === 'undefined')
       return this.$(path, headInit);
 
@@ -99,7 +104,7 @@ export class BitClient implements ProtoSchema {
   }
 
   /** @internal */
-  async post(path: string, init?: any) {
+  post(path: string, init?: any) {
     if (typeof init === 'undefined')
       return this.$(path, postInit);
 
@@ -108,7 +113,7 @@ export class BitClient implements ProtoSchema {
   }
 
   /** @internal */
-  async put(path: string, init?: any) {
+  put(path: string, init?: any) {
     if (typeof init === 'undefined')
       return this.$(path, putInit);
 
@@ -117,7 +122,7 @@ export class BitClient implements ProtoSchema {
   }
 
   /** @internal */
-  async delete(path: string, init?: any) {
+  delete(path: string, init?: any) {
     if (typeof init === 'undefined')
       return this.$(path, deleteInit);
 
@@ -126,16 +131,41 @@ export class BitClient implements ProtoSchema {
   }
 
   /** @internal */
-  async options(path: string, init?: any) {
+  options(path: string, init?: any) {
     if (typeof init === 'undefined')
       return this.$(path, optionsInit);
 
     init.method = 'OPTIONS';
     return this.$(path, init);
   }
+  /** @internal */
+  patch(path: string, init?: any) {
+    if (typeof init === 'undefined')
+      return this.$(path, patchInit);
+
+    init.method = 'PATCH';
+    return this.$(path, init);
+  }
 
   /** @internal */
-  async any(path: string, init?: any) {
+  connect(path: string, init?: any) {
+    if (typeof init === 'undefined')
+      return this.$(path, connectInit);
+
+    init.method = 'CONNECT';
+    return this.$(path, init);
+  }
+  /** @internal */
+  trace(path: string, init?: any) {
+    if (typeof init === 'undefined')
+      return this.$(path, traceInit);
+
+    init.method = 'TRACE';
+    return this.$(path, init);
+  }
+
+  /** @internal */
+  any(path: string, init?: any) {
     return typeof init === 'undefined' ? this.$(path) : this.$(path, init);
   }
 }
@@ -147,6 +177,9 @@ const postInit = { method: 'POST' };
 const putInit = { method: 'PUT' };
 const deleteInit = { method: 'DELETE' };
 const optionsInit = { method: 'OPTIONS' };
+const patchInit = { method: 'PATCH' };
+const connectInit = { method: 'CONNECT' };
+const traceInit = { method: 'TRACE' };
 
 export type Client<T extends BaseByte> = InferClient<T> & BitClient;
 

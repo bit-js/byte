@@ -4,7 +4,7 @@ import decodeURIComponent from './decodeURI';
 export type QuerySchemaTypes = 'string' | 'number' | 'bool';
 
 interface TypeMap {
-  string: string;
+  string: string | null;
   number: number;
   bool: boolean;
 }
@@ -22,13 +22,12 @@ export interface DefaultQueryPropertyOptions extends QueryPropertyOptions {
   type: 'string';
 }
 
-type InferType<T extends QuerySchemaTypes> = TypeMap[T] extends string ? string | null : TypeMap[T];
 
 export type InferQueryPropertyOptions<T extends QueryPropertyOptions> =
-    undefined extends T['maxItems'] ? InferType<T['type']>
-      : T['maxItems'] extends 0 ? null
-        : T['maxItems'] extends 1 ? InferType<T['type']>
-          : TypeMap[T['type']][];
+  undefined extends T['maxItems'] ? TypeMap[T['type']] & {}
+  : T['maxItems'] extends 0 ? null
+  : T['maxItems'] extends 1 ? TypeMap[T['type']] & {}
+  : (TypeMap[T['type']] & {})[];
 
 const defaultOptions: DefaultQueryPropertyOptions = { type: 'string' };
 

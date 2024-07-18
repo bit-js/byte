@@ -19,7 +19,7 @@ const allowCredentials = ['Access-Control-Allow-Credentials', 'true'] satisfies 
 const allowAllOrigins = ['Access-Control-Allow-Origin', '*'] satisfies CommonHeaders[number];
 const varyOrigin = ['Vary', 'Origin'] satisfies CommonHeaders[number];
 
-const defaultCors: Fn = (c) => { c.headers.push(allowAllOrigins); };
+const defaultCors = ((c) => { c.headers.push(allowAllOrigins); }) satisfies Fn;
 
 /**
  * Create a CORS action function

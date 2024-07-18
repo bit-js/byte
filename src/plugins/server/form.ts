@@ -2,10 +2,10 @@ import { $async, type BaseContext } from '../../core';
 import { noop } from '../../utils/defaultOptions';
 
 interface TypeMap {
-  string: string;
+  string: string | null;
   number: number;
   bool: boolean;
-  file: File;
+  file: File | null;
 }
 
 export interface FormPropertyOptions {
@@ -18,11 +18,11 @@ export type InferFormPropertyOptions<T extends FormPropertyOptions> =
 export type FormSchema = Record<string, FormPropertyOptions>;
 
 export type InferFormSchema<Schema extends FormSchema> = {
-  [K in keyof Schema]: InferFormPropertyOptions<Schema[K]>
+  [K in keyof Schema]: InferFormPropertyOptions<Schema[K]> & {}
 };
 
 export const form = {
-  get<Options extends FormPropertyOptions>(prop: string, { type, multipleItems }: Options): (ctx: BaseContext) => Promise<InferFormPropertyOptions<Options> | null> {
+  get<Options extends FormPropertyOptions>(prop: string, { type, multipleItems }: Options): (ctx: BaseContext) => Promise<InferFormPropertyOptions<Options>> {
     return $async(Function('n', `const p=(f)=>${type === 'string'
       ? multipleItems === true
         ? `{const v=f.getAll(${JSON.stringify(prop)});return v.every((x)=>typeof x==='string')?v:null;}`
@@ -30,13 +30,13 @@ export const form = {
       : type === 'number'
         ? multipleItems === true
           ? `{const v=f.getAll(${JSON.stringify(prop)}).map((t)=>+t);return v.some(Number.isNaN)?v:null;}`
-          : `{const v=+f.get(${JSON.stringify(prop)});return Number.isNaN(v)?null:v;}`
+          : `{return +f.get(${JSON.stringify(prop)});}`
         : type === 'file'
           ? multipleItems === true
             ? `{const v=f.getAll(${JSON.stringify(prop)});return v.every((x)=>x instanceof File)?v:null;}`
             : `{const v=f.get(${JSON.stringify(prop)});return v instanceof File?v:null;}`
           : `f.has(${JSON.stringify(prop)})`
-    };return (c)=>c.req.formData().then(p).catch(n);`)(noop));
+      };return (c)=>c.req.formData().then(p).catch(n);`)(noop));
   },
 
   schema<Schema extends FormSchema>(schema: Schema): (ctx: BaseContext) => Promise<InferFormSchema<Schema> | null> {

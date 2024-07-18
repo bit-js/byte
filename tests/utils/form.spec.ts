@@ -31,7 +31,7 @@ test('Form getters', async () => {
 
   const parseNum = form.get('id', { type: 'number' });
   expect(await parseNum(context({ id: 0 }))).toBe(0);
-  expect(await parseNum(context({ id: 'str' }))).toBe(null);
+  expect(await parseNum(context({ id: 'str' }))).toBe(NaN);
 
 
   const parseBool = form.get('darkMode', { type: 'bool' });

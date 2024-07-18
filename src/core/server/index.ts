@@ -9,7 +9,7 @@ import { Context, type BaseHandler, type DeferFn, type Fn } from './types/handle
 import { bit } from '../client';
 import { default404, emptyList } from '../../utils/defaultOptions';
 import type { AwaitedReturn } from '../utils/types';
-import type { ExcludeResponse, ExtractResponse, GenericResponse } from './utils/responses';
+import type { ExcludeResponse, ExtractResponse } from './utils/responses';
 import type { BasePlugin, InferPluginState } from './types/plugin';
 
 // Methods to register request handlers
@@ -230,6 +230,24 @@ export class Byte<Rec extends RoutesRecord = [], State = {}, FallbackResponse = 
   options(...args: any[]): any {
     // @ts-expect-error
     return this.handle('OPTIONS', ...args);
+  }
+
+  /** @internal */
+  patch(...args: any[]): any {
+    // @ts-expect-error
+    return this.handle('PATCH', ...args);
+  }
+
+  /** @internal */
+  connect(...args: any[]): any {
+    // @ts-expect-error
+    return this.handle('CONNECT', ...args);
+  }
+
+  /** @internal */
+  trace(...args: any[]): any {
+    // @ts-expect-error
+    return this.handle('TRACE', ...args);
   }
 
   /** @internal */

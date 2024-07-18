@@ -1,9 +1,8 @@
 import type { Fn } from '../../core/server';
-import { forbidden } from '../../utils/defaultOptions';
+import { default403res } from '../../utils/defaultOptions';
 
 const defaultCSRF = ((ctx) => {
-  if (ctx.req.headers.get('Origin') !== ctx.req.url.substring(0, ctx.pathStart))
-    return new Response(null, forbidden);
+  if (ctx.req.headers.get('Origin') !== ctx.req.url.substring(0, ctx.pathStart)) return default403res;
 }) satisfies Fn;
 
 /**
@@ -47,9 +46,8 @@ export function csrf<Options extends CSRFOptions = CSRFOptions>(options?: Option
   let fallbackCall: string;
   if (typeof options.fallback === 'undefined') {
     keys.push('h');
-    values.push(forbidden);
-
-    fallbackCall = 'new Response(null,h)';
+    values.push(default403res);
+    fallbackCall = 'h';
   } else {
     const { fallback } = options;
 
