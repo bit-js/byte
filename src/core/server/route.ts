@@ -132,7 +132,7 @@ export class Route<
               continue;
 
             case 4:
-              statements.push(`const c${idx}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'});if(c${idx} instanceof Response)return c${idx};c.${action[2]}=t${idx}`);
+              statements.push(`const c${idx}=${fnAsync ? 'await ' : ''}${fnKey}(${noContext ? '' : 'c'});if(c${idx} instanceof Response)return c${idx};c.${action[2]}=c${idx}`);
               continue;
           }
         }
